@@ -6,6 +6,9 @@
 import QtQuick 2.7
 
 import org.kde.ksvg 1.0 as KSvg
+//! importing PlasmaCore is necessary in order to make KSvg load the current plasma theme,
+//! without it the svg has no image set and dereferencing it crashes
+import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 3.0 as PlasmaComponents
 import org.kde.kirigami 2.20 as Kirigami
 

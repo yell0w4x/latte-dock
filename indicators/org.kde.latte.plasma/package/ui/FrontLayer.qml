@@ -193,8 +193,17 @@ Item {
                 implicitWidth: 0.25 * iconBox.width
                 implicitHeight: implicitWidth
 
-                svg: groupSvg
+                //! KSvg dereferences the assigned svg while the item is being completed, a
+                //! null one crashes the application. The indicator resources are not always
+                //! populated yet at that point, so fall back to an empty svg and just hide
+                //! the item until a real one is available.
+                svg: groupSvg ? groupSvg : emptySvg
+                visible: groupSvg !== null
                 elementId: elementForLocation(Plasmoid.location)
+
+                KSvg.Svg {
+                    id: emptySvg
+                }
 
                 readonly property QtObject groupSvg: indicator.resources && indicator.resources.svgs.length > 0 ? indicator.resources.svgs[0] : null
 

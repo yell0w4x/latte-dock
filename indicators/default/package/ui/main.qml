@@ -32,7 +32,7 @@ LatteComponents.IndicatorItem{
 
     property real textColorBrightness: colorBrightness(indicator.palette.textColor)
 
-    property color isActiveColor: indicator.palette.buttonFocusColor
+    property color isActiveColor: indicator.palette.focusColor
     property color minimizedColor: {
         if (minimizedTaskColoredDifferently) {
             return (textColorBrightness > 127.5 ? Qt.darker(indicator.palette.textColor, 1.7) : Qt.lighter(indicator.palette.textColor, 7));

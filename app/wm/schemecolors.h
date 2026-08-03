@@ -34,6 +34,9 @@ class SchemeColors: public QObject
     Q_PROPERTY(QColor buttonBackgroundColor READ buttonBackgroundColor NOTIFY colorsChanged)
     Q_PROPERTY(QColor buttonHoverColor READ buttonHoverColor NOTIFY colorsChanged)
     Q_PROPERTY(QColor buttonFocusColor READ buttonFocusColor NOTIFY colorsChanged)
+    //! Kirigami::Theme spells it focusColor, both palettes are used interchangeably
+    //! from qml so they must expose the same names
+    Q_PROPERTY(QColor focusColor READ buttonFocusColor NOTIFY colorsChanged)
 
 public:
     SchemeColors(QObject *parent, QString scheme, bool plasmaTheme = false);
