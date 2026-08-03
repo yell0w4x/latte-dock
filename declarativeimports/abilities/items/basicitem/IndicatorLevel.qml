@@ -28,8 +28,11 @@ AbilityItem.IndicatorLevel {
     readonly property real length: abilityItem.preserveIndicatorInInitialPosition ?
                                        abilityItem.abilities.metrics.iconSize + abilityItem.abilities.metrics.totals.lengthPaddings :
                                        abilityItem.parabolicItem.length - 2*abilityItem.parabolicItem.zoom*abilityItem.abilities.metrics.margin.length
+    //! metrics has no "thickness" of its own, it lives under totals. The undefined value
+    //! collapsed the indicator to a zero height whenever the item preserved its initial
+    //! position, e.g. for every task playing a bouncing/attention/new window animation.
     readonly property real thickness: abilityItem.preserveIndicatorInInitialPosition ?
-                                          abilityItem.abilities.metrics.thickness :
+                                          abilityItem.abilities.metrics.totals.thickness :
                                           abilityItem.parabolicItem.thickness
 
     Connections {

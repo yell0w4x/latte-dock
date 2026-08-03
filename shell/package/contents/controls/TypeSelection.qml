@@ -46,9 +46,26 @@ Grid {
         id: viewTypeGroup
     }
 
+    //! Plasma6 buttons take their paddings from the frame of their current state and the
+    //! "pressed" frame used by a checked button is thicker than "normal", the selected
+    //! type would therefore become taller than the other one. This hidden unchecked
+    //! button provides the normal state metrics that both of them keep.
+    PlasmaComponents.Button {
+        id: _typeButtonMetrics
+        visible: false
+        checked: false
+        text: "Ag"
+    }
+
     PlasmaComponents.Button {
         id: dockTypeButton
         width: horizontal ? (parent.width - parent.spacing)/ 2 : parent.width
+        height: _typeButtonMetrics.implicitHeight
+
+        topPadding: _typeButtonMetrics.topPadding
+        bottomPadding: _typeButtonMetrics.bottomPadding
+        leftPadding: _typeButtonMetrics.leftPadding
+        rightPadding: _typeButtonMetrics.rightPadding
         enabled: LatteCore.WindowSystem.compositingActive
 
         checkable: true
@@ -94,6 +111,12 @@ Grid {
     PlasmaComponents.Button {
         id: panelTypeButton
         width: dockTypeButton.width
+        height: _typeButtonMetrics.implicitHeight
+
+        topPadding: _typeButtonMetrics.topPadding
+        bottomPadding: _typeButtonMetrics.bottomPadding
+        leftPadding: _typeButtonMetrics.leftPadding
+        rightPadding: _typeButtonMetrics.rightPadding
         enabled: LatteCore.WindowSystem.compositingActive
 
         checkable: true
