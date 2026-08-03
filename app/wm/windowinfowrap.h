@@ -31,16 +31,24 @@ public:
         return WindowId{};
     }
 
-    //! X11 stores numeric window ids, wayland stores uuid strings. Code checking for a
-    //! garbage id used to rely on toInt()<=0, which is true for every wayland uuid and
-    //! made all wayland windows look faulty.
+    //! X11 stores numeric window ids, wayland stores uuids. Code checking for a garbage id
+    //! used to rely on toInt()<=0, which is true for every wayland uuid and made all wayland
+    //! windows look faulty. Ask the variant whether it really holds a number instead of
+    //! guessing from its type, the wayland ids arrive as QUuid as well as QString.
     inline bool isNil() const
     {
-        if (typeId() == QMetaType::QString) {
-            return toString().isEmpty();
+        if (!isValid()) {
+            return true;
         }
 
-        return toInt() <= 0;
+        bool isnumeric{false};
+        const int numericid = toInt(&isnumeric);
+
+        if (isnumeric) {
+            return numericid <= 0;
+        }
+
+        return toString().isEmpty();
     }
 };
 }
