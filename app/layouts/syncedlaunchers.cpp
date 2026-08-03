@@ -55,10 +55,14 @@ void SyncedLaunchers::removeAbilityClient(QQuickItem *client)
 
 void SyncedLaunchers::removeClientObject(QObject *obj)
 {
-    QQuickItem *item = qobject_cast<QQuickItem *>(obj);
-
-    if (item) {
-        removeAbilityClient(item);
+    //! qobject_cast can not be used here. QObject::destroyed is emitted from ~QObject, at
+    //! which point the object has already been demoted to a plain QObject and casting it
+    //! back to a QQuickItem returns nullptr. The client was therefore never removed and
+    //! m_clients kept a dangling pointer that crashed on the next property() call.
+    for (int i = m_clients.count() - 1; i >= 0; --i) {
+        if (static_cast<QObject *>(m_clients[i]) == obj) {
+            m_clients.removeAt(i);
+        }
     }
 }
 
