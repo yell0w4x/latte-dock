@@ -6,7 +6,7 @@
     SPDX-License-Identifier: LGPL-2.0-or-later
 */
 
-import QtQuick 2.4
+import QtQuick 2.15
 import QtQuick.Layouts 1.1
 
 import org.kde.plasma.components 3.0 as PlasmaComponents
@@ -14,6 +14,7 @@ import org.kde.plasma.extras 2.0 as PlasmaExtras
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.graphicaleffects as KGraphicalEffects
 import org.kde.draganddrop 2.0
+import org.kde.kwindowsystem
 import org.kde.kirigami 2.20 as Kirigami
 
 Item {
@@ -37,7 +38,7 @@ Item {
         Component.onCompleted: mimeData.setData("text/x-plasmoidservicename", pluginName)
 
         onDragStarted: {
-            kwindowsystem.showingDesktop = true;
+            KWindowSystem.showingDesktop = true;
             main.draggingWidget = true;
         }
         onDrop: {
@@ -54,8 +55,17 @@ Item {
                     latteView.extendedInterface.appletCreated(pluginName);
                 }
             }
-            onEntered: delegate.GridView.view.currentIndex = index
-            onExited: delegate.GridView.view.currentIndex = - 1
+        }
+
+        HoverHandler {
+            id: hoverHandler
+            onHoveredChanged: {
+                if (hovered) {
+                    delegate.GridView.view.currentIndex = index;
+                } else if (delegate.GridView.view.currentIndex === index) {
+                    delegate.GridView.view.currentIndex = -1;
+                }
+            }
         }
 
         ColumnLayout {
