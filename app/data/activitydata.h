@@ -29,10 +29,21 @@ public:
     Activity(Activity &&o);
     Activity(const Activity &o);
 
+    //! Plasma 6 dropped KActivities::Info::State, because activities can not
+    //! be stopped any longer. We keep a local enum in order to still be able
+    //! to mark internal/virtual activities such as [All Activities] as
+    //! non-running entries.
+    enum State
+    {
+        Invalid = 0,
+        Stopped,
+        Running
+    };
+
     //! Layout data
     bool isCurrent{false};
     QString icon;
-    KActivities::Info::State state;
+    State state{Invalid};
 
     bool isValid() const;
     bool isRunning() const;

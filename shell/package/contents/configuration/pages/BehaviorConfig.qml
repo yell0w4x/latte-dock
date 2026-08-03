@@ -5,7 +5,7 @@
 */
 
 import QtQuick 2.0
-import QtQuick.Controls 1.4
+import QtQuick.Controls 2.15 as QQC2
 import QtQuick.Layouts 1.3
 import Qt5Compat.GraphicalEffects
 
@@ -18,18 +18,19 @@ import org.kde.latte.components 1.0 as LatteComponents
 import org.kde.latte.private.containment 0.1 as LatteContainment
 
 import "../../controls" as LatteExtraControls
+import org.kde.kirigami 2.20 as Kirigami
 
 PlasmaComponents.Page {
     id: page
     width: content.width + content.Layout.leftMargin * 2
-    height: content.height + units.smallSpacing * 2
+    height: content.height + Kirigami.Units.smallSpacing * 2
 
     ColumnLayout {
         id: content       
-        width: (dialog.appliedWidth - units.smallSpacing * 2) - Layout.leftMargin * 2
+        width: (dialog.appliedWidth - Kirigami.Units.smallSpacing * 2) - Layout.leftMargin * 2
         spacing: dialog.subGroupSpacing
         anchors.horizontalCenter: parent.horizontalCenter
-        Layout.leftMargin: units.smallSpacing * 2
+        Layout.leftMargin: Kirigami.Units.smallSpacing * 2
 
         //! BEGIN: Inline Dock/Panel Type, it is used only when the secondary window
         //! overlaps the main dock config window
@@ -40,8 +41,8 @@ PlasmaComponents.Page {
 
             sourceComponent: ColumnLayout {
                 Layout.fillWidth: true
-                Layout.topMargin: units.smallSpacing
-                spacing: units.smallSpacing
+                Layout.topMargin: Kirigami.Units.smallSpacing
+                spacing: Kirigami.Units.smallSpacing
 
                 LatteComponents.Header {
                     text: i18n("Type")
@@ -58,8 +59,8 @@ PlasmaComponents.Page {
         //! BEGIN: Location
         ColumnLayout {
             Layout.fillWidth: true
-            spacing: units.smallSpacing
-            Layout.topMargin: units.smallSpacing
+            spacing: Kirigami.Units.smallSpacing
+            Layout.topMargin: Kirigami.Units.smallSpacing
 
             LatteComponents.Header {
                 text: screenRow.visible ? i18n("Screen") : i18n("Location")
@@ -73,8 +74,8 @@ PlasmaComponents.Page {
             RowLayout {
                 id: screenRow
                 Layout.fillWidth: true
-                Layout.leftMargin: units.smallSpacing * 2
-                Layout.rightMargin: units.smallSpacing * 3
+                Layout.leftMargin: Kirigami.Units.smallSpacing * 2
+                Layout.rightMargin: Kirigami.Units.smallSpacing * 3
                 spacing: 2
                 visible: screensCount > 1 || dialog.advancedLevel
 
@@ -171,15 +172,15 @@ PlasmaComponents.Page {
             RowLayout {
                 id: locationLayout
                 Layout.fillWidth: true
-                Layout.leftMargin: units.smallSpacing * 2
-                Layout.rightMargin: units.smallSpacing * 2
-                Layout.topMargin: screenRow.visible ? units.smallSpacing : 0
+                Layout.leftMargin: Kirigami.Units.smallSpacing * 2
+                Layout.rightMargin: Kirigami.Units.smallSpacing * 2
+                Layout.topMargin: screenRow.visible ? Kirigami.Units.smallSpacing : 0
                 LayoutMirroring.enabled: false
                 spacing: 2
 
                 readonly property int buttonSize: (dialog.optionsWidth - (spacing * 3)) / 4
 
-                ExclusiveGroup {
+                QQC2.ButtonGroup {
                     id: locationGroup
                 }
 
@@ -188,10 +189,10 @@ PlasmaComponents.Page {
                     Layout.minimumWidth: parent.buttonSize
                     Layout.maximumWidth: Layout.minimumWidth
                     text: i18nc("bottom location", "Bottom")
-                    iconSource: "arrow-down"
+                    icon.name: "arrow-down"
                     checked: plasmoid.location === edge
                     checkable: false
-                    exclusiveGroup: locationGroup
+                    QQC2.ButtonGroup.group: locationGroup
 
                     readonly property int edge: PlasmaCore.Types.BottomEdge
 
@@ -207,10 +208,10 @@ PlasmaComponents.Page {
                     Layout.minimumWidth: parent.buttonSize
                     Layout.maximumWidth: Layout.minimumWidth
                     text: i18nc("left location", "Left")
-                    iconSource: "arrow-left"
+                    icon.name: "arrow-left"
                     checked: plasmoid.location === edge
                     checkable: false
-                    exclusiveGroup: locationGroup
+                    QQC2.ButtonGroup.group: locationGroup
 
                     readonly property int edge: PlasmaCore.Types.LeftEdge
 
@@ -226,10 +227,10 @@ PlasmaComponents.Page {
                     Layout.minimumWidth: parent.buttonSize
                     Layout.maximumWidth: Layout.minimumWidth
                     text: i18nc("top location", "Top")
-                    iconSource: "arrow-up"
+                    icon.name: "arrow-up"
                     checked: plasmoid.location === edge
                     checkable: false
-                    exclusiveGroup: locationGroup
+                    QQC2.ButtonGroup.group: locationGroup
 
                     readonly property int edge: PlasmaCore.Types.TopEdge
 
@@ -245,10 +246,10 @@ PlasmaComponents.Page {
                     Layout.minimumWidth: parent.buttonSize
                     Layout.maximumWidth: Layout.minimumWidth
                     text: i18nc("right location", "Right")
-                    iconSource: "arrow-right"
+                    icon.name: "arrow-right"
                     checked: plasmoid.location === edge
                     checkable: false
-                    exclusiveGroup: locationGroup
+                    QQC2.ButtonGroup.group: locationGroup
 
                     readonly property int edge: PlasmaCore.Types.RightEdge
 
@@ -266,7 +267,7 @@ PlasmaComponents.Page {
         //! BEGIN: Alignment
         ColumnLayout {
             Layout.fillWidth: true
-            spacing: units.smallSpacing
+            spacing: Kirigami.Units.smallSpacing
 
             LatteComponents.Header {
                 text: i18n("Alignment")
@@ -275,15 +276,15 @@ PlasmaComponents.Page {
             RowLayout {
                 id: alignmentRow
                 Layout.fillWidth: true
-                Layout.leftMargin: units.smallSpacing * 2
-                Layout.rightMargin: units.smallSpacing * 2
+                Layout.leftMargin: Kirigami.Units.smallSpacing * 2
+                Layout.rightMargin: Kirigami.Units.smallSpacing * 2
                 LayoutMirroring.enabled: false
                 spacing: 2
 
                 readonly property int configAlignment: plasmoid.configuration.alignment
                 readonly property int buttonSize: (dialog.optionsWidth - (spacing * 3)) / 4
 
-                ExclusiveGroup {
+                QQC2.ButtonGroup {
                     id: alignmentGroup
                 }
 
@@ -291,10 +292,10 @@ PlasmaComponents.Page {
                     Layout.minimumWidth: parent.buttonSize
                     Layout.maximumWidth: Layout.minimumWidth
                     text: panelIsVertical ? i18nc("top alignment", "Top") : i18nc("left alignment", "Left")
-                    iconSource: panelIsVertical ? "format-align-vertical-top" : "format-justify-left"
+                    icon.name: panelIsVertical ? "format-align-vertical-top" : "format-justify-left"
                     checked: parent.configAlignment === alignment
                     checkable: false
-                    exclusiveGroup: alignmentGroup
+                    QQC2.ButtonGroup.group: alignmentGroup
 
                     property int alignment: panelIsVertical ? LatteCore.Types.Top : LatteCore.Types.Left
 
@@ -308,10 +309,10 @@ PlasmaComponents.Page {
                     Layout.minimumWidth: parent.buttonSize
                     Layout.maximumWidth: Layout.minimumWidth
                     text: i18nc("center alignment", "Center")
-                    iconSource: panelIsVertical ? "format-align-vertical-center" : "format-justify-center"
+                    icon.name: panelIsVertical ? "format-align-vertical-center" : "format-justify-center"
                     checked: parent.configAlignment === alignment
                     checkable: false
-                    exclusiveGroup: alignmentGroup
+                    QQC2.ButtonGroup.group: alignmentGroup
 
                     property int alignment: LatteCore.Types.Center
 
@@ -325,10 +326,10 @@ PlasmaComponents.Page {
                     Layout.minimumWidth: parent.buttonSize
                     Layout.maximumWidth: Layout.minimumWidth
                     text: panelIsVertical ? i18nc("bottom alignment", "Bottom") : i18nc("right alignment", "Right")
-                    iconSource: panelIsVertical ? "format-align-vertical-bottom" : "format-justify-right"
+                    icon.name: panelIsVertical ? "format-align-vertical-bottom" : "format-justify-right"
                     checked: parent.configAlignment === alignment
                     checkable: false
-                    exclusiveGroup: alignmentGroup
+                    QQC2.ButtonGroup.group: alignmentGroup
 
                     property int alignment: panelIsVertical ? LatteCore.Types.Bottom : LatteCore.Types.Right
 
@@ -343,10 +344,10 @@ PlasmaComponents.Page {
                     Layout.minimumWidth: parent.buttonSize
                     Layout.maximumWidth: Layout.minimumWidth
                     text: i18nc("justify alignment", "Justify")
-                    iconSource: "format-justify-fill"
+                    icon.name: "format-justify-fill"
                     checked: parent.configAlignment === alignment
                     checkable: false
-                    exclusiveGroup: alignmentGroup
+                    QQC2.ButtonGroup.group: alignmentGroup
 
                     property int alignment: LatteCore.Types.Justify
 
@@ -363,7 +364,7 @@ PlasmaComponents.Page {
         //! BEGIN: Visibility
         ColumnLayout {
             Layout.fillWidth: true
-            spacing: units.smallSpacing
+            spacing: Kirigami.Units.smallSpacing
 
             LatteComponents.Header {
                 text: i18n("Visibility")
@@ -373,15 +374,15 @@ PlasmaComponents.Page {
                 width: parent.width
                 rowSpacing: 1
                 columnSpacing: 2
-                Layout.leftMargin: units.smallSpacing * 2
-                Layout.rightMargin: units.smallSpacing * 2
+                Layout.leftMargin: Kirigami.Units.smallSpacing * 2
+                Layout.rightMargin: Kirigami.Units.smallSpacing * 2
 
                 columns: 2
 
                 property int mode: latteView.visibility.mode
                 readonly property int buttonSize: (dialog.optionsWidth - (columnSpacing)) / 2
 
-                ExclusiveGroup {
+                QQC2.ButtonGroup {
                     id: visibilityGroup
                 }
 
@@ -392,7 +393,7 @@ PlasmaComponents.Page {
                     text: i18n("Always Visible")
                     checked: parent.mode === mode
                     checkable: false
-                    exclusiveGroup: visibilityGroup
+                    QQC2.ButtonGroup.group: visibilityGroup
 
                     property int mode: LatteCore.Types.AlwaysVisible
 
@@ -408,7 +409,7 @@ PlasmaComponents.Page {
                     text: i18n("Auto Hide")
                     checked: parent.mode === mode
                     checkable: false
-                    exclusiveGroup: visibilityGroup
+                    QQC2.ButtonGroup.group: visibilityGroup
 
                     property int mode: LatteCore.Types.AutoHide
 
@@ -424,7 +425,7 @@ PlasmaComponents.Page {
                     text: i18n("Dodge Active")
                     checked: parent.mode === mode
                     checkable: false
-                    exclusiveGroup: visibilityGroup
+                    QQC2.ButtonGroup.group: visibilityGroup
 
                     property int mode: LatteCore.Types.DodgeActive
 
@@ -443,7 +444,7 @@ PlasmaComponents.Page {
                     implicitHeight: alwaysVisibleBtn.implicitHeight
 
                     checked: parent.mode === mode
-                    exclusiveGroup:  visibilityGroup
+                    QQC2.ButtonGroup.group:  visibilityGroup
 
                     mode: plasmoid.configuration.lastDodgeVisibilityMode
                     modes: [
@@ -470,7 +471,7 @@ PlasmaComponents.Page {
                     implicitHeight: alwaysVisibleBtn.implicitHeight
 
                     checked: parent.mode === mode
-                    exclusiveGroup:  visibilityGroup
+                    QQC2.ButtonGroup.group:  visibilityGroup
 
                     mode: plasmoid.configuration.lastWindowsVisibilityMode
                     modes: [
@@ -502,7 +503,7 @@ PlasmaComponents.Page {
                     implicitHeight: alwaysVisibleBtn.implicitHeight
 
                     checked: parent.mode === mode
-                    exclusiveGroup:  visibilityGroup
+                    QQC2.ButtonGroup.group:  visibilityGroup
 
                     mode: plasmoid.configuration.lastSidebarVisibilityMode
                     modes: [
@@ -528,7 +529,7 @@ PlasmaComponents.Page {
         //! BEGIN: Delay
         ColumnLayout {
             Layout.fillWidth: true
-            spacing: units.smallSpacing
+            spacing: Kirigami.Units.smallSpacing
 
             enabled: !(latteView.visibility.mode === LatteCore.Types.AlwaysVisible
                        || latteView.visibility.mode === LatteCore.Types.WindowsGoBelow
@@ -543,9 +544,9 @@ PlasmaComponents.Page {
                 width: dialog.optionsWidth
                 Layout.minimumWidth: dialog.optionsWidth
                 Layout.maximumWidth: dialog.optionsWidth
-                Layout.leftMargin: units.smallSpacing * 2
-                Layout.rightMargin: units.smallSpacing * 2
-                Layout.topMargin: units.smallSpacing
+                Layout.leftMargin: Kirigami.Units.smallSpacing * 2
+                Layout.rightMargin: Kirigami.Units.smallSpacing * 2
+                Layout.topMargin: Kirigami.Units.smallSpacing
 
                 spacing: 2
 
@@ -566,8 +567,8 @@ PlasmaComponents.Page {
                         anchors.horizontalCenter: parent.horizontalCenter
                         enabled: latteView.visibility.mode !== LatteCore.Types.SidebarAutoHide
                         PlasmaComponents.Label {
-                            Layout.leftMargin: Qt.application.layoutDirection === Qt.RightToLeft ? units.smallSpacing : 0
-                            Layout.rightMargin: Qt.application.layoutDirection === Qt.RightToLeft ? 0 : units.smallSpacing
+                            Layout.leftMargin: Qt.application.layoutDirection === Qt.RightToLeft ? Kirigami.Units.smallSpacing : 0
+                            Layout.rightMargin: Qt.application.layoutDirection === Qt.RightToLeft ? 0 : Kirigami.Units.smallSpacing
                             text: i18n("Show ")
                         }
 
@@ -597,8 +598,8 @@ PlasmaComponents.Page {
                         anchors.horizontalCenter: parent.horizontalCenter
 
                         PlasmaComponents.Label {
-                            Layout.leftMargin: Qt.application.layoutDirection === Qt.RightToLeft ? units.smallSpacing : 0
-                            Layout.rightMargin: Qt.application.layoutDirection === Qt.RightToLeft ? 0 : units.smallSpacing
+                            Layout.leftMargin: Qt.application.layoutDirection === Qt.RightToLeft ? Kirigami.Units.smallSpacing : 0
+                            Layout.rightMargin: Qt.application.layoutDirection === Qt.RightToLeft ? 0 : Kirigami.Units.smallSpacing
                             text: i18n("Hide")
                         }
 
@@ -619,7 +620,7 @@ PlasmaComponents.Page {
 
         //! BEGIN: Actions
         ColumnLayout {
-            spacing: units.smallSpacing
+            spacing: Kirigami.Units.smallSpacing
             visible: dialog.advancedLevel
 
             LatteComponents.Header {
@@ -628,8 +629,8 @@ PlasmaComponents.Page {
 
             ColumnLayout {
                 id: actionsPropertiesColumn
-                Layout.leftMargin: units.smallSpacing * 2
-                Layout.rightMargin: units.smallSpacing * 2
+                Layout.leftMargin: Kirigami.Units.smallSpacing * 2
+                Layout.rightMargin: Kirigami.Units.smallSpacing * 2
                 spacing: 0
 
                 readonly property int maxLabelWidth: Math.max(trackActiveLbl.implicitWidth,
@@ -639,7 +640,7 @@ PlasmaComponents.Page {
 
                 ColumnLayout {
                     RowLayout {
-                        Layout.topMargin: units.smallSpacing
+                        Layout.topMargin: Kirigami.Units.smallSpacing
 
                         PlasmaComponents.Label {
                             id: trackActiveLbl
@@ -671,7 +672,7 @@ PlasmaComponents.Page {
                 }
 
                 ColumnLayout {
-                    Layout.topMargin: units.smallSpacing
+                    Layout.topMargin: Kirigami.Units.smallSpacing
                     RowLayout {
                         PlasmaComponents.Label {
                             id: leftBtnLbl
@@ -834,8 +835,8 @@ PlasmaComponents.Page {
             }
 
             LatteComponents.CheckBoxesColumn {
-                Layout.leftMargin: units.smallSpacing * 2
-                Layout.rightMargin: units.smallSpacing * 2
+                Layout.leftMargin: Kirigami.Units.smallSpacing * 2
+                Layout.rightMargin: Kirigami.Units.smallSpacing * 2
                 enabled: floatingSubCategory.enabled
 
                 LatteComponents.CheckBoxesColumn {
@@ -892,7 +893,7 @@ PlasmaComponents.Page {
 
         //! BEGIN: Adjust
         ColumnLayout {
-            spacing: units.smallSpacing
+            spacing: Kirigami.Units.smallSpacing
 
             visible: dialog.advancedLevel
             enabled: !(latteView.visibility.mode === LatteCore.Types.AlwaysVisible
@@ -905,8 +906,8 @@ PlasmaComponents.Page {
             }
 
             LatteComponents.CheckBoxesColumn {
-                Layout.leftMargin: units.smallSpacing * 2
-                Layout.rightMargin: units.smallSpacing * 2
+                Layout.leftMargin: Kirigami.Units.smallSpacing * 2
+                Layout.rightMargin: Kirigami.Units.smallSpacing * 2
 
                 LatteComponents.CheckBox {
                     Layout.maximumWidth: dialog.optionsWidth

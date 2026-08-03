@@ -5,7 +5,6 @@
 */
 
 import QtQuick 2.7
-import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.3
 import Qt5Compat.GraphicalEffects
 import QtQuick.Window 2.2
@@ -21,6 +20,7 @@ import org.kde.kquickcontrolsaddons 2.0 as KQuickControlAddons
 import org.kde.latte.core 0.2 as LatteCore
 
 import "../controls" as LatteExtraControls
+import org.kde.kirigami 2.20 as Kirigami
 
 Loader {
     active: plasmoid && plasmoid.configuration && latteView
@@ -28,8 +28,8 @@ Loader {
     sourceComponent: FocusScope {
         id: dialog
 
-        width: typeSettings.width + units.smallSpacing * 4
-        height: typeSettings.height + units.smallSpacing * 4
+        width: typeSettings.width + Kirigami.Units.smallSpacing * 4
+        height: typeSettings.height + Kirigami.Units.smallSpacing * 4
         Layout.minimumWidth: width
         Layout.minimumHeight: height
         LayoutMirroring.enabled: Qt.application.layoutDirection === Qt.RightToLeft

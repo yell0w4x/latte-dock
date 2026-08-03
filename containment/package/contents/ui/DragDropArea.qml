@@ -9,6 +9,7 @@ import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.draganddrop 2.0 as DragDrop
 
 import org.kde.latte.core 0.2 as LatteCore
+import org.kde.plasma.plasmoid 2.0
 
 DragDrop.DropArea {
     id: dragArea
@@ -115,7 +116,7 @@ DragDrop.DropArea {
         dragInfo.onlyLaunchers = isDroppingOnlyLaunchers(event);
         dragInfo.computationsAreValid = true;
 
-        if (dragInfo.isTask || plasmoid.immutable || !root.myView.isShownFully) {
+        if (dragInfo.isTask || Plasmoid.immutable || !root.myView.isShownFully) {
             event.ignore();
             clearInfo();
             return;
@@ -191,7 +192,7 @@ DragDrop.DropArea {
                 eventy = masquearadedIndexFromPoint.y;
             }
 
-            plasmoid.processMimeData(event.mimeData, eventx, eventy);
+            root.processMimeData(event.mimeData, eventx, eventy);
             //! inform others what plasmoid was drag n' dropped to be added
             latteView.extendedInterface.appletDropped(event.mimeData, eventx, eventy);
             event.accept(event.proposedAction);

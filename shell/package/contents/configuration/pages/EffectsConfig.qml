@@ -4,7 +4,7 @@
 */
 
 import QtQuick 2.7
-import QtQuick.Controls 1.4
+import QtQuick.Controls 2.15 as QQC2
 import QtQuick.Layouts 1.3
 import Qt5Compat.GraphicalEffects
 import QtQuick.Dialogs 1.2
@@ -20,31 +20,32 @@ import org.kde.latte.components 1.0 as LatteComponents
 import org.kde.latte.private.containment 0.1 as LatteContainment
 
 import "../../controls" as LatteExtraControls
+import org.kde.kirigami 2.20 as Kirigami
 
 PlasmaComponents.Page {
     id: page
     width: content.width + content.Layout.leftMargin * 2
-    height: content.height + units.smallSpacing
+    height: content.height + Kirigami.Units.smallSpacing
 
     ColumnLayout {
         id: content
         anchors.horizontalCenter: parent.horizontalCenter
-        Layout.leftMargin: units.smallSpacing * 2
-        width: (dialog.appliedWidth - units.smallSpacing * 2) - Layout.leftMargin * 2
+        Layout.leftMargin: Kirigami.Units.smallSpacing * 2
+        width: (dialog.appliedWidth - Kirigami.Units.smallSpacing * 2) - Layout.leftMargin * 2
         spacing: dialog.subGroupSpacing
 
         //! BEGIN: Shadows
         ColumnLayout {
             Layout.fillWidth: true
-            Layout.topMargin: units.smallSpacing
+            Layout.topMargin: Kirigami.Units.smallSpacing
 
-            spacing: units.smallSpacing
+            spacing: Kirigami.Units.smallSpacing
 
             LatteComponents.HeaderSwitch {
                 id: showAppletShadow
                 Layout.fillWidth: true
                 Layout.minimumHeight: implicitHeight
-                Layout.topMargin: units.smallSpacing
+                Layout.topMargin: Kirigami.Units.smallSpacing
 
                 checked: plasmoid.configuration.appletShadowsEnabled
                 text: i18n("Shadows")
@@ -54,8 +55,8 @@ PlasmaComponents.Page {
             }
 
             ColumnLayout {
-                Layout.leftMargin: units.smallSpacing * 2
-                Layout.rightMargin: units.smallSpacing * 2
+                Layout.leftMargin: Kirigami.Units.smallSpacing * 2
+                Layout.rightMargin: Kirigami.Units.smallSpacing * 2
                 spacing: 0
 
                 RowLayout{
@@ -100,8 +101,8 @@ PlasmaComponents.Page {
                         enabled: showAppletShadow.checked
                         text: i18nc("number in percentage, e.g. 85 %","%1 %", shadowSizeSlider.value)
                         horizontalAlignment: Text.AlignRight
-                        Layout.minimumWidth: theme.mSize(theme.defaultFont).width * 4
-                        Layout.maximumWidth: theme.mSize(theme.defaultFont).width * 4
+                        Layout.minimumWidth: Kirigami.Units.gridUnit * 2.8
+                        Layout.maximumWidth: Kirigami.Units.gridUnit * 2.8
                     }
                 }
 
@@ -148,26 +149,26 @@ PlasmaComponents.Page {
                         enabled: showAppletShadow.checked
                         text: i18nc("number in percentage, e.g. 85 %","%1 %", shadowOpacitySlider.value)
                         horizontalAlignment: Text.AlignRight
-                        Layout.minimumWidth: theme.mSize(theme.defaultFont).width * 4
-                        Layout.maximumWidth: theme.mSize(theme.defaultFont).width * 4
+                        Layout.minimumWidth: Kirigami.Units.gridUnit * 2.8
+                        Layout.maximumWidth: Kirigami.Units.gridUnit * 2.8
                     }
                 }
 
                 RowLayout {
                     id: shadowColorRow
                     Layout.fillWidth: true
-                    Layout.topMargin: units.smallSpacing
+                    Layout.topMargin: Kirigami.Units.smallSpacing
                     spacing: 2
                     enabled: showAppletShadow.checked
 
                     readonly property string defaultShadow: "080808"
                     readonly property string themeShadow: {
-                        var strC = String(theme.textColor);
+                        var strC = String(Kirigami.Theme.textColor);
 
                         return strC.indexOf("#") === 0 ? strC.substr(1) : strC;
                     }
 
-                    ExclusiveGroup {
+                    QQC2.ButtonGroup {
                         id: shadowColorGroup
                     }
 
@@ -178,7 +179,7 @@ PlasmaComponents.Page {
                         text: i18nc("default shadow", "Default Color")
                         checked: plasmoid.configuration.shadowColorType === type
                         checkable: false
-                        exclusiveGroup: shadowColorGroup
+                        QQC2.ButtonGroup.group: shadowColorGroup
                         tooltip: i18n("Default shadow for applets")
 
                         readonly property int type: LatteContainment.Types.DefaultColorShadow
@@ -197,7 +198,7 @@ PlasmaComponents.Page {
                         text: i18nc("theme shadow", "Theme Color")
                         checked: plasmoid.configuration.shadowColorType === type
                         checkable: false
-                        exclusiveGroup: shadowColorGroup
+                        QQC2.ButtonGroup.group: shadowColorGroup
                         tooltip: i18n("Shadow from theme color palette")
 
                         readonly property int type: LatteContainment.Types.ThemeColorShadow
@@ -220,7 +221,7 @@ PlasmaComponents.Page {
                         checkable: false
                         checked: plasmoid.configuration.shadowColorType === type
                         tooltip: i18n("Use set shadow color")
-                        exclusiveGroup: shadowColorGroup
+                        QQC2.ButtonGroup.group: shadowColorGroup
 
                         readonly property int type: LatteContainment.Types.UserColorShadow
 
@@ -232,7 +233,7 @@ PlasmaComponents.Page {
 
                         Rectangle{
                             anchors.fill: parent
-                            anchors.margins: 1.5*units.smallSpacing
+                            anchors.margins: 1.5*Kirigami.Units.smallSpacing
 
                             color: "#" + plasmoid.configuration.shadowColor;
 
@@ -242,7 +243,7 @@ PlasmaComponents.Page {
                                 anchors.fill: parent
                                 color: "transparent"
                                 border.width: 1
-                                border.color: theme.textColor
+                                border.color: Kirigami.Theme.textColor
                                 opacity: parent.opacity - 0.4
                             }
 
@@ -294,14 +295,14 @@ PlasmaComponents.Page {
         //! BEGIN: Animations
         ColumnLayout {
             Layout.fillWidth: true
-            Layout.topMargin: units.smallSpacing
-            spacing: units.smallSpacing
+            Layout.topMargin: Kirigami.Units.smallSpacing
+            spacing: Kirigami.Units.smallSpacing
 
             LatteComponents.HeaderSwitch {
                 id: animationsHeader
                 Layout.fillWidth: true
                 Layout.minimumHeight: implicitHeight
-                Layout.topMargin: units.smallSpacing
+                Layout.topMargin: Kirigami.Units.smallSpacing
 
                 checked: plasmoid.configuration.animationsEnabled
                 text: i18n("Animations")
@@ -313,8 +314,8 @@ PlasmaComponents.Page {
             }
 
             ColumnLayout {
-                Layout.leftMargin: units.smallSpacing * 2
-                Layout.rightMargin: units.smallSpacing * 2
+                Layout.leftMargin: Kirigami.Units.smallSpacing * 2
+                Layout.rightMargin: Kirigami.Units.smallSpacing * 2
                 spacing: 0
                 enabled: plasmoid.configuration.animationsEnabled
 
@@ -328,7 +329,7 @@ PlasmaComponents.Page {
 
                         property int duration: plasmoid.configuration.durationTime
 
-                        ExclusiveGroup {
+                        QQC2.ButtonGroup {
                             id: animationsGroup
                         }
 
@@ -337,7 +338,7 @@ PlasmaComponents.Page {
                             text: i18n("x1")
                             checked: parent.duration === duration
                             checkable: false
-                            exclusiveGroup: animationsGroup
+                            QQC2.ButtonGroup.group: animationsGroup
 
                             readonly property int duration: 3
 
@@ -352,7 +353,7 @@ PlasmaComponents.Page {
                             text: i18n("x2")
                             checked: parent.duration === duration
                             checkable: false
-                            exclusiveGroup: animationsGroup
+                            QQC2.ButtonGroup.group: animationsGroup
 
                             readonly property int duration: 2
 
@@ -367,7 +368,7 @@ PlasmaComponents.Page {
                             text: i18n("x3")
                             checked: parent.duration === duration
                             checkable: false
-                            exclusiveGroup: animationsGroup
+                            QQC2.ButtonGroup.group: animationsGroup
 
                             readonly property int duration: 1
 
@@ -385,7 +386,7 @@ PlasmaComponents.Page {
 
         //! BEGIN: Active Indicator General Settings
         ColumnLayout{
-            spacing: units.smallSpacing
+            spacing: Kirigami.Units.smallSpacing
 
             LatteComponents.HeaderSwitch {
                 id: indicatorsSwitch
@@ -402,9 +403,9 @@ PlasmaComponents.Page {
             }
 
             ColumnLayout {
-                Layout.leftMargin: units.smallSpacing * 2
-                Layout.rightMargin: units.smallSpacing * 2
-                spacing: units.smallSpacing
+                Layout.leftMargin: Kirigami.Units.smallSpacing * 2
+                Layout.rightMargin: Kirigami.Units.smallSpacing * 2
+                spacing: Kirigami.Units.smallSpacing
                 enabled: indicatorsSwitch.checked
 
                 /*   LatteComponents.SubHeader {
@@ -498,7 +499,7 @@ PlasmaComponents.Page {
                         anchors.leftMargin: 2
                         width: tabBar.width - 2*2
                         height: 2
-                        color: theme.textColor
+                        color: Kirigami.Theme.textColor
                         opacity: 0.25
                     }
                 }

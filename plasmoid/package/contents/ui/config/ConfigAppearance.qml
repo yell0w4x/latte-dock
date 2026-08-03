@@ -5,12 +5,13 @@
 */
 
 import QtQuick 2.0
-import QtQuick.Controls 1.0
 import QtQuick.Layouts 1.0
 import Qt5Compat.GraphicalEffects
 
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 3.0 as PlasmaComponents
+import org.kde.kirigami 2.20 as Kirigami
+import org.kde.plasma.plasmoid 2.0
 
 PlasmoidItem {
     id: mainItem
@@ -18,7 +19,7 @@ PlasmoidItem {
     width: childrenRect.width
     height: childrenRect.height
 
-    property bool vertical: (plasmoid.formFactor == PlasmaCore.Types.Vertical)
+    property bool vertical: (Plasmoid.formFactor == PlasmaCore.Types.Vertical)
 
     property alias cfg_zoomHelper: zoomHelper.checked
     property alias cfg_zoomLevel: zoomLevel.value
@@ -297,7 +298,7 @@ PlasmoidItem {
         horizontalAlignment: Text.AlignHCenter
         //  font.bold: true
         font.italic: true
-        font.pointSize: 1.2 * theme.defaultFont.pointSize
+        font.pointSize: 1.2 * Kirigami.Theme.defaultFont.pointSize
 
         wrapMode: Text.WordWrap
     }

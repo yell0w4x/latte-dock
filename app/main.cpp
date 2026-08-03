@@ -25,6 +25,7 @@
 #include <QDBusInterface>
 #include <QDir>
 #include <QFile>
+#include <QLibrary>
 #include <QLockFile>
 #include <QSessionManager>
 #include <QSharedMemory>
@@ -46,6 +47,7 @@
 #define CRED     "\e[0;31m"
 
 inline void configureAboutData();
+inline void registerTaskManagerAppletQmlTypes();
 inline void detectPlatform(int argc, char **argv);
 inline void filterDebugMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 
@@ -454,6 +456,8 @@ int main(int argc, char **argv)
     KCrash::setDrKonqiEnabled(true);
     KCrash::setFlags(KCrash::AutoRestart | KCrash::AlwaysDirectly);
 
+    registerTaskManagerAppletQmlTypes();
+
     Latte::Corona corona(defaultLayoutOnStartup, layoutNameOnStartup, addViewTemplateNameOnStartup, memoryUsage);
     KDBusService service(KDBusService::Unique);
 
@@ -572,4 +576,34 @@ inline void detectPlatform(int argc, char **argv)
     } else if (qstrcmp(sessionType, "x11") == 0) {
         qputenv("QT_QPA_PLATFORM", "xcb");
     }
+}
+
+//! Plasma 6 removed the standalone "org.kde.plasma.private.taskmanager" QML module and moved
+//! SmartLauncherItem/Backend inside the task manager applet plugin, which registers them under
+//! "plasma.applet.org.kde.plasma.taskmanager" when it is loaded. Latte Tasks needs both, so the
+//! plugin is loaded explicitly before any QML is instantiated.
+inline void registerTaskManagerAppletQmlTypes()
+{
+    const QStringList libraryPaths = QCoreApplication::libraryPaths();
+
+    for (const auto &path : libraryPaths) {
+        const QString pluginFile = path + QStringLiteral("/plasma/applets/org.kde.plasma.taskmanager.so");
+
+        if (!QFile::exists(pluginFile)) {
+            continue;
+        }
+
+        QLibrary plugin(pluginFile);
+        plugin.setLoadHints(QLibrary::PreventUnloadHint);
+
+        if (plugin.load()) {
+            qDebug() << "Task manager applet qml types registered from :: " << pluginFile;
+        } else {
+            qWarning() << "Task manager applet plugin could not be loaded :: " << plugin.errorString();
+        }
+
+        return;
+    }
+
+    qWarning() << "Task manager applet plugin was not found, Latte Tasks will not be available...";
 }

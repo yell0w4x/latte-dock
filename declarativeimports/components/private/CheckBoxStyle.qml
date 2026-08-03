@@ -4,7 +4,6 @@
 */
 
 import QtQuick 2.0
-import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.3
 import Qt5Compat.GraphicalEffects
 
@@ -12,6 +11,7 @@ import QtQuick.Controls.Styles.Plasma 2.0 as PlasmaStyles
 
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 3.0 as PlasmaComponents
+import org.kde.kirigami 2.20 as Kirigami
 
 PlasmaStyles.CheckBoxStyle{
     id: checkboxStyle
@@ -26,8 +26,8 @@ PlasmaStyles.CheckBoxStyle{
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.bottom
-            height: 1 * units.devicePixelRatio
-            color: theme.highlightColor
+            height: 1
+            color: Kirigami.Theme.highlightColor
             visible: control.activeFocus
         }
     }

@@ -375,8 +375,11 @@ void View::init(Plasma::Containment *plasma_containment)
 
     connect(m_corona->indicatorFactory(), &Latte::Indicator::Factory::indicatorRemoved, this, &View::indicatorPluginRemoved);
 
-    //! Assign app interfaces in be accessible through containment graphic item
-    QQuickItem *containmentGraphicItem = qobject_cast<QQuickItem *>(plasma_containment->property("_plasma_graphicObject").value<QObject *>());
+    //! Assign app interfaces in be accessible through containment graphic item.
+    //! Plasma 6 replaced the "_plasma_graphicObject" dynamic property with
+    //! AppletQuickItem::itemForApplet(); the item may not exist yet, in which case
+    //! Latte::Interfaces resolves everything on its own once it is created.
+    QQuickItem *containmentGraphicItem = PlasmaQuick::AppletQuickItem::itemForApplet(plasma_containment);
 
     if (containmentGraphicItem) {
         containmentGraphicItem->setProperty("_latte_globalShortcuts_object", QVariant::fromValue(m_corona->globalShortcuts()->shortcutsTracker()));
@@ -1174,7 +1177,7 @@ QStringList View::activities() const
 {
     QStringList running;
 
-    QStringList runningAll = m_corona->activitiesConsumer()->runningActivities();
+    QStringList runningAll = m_corona->activitiesConsumer()->activities();
 
     for(int i=0; i<m_activities.count(); ++i) {
         if (runningAll.contains(m_activities[i])) {
@@ -1300,7 +1303,7 @@ void View::setLayout(Layout::GenericLayout *layout)
         });
 
         if (latteCorona->layoutsManager()->memoryUsage() == MemoryUsage::MultipleLayouts) {
-            connectionsLayout << connect(latteCorona->activitiesConsumer(), &KActivities::Consumer::runningActivitiesChanged, this, [&]() {
+            connectionsLayout << connect(latteCorona->activitiesConsumer(), &KActivities::Consumer::activitiesChanged, this, [&]() {
                 if (m_layout && m_visibility) {
                     setActivities(m_layout->appliedActivities());
                     qDebug() << "DOCK VIEW FROM LAYOUT (runningActivitiesChanged) ::: " << m_layout->name()
@@ -1495,7 +1498,7 @@ void View::setInterfacesGraphicObj(Latte::Interfaces *ifaces)
     m_interfacesGraphicObj = ifaces;
 
     if (containment()) {
-        QQuickItem *containmentGraphicItem = qobject_cast<QQuickItem *>(containment()->property("_plasma_graphicObject").value<QObject *>());
+        QQuickItem *containmentGraphicItem = PlasmaQuick::AppletQuickItem::itemForApplet(containment());
 
         if (containmentGraphicItem) {
             containmentGraphicItem->setProperty("_latte_view_interfacesobject", QVariant::fromValue(m_interfacesGraphicObj));

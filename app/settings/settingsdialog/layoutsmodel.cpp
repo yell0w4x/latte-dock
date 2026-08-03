@@ -897,36 +897,33 @@ void Layouts::initActivities()
     allActivities.id = Latte::Data::Layout::ALLACTIVITIESID;
     allActivities.name = QString("[ " + i18n("All Activities") + " ]");
     allActivities.icon = "activities";
-    allActivities.state = KActivities::Info::Stopped;
+    allActivities.state = Latte::Data::Activity::Stopped;
     m_activitiesTable << allActivities;
 
     Latte::Data::Activity freeActivities;
     freeActivities.id = Latte::Data::Layout::FREEACTIVITIESID;
     freeActivities.name = QString("[ " + i18n("Free Activities") + " ]");
     freeActivities.icon = "activities";
-    freeActivities.state = KActivities::Info::Stopped;
+    freeActivities.state = Latte::Data::Activity::Stopped;
     m_activitiesTable << freeActivities;
 
     Latte::Data::Activity currentActivity;
     currentActivity.id = Latte::Data::Layout::CURRENTACTIVITYID;
     currentActivity.name = QString("[ " + i18n("Current Activity") + " ]");
     currentActivity.icon = "dialog-yes";
-    currentActivity.state = KActivities::Info::Stopped;
+    currentActivity.state = Latte::Data::Activity::Stopped;
     m_activitiesTable << currentActivity;
 
     QStringList activities = m_corona->layoutsManager()->synchronizer()->activities();;
 
     for(const auto &id: activities) {
-        KActivities::Info info(id);
-
-        if (info.state() != KActivities::Info::Invalid) {
-            onActivityAdded(id);
-        }
+        //! Plasma 6 activities are always running when they are reported by the Consumer
+        onActivityAdded(id);
     }
 
     connect(m_corona->activitiesConsumer(), &KActivities::Consumer::activityAdded, this, &Layouts::onActivityAdded);
     connect(m_corona->activitiesConsumer(), &KActivities::Consumer::activityRemoved, this, &Layouts::onActivityRemoved);
-    connect(m_corona->activitiesConsumer(), &KActivities::Consumer::runningActivitiesChanged, this, &Layouts::onRunningActivitiesChanged);
+    connect(m_corona->activitiesConsumer(), &KActivities::Consumer::activitiesChanged, this, &Layouts::onRunningActivitiesChanged);
 
     emit activitiesStatesChanged();
 }
@@ -951,7 +948,7 @@ void Layouts::onActivityAdded(const QString &id)
     activity.id = m_activitiesInfo[id]->id();
     activity.name = m_activitiesInfo[id]->name();
     activity.icon = m_activitiesInfo[id]->icon();
-    activity.state = m_activitiesInfo[id]->state();
+    activity.state = Latte::Data::Activity::Running;
     activity.isCurrent = m_activitiesInfo[id]->isCurrent();
 
     if (!m_activitiesTable.containsId(id)) {
@@ -992,7 +989,7 @@ void Layouts::onActivityChanged(const QString &id)
     if (m_activitiesTable.containsId(id) && m_activitiesInfo.contains(id)) {
         m_activitiesTable[id].name = m_activitiesInfo[id]->name();
         m_activitiesTable[id].icon = m_activitiesInfo[id]->icon();
-        m_activitiesTable[id].state = m_activitiesInfo[id]->state();
+        m_activitiesTable[id].state = Latte::Data::Activity::Running;
         m_activitiesTable[id].isCurrent = m_activitiesInfo[id]->isCurrent();
 
         emit activitiesStatesChanged();
@@ -1003,9 +1000,9 @@ void Layouts::onRunningActivitiesChanged(const QStringList &runningIds)
 {
     for (int i = 0; i < m_activitiesTable.rowCount(); ++i) {
         if (runningIds.contains(m_activitiesTable[i].id)) {
-            m_activitiesTable[i].state = KActivities::Info::Running;
+            m_activitiesTable[i].state = Latte::Data::Activity::Running;
         } else {
-            m_activitiesTable[i].state = KActivities::Info::Stopped;
+            m_activitiesTable[i].state = Latte::Data::Activity::Stopped;
         }
     }
 

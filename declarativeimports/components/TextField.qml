@@ -4,9 +4,9 @@
 */
 import QtQuick 2.0
 import QtQuick.Layouts 1.3
-import QtQuick.Controls 1.4
 
 import org.kde.plasma.components 3.0 as PlasmaComponents
+import org.kde.kirigami 2.20 as Kirigami
 
 PlasmaComponents.TextField {
     id: textField
@@ -26,7 +26,7 @@ PlasmaComponents.TextField {
     placeholderText: i18n("none")
     horizontalAlignment: Text.AlignLeft
 
-    readonly property int implicitWidth: internalContent.width + theme.mSize(theme.defaultFont).width * 3.5
+    readonly property int implicitWidth: internalContent.width + Kirigami.Units.gridUnit * 2.45
 
     readonly property int value: text === "" ? minValue : parseInt(text)
     property int step: 100
@@ -67,8 +67,8 @@ PlasmaComponents.TextField {
             Layout.fillHeight: true
             Layout.preferredWidth: height
             Layout.maximumWidth: height
-            Layout.leftMargin: Qt.application.layoutDirection === Qt.RightToLeft ? 0 : 0.7 * theme.mSize(theme.defaultFont).width
-            Layout.rightMargin: Qt.application.layoutDirection === Qt.RightToLeft ? 0.7 * theme.mSize(theme.defaultFont).width : 0
+            Layout.leftMargin: Qt.application.layoutDirection === Qt.RightToLeft ? 0 : Kirigami.Units.gridUnit * 0.49
+            Layout.rightMargin: Qt.application.layoutDirection === Qt.RightToLeft ? Kirigami.Units.gridUnit * 0.49 : 0
 
             text: "-"
             onClicked: decrement()

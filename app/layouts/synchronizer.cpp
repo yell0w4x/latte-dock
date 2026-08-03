@@ -67,7 +67,7 @@ Synchronizer::Synchronizer(QObject *parent)
         }
     });
 
-    connect(m_manager->corona()->activitiesConsumer(), &KActivities::Consumer::runningActivitiesChanged,
+    connect(m_manager->corona()->activitiesConsumer(), &KActivities::Consumer::activitiesChanged,
             this, [&]() {
         if (m_manager->memoryUsage() == MemoryUsage::MultipleLayouts) {
             syncMultipleLayoutsToActivities();
@@ -157,7 +157,7 @@ QStringList Synchronizer::freeActivities()
 
 QStringList Synchronizer::runningActivities()
 {   
-    return m_manager->corona()->activitiesConsumer()->runningActivities();
+    return m_manager->corona()->activitiesConsumer()->activities();
 }
 
 QStringList Synchronizer::freeRunningActivities()
@@ -515,21 +515,8 @@ void Synchronizer::pauseLayout(QString layoutName)
             return;
         }
 
-        QStringList appliedactivities = layout->appliedActivities();
-
-        if (layout && !appliedactivities.isEmpty()) {
-            int i = 0;
-
-            for (const auto &activityid : appliedactivities) {
-                //! Stopping the activities must be done asynchronous because otherwise
-                //! the activity manager cant close multiple activities
-                QTimer::singleShot(i * 1000, [this, activityid]() {
-                    m_activitiesController->stopActivity(activityid);
-                });
-
-                i = i + 1;
-            }
-        }
+        //! Plasma 6 does not support stopping activities any longer, all existing
+        //! activities are always running, so there is nothing to pause here.
     }
 }
 
@@ -864,10 +851,7 @@ bool Synchronizer::switchToLayoutInMultipleModeBasedOnActivities(const QString &
     }
 
     if (!switchToActivity.isEmpty()) {
-        if (!m_manager->corona()->activitiesConsumer()->runningActivities().contains(switchToActivity)) {
-            m_activitiesController->startActivity(switchToActivity);
-        }
-
+        //! Plasma 6 activities are always running, they only need to be activated
         m_activitiesController->setCurrentActivity(switchToActivity);
     }
 

@@ -7,6 +7,7 @@ import QtQuick 2.0
 
 import org.kde.ksvg 1.0 as KSvg
 import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.plasmoid 2.0
 
 KSvg.FrameSvgItem {
     id: frame
@@ -22,19 +23,19 @@ KSvg.FrameSvgItem {
             return "";
         }
 
-        if (plasmoid.location === PlasmaCore.Types.LeftEdge) {
+        if (Plasmoid.location === PlasmaCore.Types.LeftEdge) {
             return "west-active-tab";
         }
 
-        if (plasmoid.location === PlasmaCore.Types.TopEdge) {
+        if (Plasmoid.location === PlasmaCore.Types.TopEdge) {
             return "north-active-tab";
         }
 
-        if (plasmoid.location === PlasmaCore.Types.RightEdge) {
+        if (Plasmoid.location === PlasmaCore.Types.RightEdge) {
             return "east-active-tab";
         }
 
-        if (plasmoid.location === PlasmaCore.Types.BottomEdge) {
+        if (Plasmoid.location === PlasmaCore.Types.BottomEdge) {
             return "south-active-tab";
         }
 

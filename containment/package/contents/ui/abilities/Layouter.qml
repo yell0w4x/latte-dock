@@ -15,7 +15,7 @@ Ability.LayouterPrivate {
 
     readonly property bool inNormalFillCalculationsState: animations.needBothAxis.count === 0
                                                           && animations.needThickness.count === 0
-                                                          && (animations.needLength.count === 0 || root.dragInfo.entered) /*update when the user drags a plasmoid on the view*/
+                                                          && (animations.needLength.count === 0 || root.dragInfo.entered) /*update when the user drags a Plasmoid on the view*/
                                                           && !appletsInParentChange
                                                         //  && (!dragOverlay || (dragOverlay && !dragOverlay.pressed)) /*do not update during moving/dragging applets*/
 
@@ -49,7 +49,7 @@ Ability.LayouterPrivate {
     }
 
     Connections {
-        target: plasmoid
+        target: Plasmoid
         onFormFactorChanged: _layouter.updateSizeForAppletsInFill();
     }
 

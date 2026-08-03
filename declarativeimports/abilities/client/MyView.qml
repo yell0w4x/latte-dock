@@ -7,6 +7,7 @@ import QtQuick 2.0
 
 import org.kde.plasma.plasmoid 2.0
 import org.kde.latte.abilities.definition 0.1 as AbilityDefinition
+import org.kde.kirigami 2.20 as Kirigami
 
 AbilityDefinition.MyView {
     id: _myView
@@ -46,12 +47,12 @@ AbilityDefinition.MyView {
 
     itemShadow: ref.myView.itemShadow
 
-    palette: bridge && bridge.applyPalette ? bridge.palette : theme
+    palette: bridge && bridge.applyPalette ? bridge.palette : Kirigami.Theme
 
     readonly property AbilityDefinition.MyView local: AbilityDefinition.MyView {
         isShownFully: true
-        inEditMode: plasmoid.userConfiguring
-        inConfigureAppletsMode: plasmoid.userConfiguring
+        inEditMode: Plasmoid.userConfiguring
+        inConfigureAppletsMode: Plasmoid.userConfiguring
     }
 
     Item {

@@ -155,6 +155,8 @@ private:
 
     void setAppletOrder(const QList<int> &order);
     void setOrder(const QList<int> &order);
+    QList<QObject *> appletsList() const;
+
     void setLockedZoomApplets(const QList<int> &applets);
     void setUserBlocksColorizingApplets(const QList<int> &applets);
 

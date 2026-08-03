@@ -17,6 +17,7 @@ import org.kde.latte.core 0.2 as LatteCore
 import org.kde.latte.private.tasks 0.1 as LatteTasks
 
 import "../code/activitiesTools.js" as ActivitiesTools
+import org.kde.kirigami 2.20 as Kirigami
 
 PlasmaComponents.ContextMenu {
     id: menu
@@ -48,9 +49,9 @@ PlasmaComponents.ContextMenu {
 
     property int activitiesCount: 0
 
-    readonly property string tailSeparatorText: plasmoid.formFactor === PlasmaCore.Types.Vertical ? i18n("Top Separator") :
+    readonly property string tailSeparatorText: Plasmoid.formFactor === PlasmaCore.Types.Vertical ? i18n("Top Separator") :
                                                                                                     (!root.LayoutMirroring.enabled ? i18n("Left Separator") : i18n("Right Separator"))
-    readonly property string headSeparatorText: plasmoid.formFactor === PlasmaCore.Types.Vertical ? i18n("Bottom Separator") :
+    readonly property string headSeparatorText: Plasmoid.formFactor === PlasmaCore.Types.Vertical ? i18n("Bottom Separator") :
                                                                                                     (!root.LayoutMirroring.enabled ? i18n("Right Separator") : i18n("Left Separator"))
 
     onStatusChanged: {
@@ -60,7 +61,7 @@ PlasmaComponents.ContextMenu {
         } else if (status == PlasmaComponents.DialogStatus.Closed) {
             root.contextMenu = null;
             menu.destroy();
-            backend.ungrabMouse(visualParent);
+            //! Plasma 6 dropped Backend::ungrabMouse
         }
     }
 
@@ -125,7 +126,7 @@ PlasmaComponents.ContextMenu {
         // QMenu does not limit its width automatically. Even if we set a maximumWidth
         // it would just cut off text rather than eliding. So we do this manually.
         var textMetrics = Qt.createQmlObject("import QtQuick 2.4; TextMetrics {}", menu);
-        var maximumWidth = theme.mSize(theme.defaultFont).width * 22;
+        var maximumWidth = Kirigami.Units.gridUnit * 15.4;
 
         sections.forEach(function (section) {
             if (section["actions"].length > 0 || section["group"] == "actions") {
@@ -304,7 +305,7 @@ PlasmaComponents.ContextMenu {
     Component.onCompleted: {
         ActivitiesTools.launchersOnActivities = root.launchersOnActivities
         ActivitiesTools.currentActivity = activityInfo.currentActivity;
-        ActivitiesTools.plasmoid = plasmoid;
+        ActivitiesTools.plasmoid = Plasmoid;
 
         //From Plasma 5.10 and frameworks 5.34 jumpLists and
         //places are supported
@@ -321,7 +322,7 @@ PlasmaComponents.ContextMenu {
     Component.onDestruction: {
         if (!changingLayout) {
             root.contextMenu = null;
-            backend.ungrabMouse(visualParent);
+            //! Plasma 6 dropped Backend::ungrabMouse
         }
     }
 
@@ -642,7 +643,7 @@ PlasmaComponents.ContextMenu {
             }
 
             PlasmaComponents.MenuItem {
-                visible: (plasmoid.configuration.groupingStrategy !== 0) && menu.visualParent.m.IsWindow === true
+                visible: (Plasmoid.configuration.groupingStrategy !== 0) && menu.visualParent.m.IsWindow === true
 
                 checkable: true
                 checked: menu.visualParent && menu.visualParent.m.IsGroupable === true
@@ -698,7 +699,7 @@ PlasmaComponents.ContextMenu {
         visible: visualParent && (!visualParent.isSeparator || (visualParent.isSeparator && root.inEditMode))
         // && get(atm.IsLauncher) !== true
                  && get(atm.IsStartup) !== true
-                 && plasmoid.immutability !== PlasmaCore.Types.SystemImmutable
+                 && Plasmoid.immutability !== PlasmaCore.Types.SystemImmutable
                  && (activityInfo.numberOfRunningActivities >= 2)
 
         Connections {
@@ -771,7 +772,7 @@ PlasmaComponents.ContextMenu {
 
     PlasmaComponents.MenuItem {
         visible: (visualParent && !visualParent.isSeparator && get(atm.IsLauncher) === true)
-                 && plasmoid.immutability !== PlasmaCore.Types.SystemImmutable
+                 && Plasmoid.immutability !== PlasmaCore.Types.SystemImmutable
 
         text: i18n("Unpin Launcher")
         icon: "window-unpin"
@@ -832,11 +833,11 @@ PlasmaComponents.ContextMenu {
     PlasmaComponents.MenuItem {
         id: alternativesMenuItem
         visible: (appletAbilities.myView.isReady && appletAbilities.myView.inEditMode)
-                 || (!appletAbilities.myView.isReady && plasmoid.userConfiguring /*normal plasmoid in the desktop*/)
-        text: plasmoid.action("alternatives").text
-        icon: plasmoid.action("alternatives").icon
+                 || (!appletAbilities.myView.isReady && Plasmoid.userConfiguring /*normal Plasmoid in the desktop*/)
+        text: Plasmoid.internalAction("alternatives").text
+        icon: Plasmoid.internalAction("alternatives").icon
 
-        onClicked: plasmoid.action("alternatives").trigger();
+        onClicked: Plasmoid.internalAction("alternatives").trigger();
     }
 
     PlasmaComponents.MenuItem {
@@ -855,11 +856,11 @@ PlasmaComponents.ContextMenu {
         //! Workaround: this is preferred compared to:
         //!   action:plasmoid.action("remove")
         //! which shows the action always and not dependent of myView.inEditMode flag
-        text: plasmoid.action("remove").text
-        icon: plasmoid.action("remove").icon
+        text: Plasmoid.internalAction("remove").text
+        icon: Plasmoid.internalAction("remove").icon
         visible: appletAbilities.myView.isReady && appletAbilities.myView.inEditMode
 
-        onClicked: plasmoid.action("remove").trigger();
+        onClicked: Plasmoid.internalAction("remove").trigger();
     }
 
     PlasmaComponents.MenuItem {

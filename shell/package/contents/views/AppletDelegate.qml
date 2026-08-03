@@ -13,6 +13,7 @@ import org.kde.plasma.components 3.0 as PlasmaComponents
 import org.kde.plasma.extras 2.0 as PlasmaExtras
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.draganddrop 2.0
+import org.kde.kirigami 2.20 as Kirigami
 
 PlasmoidItem {
     id: delegate
@@ -58,25 +59,25 @@ PlasmoidItem {
 
         ColumnLayout {
             id: mainLayout
-            spacing: units.smallSpacing
+            spacing: Kirigami.Units.smallSpacing
             anchors {
                 left: parent.left
                 right: parent.right
                 //bottom: parent.bottom
-                margins: units.smallSpacing * 2
-                rightMargin: units.smallSpacing * 2 // don't cram the text to the border too much
+                margins: Kirigami.Units.smallSpacing * 2
+                rightMargin: Kirigami.Units.smallSpacing * 2 // don't cram the text to the border too much
                 top: parent.top
             }
 
             Item {
                 id: iconContainer
-                width: units.iconSizes.enormous
+                width: Kirigami.Units.iconSizes.enormous
                 height: width
                 Layout.alignment: Qt.AlignHCenter
                 opacity: delegate.pendingUninstall ? 0.6 : 1
                 Behavior on opacity {
                     OpacityAnimator {
-                        duration: units.longDuration
+                        duration: Kirigami.Units.longDuration
                         easing.type: Easing.InOutQuad
                     }
                 }
@@ -84,13 +85,13 @@ PlasmoidItem {
                 Item {
                     id: iconWidget
                     anchors.fill: parent
-                    PlasmaCore.IconItem {
+                    Kirigami.Icon {
                         anchors.fill: parent
                         source: model.decoration
                         visible: model.screenshot === ""
                     }
                     Image {
-                        width: units.iconSizes.enormous
+                        width: Kirigami.Units.iconSizes.enormous
                         height: width
                         anchors.fill: parent
                         fillMode: Image.PreserveAspectFit
@@ -103,9 +104,9 @@ PlasmoidItem {
                     anchors.fill: parent
 
                     Rectangle {
-                        x: Math.round(-units.smallSpacing * 1.5 / 2)
+                        x: Math.round(-Kirigami.Units.smallSpacing * 1.5 / 2)
                         y: x
-                        width: runningBadge.width + Math.round(units.smallSpacing * 1.5)
+                        width: runningBadge.width + Math.round(Kirigami.Units.smallSpacing * 1.5)
                         height: width
                         radius: height
                         visible: running && delegate.GridView.isCurrentItem
@@ -115,9 +116,9 @@ PlasmoidItem {
                 Rectangle {
                     id: runningBadge
                     width: height
-                    height: Math.round(theme.mSize(countLabel.font).height * 1.3)
+                    height: Math.round(Kirigami.Units.gridUnit * 1.3)
                     radius: height
-                    color: theme.highlightColor
+                    color: Kirigami.Theme.highlightColor
                     visible: running && delegate.GridView.isCurrentItem
                     onVisibleChanged: maskShaderSource.scheduleUpdate()
 
@@ -163,7 +164,7 @@ PlasmoidItem {
                         top: parent.top
                         right: parent.right
                     }
-                    iconSource: delegate.pendingUninstall ? "edit-undo" : "edit-delete"
+                    icon.name: delegate.pendingUninstall ? "edit-undo" : "edit-delete"
                     // we don't really "undo" anything but we'll pretend to the user that we do
                     tooltip: delegate.pendingUninstall ? i18nd("plasma_shell_org.kde.plasma.desktop", "Undo uninstall")
                                                        : i18nd("plasma_shell_org.kde.plasma.desktop", "Uninstall widget")
@@ -213,7 +214,7 @@ PlasmoidItem {
                 // otherwise causes binding loop due to the way the Plasma sets the height
                 height: implicitHeight
                 text: model.description
-                font: theme.smallestFont
+                font: Kirigami.Theme.smallFont
                 wrapMode: Text.WordWrap
                 elide: Text.ElideRight
                 maximumLineCount: heading.lineCount === 1 ? 3 : 2

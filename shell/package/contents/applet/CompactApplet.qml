@@ -10,6 +10,8 @@ import Qt5Compat.GraphicalEffects
 
 import org.kde.ksvg 1.0 as KSvg
 import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.plasmoid 2.0
+import org.kde.kirigami 2.20 as Kirigami
 import org.kde.plasma.components 3.0 as PlasmaComponents
 import org.kde.kquickcontrolsaddons 2.0
 
@@ -20,12 +22,15 @@ PlasmaCore.ToolTipArea {
     objectName: "org.kde.desktop-CompactApplet"
     anchors.fill: parent
 
-    mainText: plasmoid.toolTipMainText
-    subText: plasmoid.toolTipSubText
-    location: plasmoid.location
-    active: !plasmoid.expanded
-    textFormat: plasmoid.toolTipTextFormat
-    mainItem: plasmoid.toolTipItem ? plasmoid.toolTipItem : null
+    mainText: plasmoidItem ? plasmoidItem.toolTipMainText : ""
+    subText: plasmoidItem ? plasmoidItem.toolTipSubText : ""
+    location: Plasmoid.location
+    active: plasmoidItem && !plasmoidItem.expanded
+    textFormat: plasmoidItem ? plasmoidItem.toolTipTextFormat : Text.AutoText
+    mainItem: plasmoidItem && plasmoidItem.toolTipItem ? plasmoidItem.toolTipItem : null
+
+    //! Plasma 6 hands the PlasmoidItem over to the compact representation wrapper
+    property PlasmoidItem plasmoidItem
 
     property Item fullRepresentation: null
     property Item compactRepresentation: null
@@ -78,7 +83,7 @@ PlasmaCore.ToolTipArea {
             })
         } else {
             popupWindow.mainItem.width = Qt.binding(function() {
-                return PlasmaCore.Theme.mSize(PlasmaCore.Theme.defaultFont).width * 35
+                return Kirigami.Units.gridUnit * 24.5
             })
         }
 
@@ -96,7 +101,7 @@ PlasmaCore.ToolTipArea {
             })
         } else {
             popupWindow.mainItem.height = Qt.binding(function() {
-                return PlasmaCore.Theme.mSize(PlasmaCore.Theme.defaultFont).height * 25
+                return Kirigami.Units.gridUnit * 25
             })
         }
 
@@ -111,7 +116,7 @@ PlasmaCore.ToolTipArea {
         visible: fromCurrentTheme && opacity > 0
         prefix: {
             var prefix;
-            switch (plasmoid.location) {
+            switch (Plasmoid.location) {
                 case PlasmaCore.Types.LeftEdge:
                     prefix = "west-active-tab";
                     break;
@@ -129,10 +134,10 @@ PlasmaCore.ToolTipArea {
                 }
                 return prefix;
             }
-        opacity: plasmoid.expanded ? 1 : 0
+        opacity: plasmoidItem.expanded ? 1 : 0
         Behavior on opacity {
             NumberAnimation {
-                duration: PlasmaCore.Units.shortDuration
+                duration: Kirigami.Units.shortDuration
                 easing.type: Easing.InOutQuad
             }
         }
@@ -143,16 +148,16 @@ PlasmaCore.ToolTipArea {
     Timer {
         id: expandedSync
         interval: 500
-        onTriggered: plasmoid.expanded = popupWindow.visible;
+        onTriggered: if (plasmoidItem) { plasmoidItem.expanded = popupWindow.visible; }
     }
 
     Connections {
-        target: plasmoid.action("configure")
-        function onTriggered() { plasmoid.expanded = false }
+        target: Plasmoid.internalAction("configure")
+        function onTriggered() { if (plasmoidItem) { plasmoidItem.expanded = false; } }
     }
 
     Connections {
-        target: plasmoid
+        target: Plasmoid
         function onContextualActionsAboutToShow() { root.hideToolTip() }
     }
 
@@ -160,12 +165,12 @@ PlasmaCore.ToolTipArea {
         id: popupWindow
         objectName: "popupWindow"
         flags: Qt.WindowStaysOnTopHint
-        visible: plasmoid.expanded && fullRepresentation
+        visible: plasmoidItem && plasmoidItem.expanded && fullRepresentation
         visualParent: compactRepresentationVisualParent ? compactRepresentationVisualParent : (compactRepresentation ? compactRepresentation : null)
-       // location: PlasmaCore.Types.Floating //plasmoid.location
-        edge: plasmoid.location /*this way dialog borders are not updated and it is used only for adjusting dialog position*/
-        hideOnWindowDeactivate: plasmoid.hideOnWindowDeactivate
-        backgroundHints: (plasmoid.containmentDisplayHints & PlasmaCore.Types.DesktopFullyCovered) ? PlasmaCore.Dialog.SolidBackground : PlasmaCore.Dialog.StandardBackground
+       // location: PlasmaCore.Types.Floating //Plasmoid.location
+        edge: Plasmoid.location /*this way dialog borders are not updated and it is used only for adjusting dialog position*/
+        hideOnWindowDeactivate: plasmoidItem ? plasmoidItem.hideOnWindowDeactivate : true
+        backgroundHints: (Plasmoid.containmentDisplayHints & PlasmaCore.Types.DesktopFullyCovered) ? PlasmaCore.Dialog.SolidBackground : PlasmaCore.Dialog.StandardBackground
 
         property var oldStatus: PlasmaCore.Types.UnknownStatus
 
@@ -176,7 +181,7 @@ PlasmaCore.ToolTipArea {
             focus: true
 
             Keys.onEscapePressed: {
-                plasmoid.expanded = false;
+                if (plasmoidItem) { plasmoidItem.expanded = false; }
             }
 
             LayoutMirroring.enabled: Qt.application.layoutDirection === Qt.RightToLeft
@@ -201,10 +206,10 @@ PlasmaCore.ToolTipArea {
         onVisibleChanged: {
             if (!visible) {
                 expandedSync.restart();
-                plasmoid.status = oldStatus;
+                Plasmoid.status = oldStatus;
             } else {
-                oldStatus = plasmoid.status;
-                plasmoid.status = PlasmaCore.Types.RequiresAttentionStatus;
+                oldStatus = Plasmoid.status;
+                Plasmoid.status = PlasmaCore.Types.RequiresAttentionStatus;
                 // This call currently fails and complains at runtime:
                 // QWindow::setWindowState: QWindow::setWindowState does not accept Qt::WindowActive
                 popupWindow.requestActivate();

@@ -8,6 +8,7 @@
 */
 
 import QtQuick 2.6
+import QtQuick.Controls 2.15 as QQC2
 import QtQuick.Layouts 1.1
 import Qt5Compat.GraphicalEffects
 import QtQml.Models 2.2
@@ -19,6 +20,8 @@ import org.kde.plasma.components 3.0 as PlasmaComponents
 import org.kde.kquickcontrolsaddons 2.0 as KQuickControlsAddons
 
 import org.kde.taskmanager 0.1 as TaskManager
+import org.kde.kirigami 2.20 as Kirigami
+import org.kde.plasma.plasmoid 2.0
 
 PlasmaComponents.ScrollView {
     id: mainToolTip
@@ -45,7 +48,7 @@ PlasmaComponents.ScrollView {
     property bool isOnAllVirtualDesktopsParent
     property var activitiesParent
     //
-    readonly property bool isVerticalPanel: plasmoid.formFactor === PlasmaCore.Types.Vertical
+    readonly property bool isVerticalPanel: Plasmoid.formFactor === PlasmaCore.Types.Vertical
 
     Layout.minimumWidth: contentItem.width
     Layout.maximumWidth: Layout.minimumWidth
@@ -56,16 +59,11 @@ PlasmaComponents.ScrollView {
     LayoutMirroring.enabled: Qt.application.layoutDirection === Qt.RightToLeft
     LayoutMirroring.childrenInherit: true
 
-    property int textWidth: theme.mSize(theme.defaultFont).width * 20
+    property int textWidth: Kirigami.Units.gridUnit * 14
 
-    verticalScrollBarPolicy: Qt.ScrollBarAlwaysOff
-    horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
-
-    Component.onCompleted: {
-        flickableItem.interactive = Qt.binding(function() {
-            return isVerticalPanel ? contentItem.height > viewport.height : contentItem.width > viewport.width
-        });
-    }
+    //! Plasma 6 components are QtQuick Controls 2 based, scrollbars are attached properties now
+    QQC2.ScrollBar.vertical.policy: QQC2.ScrollBar.AlwaysOff
+    QQC2.ScrollBar.horizontal.policy: QQC2.ScrollBar.AlwaysOff
 
     Item{
         width: contentItem.width
@@ -101,7 +99,7 @@ PlasmaComponents.ScrollView {
                 rows: !isVerticalPanel
                 columns: isVerticalPanel
                 flow: isVerticalPanel ? Grid.TopToBottom : Grid.LeftToRight
-                spacing: units.largeSpacing
+                spacing: Kirigami.Units.largeSpacing
 
                 readonly property bool hasVisibleDescription: {
                     for (var i=0; i<children.length; ++i) {

@@ -14,19 +14,20 @@ import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 3.0 as PlasmaComponents
 import org.kde.kirigami 2.2 as Kirigami
 import "private" as Private
+import org.kde.ksvg 1.0 as KSvg
 
 T.ComboBox {
     id: control
 
     implicitWidth: Math.max(background ? background.implicitWidth : 0,
                             contentItem.implicitWidth + leftPadding + rightPadding) + indicator.implicitWidth + rightPadding
-    implicitHeight: units.gridUnit * 1.6
+    implicitHeight: Kirigami.Units.gridUnit * 1.6
     baselineOffset: contentItem.y + contentItem.baselineOffset
 
     hoverEnabled: true
     topPadding: surfaceNormal.margins.top
     leftPadding: surfaceNormal.margins.left
-    rightPadding: surfaceNormal.margins.right + units.gridUnit * 2
+    rightPadding: surfaceNormal.margins.right + Kirigami.Units.gridUnit * 2
     bottomPadding: surfaceNormal.margins.bottom
 
     wheelEnabled: false
@@ -86,17 +87,17 @@ T.ComboBox {
         }
     }
 
-    indicator: PlasmaCore.SvgItem {
-        implicitWidth: units.iconSizes.small
+    indicator: KSvg.SvgItem {
+        implicitWidth: Kirigami.Units.iconSizes.small
         implicitHeight: implicitWidth
         anchors {
             right: parent.right
             rightMargin: control.buttonIsTransparent ? 0 : surfaceNormal.margins.right
             verticalCenter: parent.verticalCenter
         }
-        svg: PlasmaCore.Svg {
+        svg: KSvg.Svg {
             imagePath: "widgets/arrows"
-            colorGroup: PlasmaCore.Theme.ButtonColorGroup
+            colorSet: KSvg.Svg.Button
         }
         elementId: "down-arrow"
     }
@@ -202,12 +203,12 @@ T.ComboBox {
                 rightMargin: control.mirrored ? 1 : 0
             }
 
-            PlasmaCore.IconItem {
+            Kirigami.Icon {
                 id: selectedIcon
                 implicitWidth: textLabel.height
                 implicitHeight: textLabel.height
 
-                colorGroup: PlasmaCore.Theme.ButtonColorGroup
+                colorSet: KSvg.Svg.Button
                 source: {
                     if (control
                             && control.currentIndex>=0
@@ -230,12 +231,12 @@ T.ComboBox {
                 id: textLabel
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                Layout.leftMargin: !selectedIcon.visible && !control.mirrored ? units.smallSpacing : 0
-                Layout.rightMargin: !selectedIcon.visible && control.mirrored ? units.smallSpacing : 0
+                Layout.leftMargin: !selectedIcon.visible && !control.mirrored ? Kirigami.Units.smallSpacing : 0
+                Layout.rightMargin: !selectedIcon.visible && control.mirrored ? Kirigami.Units.smallSpacing : 0
 
                 text: control.displayText
                 font: control.font
-                color: control.pressed ? theme.highlightedTextColor : theme.buttonTextColor
+                color: control.pressed ? Kirigami.Theme.highlightedTextColor : Kirigami.Theme.textColor
                 horizontalAlignment: Text.AlignLeft
                 verticalAlignment: Text.AlignVCenter
                 opacity: control.enabled ? 1 : 0.6
@@ -261,7 +262,7 @@ T.ComboBox {
                 // Work around Qt bug where NativeRendering breaks for non-integer scale factors
                 // https://bugreports.qt.io/browse/QTBUG-67007
                 renderType: Screen.devicePixelRatio % 1 !== 0 ? Text.QtRendering : Text.NativeRendering
-                color: theme.buttonTextColor //control.enabled ? theme.textColor : theme.disabledTextColor
+                color: Kirigami.Theme.textColor //control.enabled ? theme.textColor : theme.disabledTextColor
                 selectionColor: Kirigami.Theme.highlightColor
                 selectedTextColor: Kirigami.Theme.highlightedTextColor
 
@@ -311,10 +312,10 @@ T.ComboBox {
         y: rect.y + 6
     }*/
 
-    background: PlasmaCore.FrameSvgItem {
+    background: KSvg.FrameSvgItem {
         id: surfaceNormal
         //retrocompatibility with old controls
-        implicitWidth: units.gridUnit * 6
+        implicitWidth: Kirigami.Units.gridUnit * 6
         width: parent.width
         height: parent.height
 
@@ -437,8 +438,8 @@ T.ComboBox {
                 margins: -1
             }
             radius: 2
-            color: theme.viewBackgroundColor
-            border.color: Qt.rgba(theme.textColor.r, theme.textColor.g, theme.textColor.b, 0.3)
+            color: Kirigami.Theme.backgroundColor
+            border.color: Qt.rgba(Kirigami.Theme.textColor.r, Kirigami.Theme.textColor.g, Kirigami.Theme.textColor.b, 0.3)
             layer.enabled: true
 
             layer.effect: DropShadow {

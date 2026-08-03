@@ -22,8 +22,8 @@ Loader{
 
     readonly property bool backgroundIsBusy: item ? item.isBusy : false
 
-    readonly property real originalThemeTextColorBrightness: ColorizerTools.colorBrightness(theme.textColor)
-    readonly property color originalLightTextColor: originalThemeTextColorBrightness > 127.5 ? theme.textColor : theme.backgroundColor
+    readonly property real originalThemeTextColorBrightness: ColorizerTools.colorBrightness(themeExtended.defaultTheme.textColor)
+    readonly property color originalLightTextColor: originalThemeTextColorBrightness > 127.5 ? themeExtended.defaultTheme.textColor : themeExtended.defaultTheme.backgroundColor
 
     readonly property real themeTextColorBrightness: ColorizerTools.colorBrightness(textColor)
     readonly property real backgroundColorBrightness: ColorizerTools.colorBrightness(backgroundColor)
@@ -47,7 +47,7 @@ Loader{
     readonly property bool editModeTextColorIsBright: ColorizerTools.colorBrightness(editModeTextColor) > 127.5
     readonly property color editModeTextColor: latteView && latteView.layout ? latteView.layout.textColor : "white"
 
-    readonly property bool mustBeShown: (applyTheme && applyTheme !== theme)
+    readonly property bool mustBeShown: (applyTheme && applyTheme !== themeExtended.defaultTheme)
                                         || (root.inConfigureAppletsMode && (root.themeColors === LatteContainment.Types.SmartThemeColors))
 
     readonly property real currentBackgroundBrightness: item ? item.currentBrightness : -1000
@@ -59,7 +59,7 @@ Loader{
 
     property QtObject applyTheme: {
         if (!root.environment.isGraphicsSystemAccelerated) {
-            return theme;
+            return themeExtended.defaultTheme;
         }
 
         if (latteView && latteView.windowsTracker && !(root.plasmaBackgroundForPopups && root.hasExpandedApplet)) {
@@ -87,7 +87,7 @@ Loader{
                         && root.windowColors === LatteContainment.Types.NoneWindowColors
                         && root.forceSolidPanel) ) {
                 /* plasma style*/
-                return theme;
+                return themeExtended.defaultTheme;
             }
 
             if (root.themeColors === LatteContainment.Types.DarkThemeColors) {
@@ -118,13 +118,13 @@ Loader{
                         return themeExtended.darkTheme;
                     } else {
                         //! default plasma theme should be better for panel transparency > 70
-                        return theme;
+                        return themeExtended.defaultTheme;
                     }
                 }
             }
         }
 
-        return theme;
+        return themeExtended.defaultTheme;
     }
 
     property color applyColor: textColor
@@ -142,8 +142,8 @@ Loader{
         return applyTheme.textColor;
     }
 
-    readonly property color inactiveBackgroundColor: applyTheme === theme ? theme.backgroundColor : applyTheme.inactiveBackgroundColor
-    readonly property color inactiveTextColor: applyTheme === theme ? theme.textColor : applyTheme.inactiveTextColor
+    readonly property color inactiveBackgroundColor: applyTheme === themeExtended.defaultTheme ? themeExtended.defaultTheme.backgroundColor : applyTheme.inactiveBackgroundColor
+    readonly property color inactiveTextColor: applyTheme === themeExtended.defaultTheme ? themeExtended.defaultTheme.textColor : applyTheme.inactiveTextColor
 
     readonly property color highlightColor: applyTheme.highlightColor
     readonly property color highlightedTextColor: applyTheme.highlightedTextColor
@@ -158,7 +158,7 @@ Loader{
 
     readonly property string scheme: {
         if (root.inConfigureAppletsMode && (root.themeColors === LatteContainment.Types.SmartThemeColors)) {
-            if (!LatteCore.WindowSystem.compositingActive && applyTheme !== theme) {
+            if (!LatteCore.WindowSystem.compositingActive && applyTheme !== themeExtended.defaultTheme) {
                 return applyTheme.schemeFile;
             }
 
@@ -179,7 +179,7 @@ Loader{
             }
         }
 
-        if (applyTheme===theme || !mustBeShown) {
+        if (applyTheme===themeExtended.defaultTheme || !mustBeShown) {
             if (themeExtended) {
                 return themeExtended.defaultTheme.schemeFile;
             } else {
@@ -192,7 +192,7 @@ Loader{
 
     sourceComponent: LatteApp.BackgroundTracker {
         activity: root.myView.isReady ? root.myView.lastUsedActivity : ""
-        location: plasmoid.location
+        location: Plasmoid.location
         screenName: latteView && latteView.positioner ? latteView.positioner.currentScreenName : ""
     }
 }

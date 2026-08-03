@@ -4,7 +4,6 @@
 */
 
 import QtQuick 2.7
-import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.3
 
 import org.kde.plasma.plasmoid 2.0
@@ -12,6 +11,7 @@ import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 3.0 as PlasmaComponents
 
 import org.kde.latte.components 1.0 as LatteComponents
+import org.kde.kirigami 2.20 as Kirigami
 
 ColumnLayout {
     id: root
@@ -23,7 +23,7 @@ ColumnLayout {
 
     RowLayout {
         Layout.fillWidth: true
-        spacing: units.smallSpacing
+        spacing: Kirigami.Units.smallSpacing
 
         PlasmaComponents.Label {
             text: i18n("Padding")
@@ -52,8 +52,8 @@ ColumnLayout {
         PlasmaComponents.Label {
             text: i18nc("number in percentage, e.g. 85 %","%1 %", currentValue)
             horizontalAlignment: Text.AlignRight
-            Layout.minimumWidth: theme.mSize(theme.defaultFont).width * 4
-            Layout.maximumWidth: theme.mSize(theme.defaultFont).width * 4
+            Layout.minimumWidth: Kirigami.Units.gridUnit * 2.8
+            Layout.maximumWidth: Kirigami.Units.gridUnit * 2.8
 
             readonly property int currentValue: lengthIntMarginSlider.value
         }
@@ -61,7 +61,7 @@ ColumnLayout {
 
     RowLayout {
         Layout.fillWidth: true
-        spacing: units.smallSpacing
+        spacing: Kirigami.Units.smallSpacing
 
         PlasmaComponents.Label {
             text: i18n("Corner Margin")
@@ -88,8 +88,8 @@ ColumnLayout {
         PlasmaComponents.Label {
             text: i18nc("number in percentage, e.g. 85 %","%1 %", currentValue)
             horizontalAlignment: Text.AlignRight
-            Layout.minimumWidth: theme.mSize(theme.defaultFont).width * 4
-            Layout.maximumWidth: theme.mSize(theme.defaultFont).width * 4
+            Layout.minimumWidth: Kirigami.Units.gridUnit * 2.8
+            Layout.maximumWidth: Kirigami.Units.gridUnit * 2.8
 
             readonly property int currentValue: backgroundCornerMarginSlider.value
         }
@@ -100,7 +100,7 @@ ColumnLayout {
     }
 
     LatteComponents.CheckBoxesColumn {
-        Layout.topMargin: 1.5 * units.smallSpacing
+        Layout.topMargin: 1.5 * Kirigami.Units.smallSpacing
 
        /* LatteComponents.CheckBox {
             Layout.maximumWidth: dialog.optionsWidth

@@ -996,7 +996,7 @@ bool GenericLayout::initCorona()
     //! signals
     connect(this, &GenericLayout::activitiesChanged, this, &GenericLayout::updateLastUsedActivity);
     connect(m_corona->activitiesConsumer(), &KActivities::Consumer::currentActivityChanged, this, &GenericLayout::updateLastUsedActivity);
-    connect(m_corona->activitiesConsumer(), &KActivities::Consumer::runningActivitiesChanged, this, &GenericLayout::updateLastUsedActivity);
+    connect(m_corona->activitiesConsumer(), &KActivities::Consumer::activitiesChanged, this, &GenericLayout::updateLastUsedActivity);
 
     connect(this, &GenericLayout::lastConfigViewForChanged, m_corona->layoutsManager(), &Layouts::Manager::lastConfigViewChangedFrom);
     connect(m_corona->layoutsManager(), &Layouts::Manager::lastConfigViewChangedFrom, this, &GenericLayout::onLastConfigViewChangedFrom);

@@ -20,8 +20,8 @@ MouseArea {
     id: configurationArea
     z: 1000
 
-    width: plasmoid.formFactor === PlasmaCore.Types.Horizontal ? root.width : thickness
-    height: plasmoid.formFactor === PlasmaCore.Types.Vertical ? root.height : thickness
+    width: Plasmoid.formFactor === PlasmaCore.Types.Horizontal ? root.width : thickness
+    height: Plasmoid.formFactor === PlasmaCore.Types.Vertical ? root.height : thickness
 
     visible: root.inConfigureAppletsMode
     hoverEnabled: root.inConfigureAppletsMode
@@ -55,7 +55,7 @@ MouseArea {
     property int appletY
 
     readonly property int thickness: metrics.mask.thickness.maxNormal - metrics.extraThicknessForNormal
-    readonly property int spacerHandleSize: units.smallSpacing
+    readonly property int spacerHandleSize: Kirigami.Units.smallSpacing
 
     onHeightChanged: tooltip.visible = false;
     onWidthChanged: tooltip.visible = false;
@@ -99,7 +99,7 @@ MouseArea {
     onPositionChanged: {
         if (pressed) {
             if(currentApplet){
-                if (plasmoid.formFactor === PlasmaCore.Types.Vertical) {
+                if (Plasmoid.formFactor === PlasmaCore.Types.Vertical) {
                     currentApplet.y += (mouse.y - lastY);
                 } else {
                     currentApplet.x += (mouse.x - lastX);
@@ -112,7 +112,7 @@ MouseArea {
             var mousesink = {x: mouse.x, y: mouse.y};
 
             //! ignore thicknes moving at all cases
-            if (plasmoid.formFactor === PlasmaCore.Types.Horizontal) {
+            if (Plasmoid.formFactor === PlasmaCore.Types.Horizontal) {
                 mousesink.y = configurationArea.height / 2;
             } else {
                 mousesink.x = configurationArea.width / 2;
@@ -123,8 +123,8 @@ MouseArea {
             if (item && item !== placeHolder) {
                 var posInItem = mapToItem(item, mousesink.x, mousesink.y);
 
-                if ((plasmoid.formFactor === PlasmaCore.Types.Vertical && posInItem.y < item.height/2) ||
-                        (plasmoid.formFactor !== PlasmaCore.Types.Vertical && posInItem.x < item.width/2)) {
+                if ((Plasmoid.formFactor === PlasmaCore.Types.Vertical && posInItem.y < item.height/2) ||
+                        (Plasmoid.formFactor !== PlasmaCore.Types.Vertical && posInItem.x < item.width/2)) {
                     fastLayoutManager.insertBefore(item, placeHolder);
                 } else {
                     fastLayoutManager.insertAfter(item, placeHolder);
@@ -200,10 +200,10 @@ MouseArea {
         }
 
         if(currentApplet && currentApplet.applet){
-            if (plasmoid.formFactor === PlasmaCore.Types.Vertical) {
-                currentApplet.applet.configuration.length = handle.height;
+            if (Plasmoid.formFactor === PlasmaCore.Types.Vertical) {
+                currentApplet.applet.plasmoid.configuration.length = handle.height;
             } else {
-                currentApplet.applet.configuration.length = handle.width;
+                currentApplet.applet.plasmoid.configuration.length = handle.width;
             }
         }
 
@@ -299,7 +299,7 @@ MouseArea {
 
             Rectangle{
                 anchors.fill: parent
-                color: theme.backgroundColor
+                color: Kirigami.Theme.backgroundColor
                 radius: 3
                 opacity: 0.35
             }
@@ -325,7 +325,7 @@ MouseArea {
             states:[
                 State{
                     name: "bottom"
-                    when: plasmoid.location === PlasmaCore.Types.BottomEdge
+                    when: Plasmoid.location === PlasmaCore.Types.BottomEdge
 
                     AnchorChanges{
                         target: handleVisualItem;
@@ -340,7 +340,7 @@ MouseArea {
                 },
                 State{
                     name: "top"
-                    when: plasmoid.location === PlasmaCore.Types.TopEdge
+                    when: Plasmoid.location === PlasmaCore.Types.TopEdge
 
                     AnchorChanges{
                         target: handleVisualItem;
@@ -355,7 +355,7 @@ MouseArea {
                 },
                 State{
                     name: "left"
-                    when: plasmoid.location === PlasmaCore.Types.LeftEdge
+                    when: Plasmoid.location === PlasmaCore.Types.LeftEdge
 
                     AnchorChanges{
                         target: handleVisualItem;
@@ -370,7 +370,7 @@ MouseArea {
                 },
                 State{
                     name: "right"
-                    when: plasmoid.location === PlasmaCore.Types.RightEdge
+                    when: Plasmoid.location === PlasmaCore.Types.RightEdge
 
                     AnchorChanges{
                         target: handleVisualItem;
@@ -400,17 +400,17 @@ MouseArea {
 
         type: PlasmaCore.Dialog.Dock
         flags: Qt.WindowStaysOnTopHint | Qt.WindowDoesNotAcceptFocus | Qt.BypassWindowManagerHint | Qt.ToolTip
-        location: plasmoid.location
+        location: Plasmoid.location
 
         onVisualParentChanged: {
             if (visualParent && currentApplet
                     && (currentApplet.applet || currentApplet.isSeparator || currentApplet.isInternalViewSplitter)) {
 
                 configureButton.visible = !currentApplet.isInternalViewSplitter
-                        && (currentApplet.applet.pluginName !== "org.kde.latte.plasmoid")
-                        && currentApplet.applet.action("configure")
-                        && currentApplet.applet.action("configure").enabled;
-                closeButton.visible = !currentApplet.isInternalViewSplitter && currentApplet.applet.action("remove") && currentApplet.applet.action("remove").enabled;
+                        && (currentApplet.applet.plasmoid.pluginName !== "org.kde.latte.plasmoid")
+                        && currentApplet.applet.plasmoid.internalAction("configure")
+                        && currentApplet.applet.plasmoid.internalAction("configure").enabled;
+                closeButton.visible = !currentApplet.isInternalViewSplitter && currentApplet.applet.plasmoid.internalAction("remove") && currentApplet.applet.plasmoid.internalAction("remove").enabled;
                 lockButton.visible = !currentApplet.isInternalViewSplitter
                         && !currentApplet.communicator.indexerIsSupported
                         && !currentApplet.communicator.appletBlocksParabolicEffect
@@ -418,7 +418,7 @@ MouseArea {
 
                 colorizingButton.visible = root.colorizerEnabled && !currentApplet.appletBlocksColorizing && !currentApplet.isInternalViewSplitter;
 
-                label.text = currentApplet.isInternalViewSplitter ? i18n("Justify Splitter") : currentApplet.applet.title;
+                label.text = currentApplet.isInternalViewSplitter ? i18n("Justify Splitter") : currentApplet.applet.plasmoid.title;
             }
         }
 
@@ -437,10 +437,10 @@ MouseArea {
             Row {
                 id: handleRow
                 anchors.horizontalCenter: parent.horizontalCenter
-                spacing: 2*units.smallSpacing
+                spacing: 2*Kirigami.Units.smallSpacing
 
                 Row{
-                    spacing: units.smallSpacing
+                    spacing: Kirigami.Units.smallSpacing
                     PlasmaComponents.ToolButton {
                         id: configureButton
                         anchors.verticalCenter: parent.verticalCenter
@@ -449,20 +449,20 @@ MouseArea {
                         // tooltip: i18n("Configure applet")
                         onClicked: {
                             // tooltip.visible = false;
-                            currentApplet.applet.action("configure").trigger();
+                            currentApplet.applet.plasmoid.internalAction("configure").trigger();
                         }
                     }
 
                     PlasmaComponents.Label {
                         id: label
                         anchors.verticalCenter: parent.verticalCenter
-                        anchors.rightMargin: units.smallSpacing
+                        anchors.rightMargin: Kirigami.Units.smallSpacing
                         textFormat: Text.PlainText
                         maximumLineCount: 1
                     }
 
                     Row{
-                        spacing: units.smallSpacing/2
+                        spacing: Kirigami.Units.smallSpacing/2
 
                         PlasmaComponents.ToolButton{
                             id: colorizingButton
@@ -471,7 +471,7 @@ MouseArea {
                             // tooltip: i18n("Enable painting for this applet")
 
                             onClicked: {
-                                fastLayoutManager.setOption(currentApplet.applet.id, "userBlocksColorizing", !checked);
+                                fastLayoutManager.setOption(currentApplet.applet.plasmoid.id, "userBlocksColorizing", !checked);
                             }
                         }
 
@@ -482,7 +482,7 @@ MouseArea {
                             // tooltip: i18n("Disable parabolic effect for this applet")
 
                             onClicked: {
-                                fastLayoutManager.setOption(currentApplet.applet.id, "lockZoom", checked);
+                                fastLayoutManager.setOption(currentApplet.applet.plasmoid.id, "lockZoom", checked);
                             }
                         }
 
@@ -494,7 +494,7 @@ MouseArea {
                             onClicked: {
                                 // tooltip.visible = false;
                                 if(currentApplet && currentApplet.applet)
-                                    currentApplet.applet.action("remove").trigger();
+                                    currentApplet.applet.plasmoid.internalAction("remove").trigger();
                             }
                         }
                     }
@@ -506,7 +506,7 @@ MouseArea {
     states: [
         State {
             name: "bottom"
-            when: (plasmoid.location === PlasmaCore.Types.BottomEdge)
+            when: (Plasmoid.location === PlasmaCore.Types.BottomEdge)
 
             AnchorChanges {
                 target: configurationArea
@@ -516,7 +516,7 @@ MouseArea {
         },
         State {
             name: "top"
-            when: (plasmoid.location === PlasmaCore.Types.TopEdge)
+            when: (Plasmoid.location === PlasmaCore.Types.TopEdge)
 
             AnchorChanges {
                 target: configurationArea
@@ -526,7 +526,7 @@ MouseArea {
         },
         State {
             name: "left"
-            when: (plasmoid.location === PlasmaCore.Types.LeftEdge)
+            when: (Plasmoid.location === PlasmaCore.Types.LeftEdge)
 
             AnchorChanges {
                 target: configurationArea
@@ -536,7 +536,7 @@ MouseArea {
         },
         State {
             name: "right"
-            when: (plasmoid.location === PlasmaCore.Types.RightEdge)
+            when: (Plasmoid.location === PlasmaCore.Types.RightEdge)
 
             AnchorChanges {
                 target: configurationArea

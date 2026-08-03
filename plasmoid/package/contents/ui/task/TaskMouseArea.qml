@@ -87,7 +87,7 @@ MouseArea {
                     pressY = -1;
                     root.dragSource = taskItem;
                     dragHelper.Drag.imageSource = result.url;
-                    dragHelper.Drag.mimeData = backend.generateMimeData(model.MimeType, model.MimeData, model.LauncherUrlWithoutIcon);
+                    dragHelper.Drag.mimeData = root.taskMimeData(model.MimeType, model.MimeData, model.LauncherUrlWithoutIcon);
                     dragHelper.Drag.active = true;
                 });
             }
@@ -184,18 +184,8 @@ MouseArea {
                     activateTask();
                 }
             } else if (mouse.button == Qt.LeftButton){
+                //! Plasma 6 dropped the present windows/window view api from the task manager backend
                 var canPresentWindowsIsSupported = false;
-
-                if (root.plasmaAtLeast525) {
-                    //! At least Plasma 5.25 case
-                    canPresentWindowsIsSupported = LatteCore.WindowSystem.compositingActive && backend.windowViewAvailable;
-                } else if (root.plasmaGreaterThan522) {
-                    //! At least Plasma 5.23 case
-                    canPresentWindowsIsSupported = LatteCore.WindowSystem.compositingActive && backend.canPresentWindows;
-                } else {
-                    //! past Plasma versions
-                    canPresentWindowsIsSupported = LatteCore.WindowSystem.compositingActive && backend.canPresentWindows();
-                }
 
                 if( !taskItem.isLauncher && !root.disableAllWindowsFunctionality ){
                     if ( (root.leftClickAction === LatteTasks.Types.PreviewWindows && isGroupParent)
@@ -222,7 +212,7 @@ MouseArea {
                 }
             }
 
-            backend.cancelHighlightWindows();
+            //! Plasma 6 dropped Backend::cancelHighlightWindows
         }
 
         pressed = false;
@@ -252,8 +242,8 @@ MouseArea {
         var positiveDirection = (mainAngle > 12);
         var negativeDirection = (mainAngle < -12);
 
-        var parallelScrolling = (verticalDirection && plasmoid.formFactor === PlasmaCore.Types.Vertical)
-                || (!verticalDirection && plasmoid.formFactor === PlasmaCore.Types.Horizontal);
+        var parallelScrolling = (verticalDirection && Plasmoid.formFactor === PlasmaCore.Types.Vertical)
+                || (!verticalDirection && Plasmoid.formFactor === PlasmaCore.Types.Horizontal);
 
         if (positiveDirection) {
             slotPublishGeometries();
@@ -326,7 +316,7 @@ MouseArea {
     //show window previews
     Timer {
         id: _hoveredTimer
-        interval: Math.max(150,plasmoid.configuration.previewsDelay)
+        interval: Math.max(150,Plasmoid.configuration.previewsDelay)
         repeat: false
 
         onTriggered: {

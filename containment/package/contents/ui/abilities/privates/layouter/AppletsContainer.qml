@@ -104,7 +104,7 @@ Item {
                         && !grid.children[i].isPlaceHolder
                         && grid.children[i].isAutoFillApplet
                         && !grid.children[i].isHidden) {
-                    //console.log("fill :::: " + children[i].applet.pluginName);
+                    //console.log("fill :::: " + children[i].applet.plasmoid.pluginName);
                     no++;
                 }
             }
@@ -126,7 +126,7 @@ Item {
                         && grid.children[i].isRequestingFill
                         && grid.children[i].applet
                         && !grid.children[i].isHidden) {
-                    //console.log("fill :::: " + children[i].applet.pluginName);
+                    //console.log("fill :::: " + children[i].applet.plasmoid.pluginName);
                     no++;
                 }
             }

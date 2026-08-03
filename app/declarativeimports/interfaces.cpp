@@ -5,6 +5,14 @@
 
 #include "interfaces.h"
 
+#include "../lattecorona.h"
+#include "../layouts/manager.h"
+#include "../plasma/extended/theme.h"
+#include "../settings/universalsettings.h"
+#include "../shortcuts/globalshortcuts.h"
+#include "../shortcuts/shortcutstracker.h"
+#include "../view/view.h"
+
 #include <PlasmaQuick/AppletQuickItem>
 
 namespace Latte{
@@ -104,7 +112,33 @@ void Interfaces::setUniversalSettings(QObject *settings)
 
 void Interfaces::updateView()
 {
-    if (m_plasmoid) {
+    if (!m_plasmoid) {
+        return;
+    }
+
+    //! Plasma 6 dropped the "_plasma_graphicObject" dynamic property, so Latte::View can not
+    //! push its interfaces onto the containment graphic item any longer. The corona is reachable
+    //! straight from the applet, already during the containment qml creation.
+    Latte::Corona *corona{nullptr};
+
+    if (m_plasmoid->applet() && m_plasmoid->applet()->containment()) {
+        corona = qobject_cast<Latte::Corona *>(m_plasmoid->applet()->containment()->corona());
+    }
+
+    if (corona) {
+        setGlobalShortcuts(corona->globalShortcuts()->shortcutsTracker());
+        setLayoutsManager(corona->layoutsManager());
+        setThemeExtended(corona->themeExtended());
+        setUniversalSettings(corona->universalSettings());
+    }
+
+    //! the view on the other hand becomes available only after the containment item has been
+    //! reparented into the Latte::View window
+    Latte::View *view = qobject_cast<Latte::View *>(m_plasmoid->window());
+
+    if (view) {
+        setView(view);
+    } else {
         setView(m_plasmoid->property("_latte_view_object").value<QObject *>());
     }
 }
@@ -143,11 +177,11 @@ void Interfaces::setPlasmoidInterface(QObject *interface)
     if (plasmoid && m_plasmoid != plasmoid) {
         m_plasmoid = plasmoid;
 
-        setGlobalShortcuts(plasmoid->property("_latte_globalShortcuts_object").value<QObject *>());
-        setLayoutsManager(plasmoid->property("_latte_layoutsManager_object").value<QObject *>());
-        setThemeExtended(plasmoid->property("_latte_themeExtended_object").value<QObject *>());
-        setUniversalSettings(plasmoid->property("_latte_universalSettings_object").value<QObject *>());
-        setView(plasmoid->property("_latte_view_object").value<QObject *>());
+        //! the containment item is reparented into the Latte::View window after it has been
+        //! created, so the interfaces must be recalculated when that happens
+        connect(m_plasmoid, &QQuickItem::windowChanged, this, &Interfaces::updateView, Qt::UniqueConnection);
+
+        updateView();
 
         emit interfaceChanged();
     }

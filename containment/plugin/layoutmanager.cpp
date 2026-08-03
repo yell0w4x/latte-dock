@@ -293,6 +293,25 @@ void LayoutManager::onRootItemChanged()
     m_initAppletContainerMethod = rootMetaObject->method(initAppletContainerIndex);
 }
 
+//! Plasma 6 exposes Containment::applets as QList<Plasma::Applet *>, it can not be
+//! converted to a QList<QObject *> through QVariant any longer.
+QList<QObject *> LayoutManager::appletsList() const
+{
+    QList<QObject *> applets;
+
+    if (!m_plasmoid) {
+        return applets;
+    }
+
+    const auto plasmaapplets = m_plasmoid->property("applets").value<QList<Plasma::Applet *>>();
+
+    for (auto *applet : plasmaapplets) {
+        applets << applet;
+    }
+
+    return applets;
+}
+
 bool LayoutManager::isValidApplet(const int &id)
 {
     //! should be loaded after m_plasmoid has been set properly
@@ -300,7 +319,7 @@ bool LayoutManager::isValidApplet(const int &id)
         return false;
     }
 
-    QList<QObject *> applets = m_plasmoid->property("applets").value<QList<QObject *>>();
+    QList<QObject *> applets = appletsList();
 
     for(int i=0; i<applets.count(); ++i) {
         uint appletid = applets[i]->property("id").toUInt();
@@ -316,7 +335,7 @@ bool LayoutManager::isValidApplet(const int &id)
 void LayoutManager::restore()
 {
     QList<int> appletIdsOrder = toIntList((*m_configuration)["appletOrder"].toString());
-    QList<QObject *> applets = m_plasmoid->property("applets").value<QList<QObject *>>();
+    QList<QObject *> applets = appletsList();
 
     Latte::Types::Alignment alignment = static_cast<Latte::Types::Alignment>((*m_configuration)["alignment"].toInt());
     int splitterPosition = (*m_configuration)["splitterPosition"].toInt();

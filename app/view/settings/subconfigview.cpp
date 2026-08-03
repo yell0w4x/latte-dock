@@ -169,9 +169,10 @@ void SubConfigView::initParentView(Latte::View *view)
 
     viewconnections << connect(m_latteView->positioner(), &ViewPart::Positioner::canvasGeometryChanged, this, &SubConfigView::syncGeometry);
 
-    //! Assign app interfaces in be accessible through containment graphic item
-    QQuickItem *containmentGraphicItem = qobject_cast<QQuickItem *>(m_latteView->containment()->property("_plasma_graphicObject").value<QObject *>());
-    rootContext()->setContextProperty(QStringLiteral("plasmoid"), containmentGraphicItem);
+    //! Plasma 6: the containment graphic item is not an applet interface any longer,
+    //! the configuration windows need the Plasma::Applet itself in order to reach
+    //! configuration/location/formFactor.
+    rootContext()->setContextProperty(QStringLiteral("plasmoid"), m_latteView->containment());
     rootContext()->setContextProperty(QStringLiteral("latteView"), m_latteView);
 }
 
