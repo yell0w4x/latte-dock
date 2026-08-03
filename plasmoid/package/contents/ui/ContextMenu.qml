@@ -9,7 +9,7 @@ import QtQuick 2.0
 import org.kde.plasma.plasmoid 2.0
 
 import org.kde.plasma.core 2.0 as PlasmaCore
-import org.kde.plasma.components 3.0 as PlasmaComponents
+import org.kde.plasma.extras 2.0 as PlasmaExtras
 import org.kde.activities 0.1 as Activities
 import org.kde.taskmanager 0.1 as TaskManager
 
@@ -19,7 +19,7 @@ import org.kde.latte.private.tasks 0.1 as LatteTasks
 import "../code/activitiesTools.js" as ActivitiesTools
 import org.kde.kirigami 2.20 as Kirigami
 
-PlasmaComponents.ContextMenu {
+PlasmaExtras.Menu {
     id: menu
 
     property bool changingLayout: false
@@ -32,13 +32,13 @@ PlasmaComponents.ContextMenu {
 
     placement: {
         if (root.location === PlasmaCore.Types.LeftEdge) {
-            return PlasmaCore.Types.RightPosedTopAlignedPopup;
+            return PlasmaExtras.Menu.RightPosedTopAlignedPopup;
         } else if (root.location === PlasmaCore.Types.TopEdge) {
-            return PlasmaCore.Types.BottomPosedLeftAlignedPopup;
+            return PlasmaExtras.Menu.BottomPosedLeftAlignedPopup;
         } else if (root.location === PlasmaCore.Types.RightEdge) {
-            return PlasmaCore.Types.LeftPosedTopAlignedPopup;
+            return PlasmaExtras.Menu.LeftPosedTopAlignedPopup;
         } else {
-            return PlasmaCore.Types.TopPosedLeftAlignedPopup;
+            return PlasmaExtras.Menu.TopPosedLeftAlignedPopup;
         }
     }
 
@@ -55,10 +55,10 @@ PlasmaComponents.ContextMenu {
                                                                                                     (!root.LayoutMirroring.enabled ? i18n("Right Separator") : i18n("Left Separator"))
 
     onStatusChanged: {
-        if (visualParent && get(atm.LauncherUrlWithoutIcon) != null && status == PlasmaComponents.DialogStatus.Open) {
+        if (visualParent && get(atm.LauncherUrlWithoutIcon) != null && status == PlasmaExtras.Menu.Open) {
             launcherToggleAction.checked = (tasksModel.launcherPosition(get(atm.LauncherUrlWithoutIcon)) != -1);
             activitiesDesktopsMenu.refresh();
-        } else if (status == PlasmaComponents.DialogStatus.Closed) {
+        } else if (status == PlasmaExtras.Menu.Closed) {
             root.contextMenu = null;
             menu.destroy();
             //! Plasma 6 dropped Backend::ungrabMouse
@@ -85,15 +85,15 @@ PlasmaComponents.ContextMenu {
 
     function newMenuItem(parent) {
         return Qt.createQmlObject(
-                    "import org.kde.plasma.components 3.0 as PlasmaComponents;" +
-                    "PlasmaComponents.MenuItem {}",
+                    "import org.kde.plasma.extras 2.0 as PlasmaExtras;" +
+                    "PlasmaExtras.MenuItem {}",
                     parent);
     }
 
     function newSeparator(parent) {
         return Qt.createQmlObject(
-                    "import org.kde.plasma.components 3.0 as PlasmaComponents;" +
-                    "PlasmaComponents.MenuItem { separator: true }",
+                    "import org.kde.plasma.extras 2.0 as PlasmaExtras;" +
+                    "PlasmaExtras.MenuItem { separator: true }",
                     parent);
     }
 
@@ -328,7 +328,7 @@ PlasmaComponents.ContextMenu {
 
     /// Sub Items
 
-    PlasmaComponents.MenuItem {
+    PlasmaExtras.MenuItem {
         id: startNewInstanceItem
         visible: (visualParent && visualParent.m.IsLauncher !== true && visualParent.m.IsStartup !== true)
 
@@ -340,7 +340,7 @@ PlasmaComponents.ContextMenu {
         onClicked: tasksModel.requestNewInstance(menu.modelIndex)
     }
 
-    PlasmaComponents.MenuItem {
+    PlasmaExtras.MenuItem {
         id: virtualDesktopsMenuItem
 
         visible: virtualDesktopInfo.numberOfDesktops > 1
@@ -352,14 +352,15 @@ PlasmaComponents.ContextMenu {
 
         text: i18n("Move To &Desktop")
 
-        Connections {
+        //! Plasma 6 MenuItem has no default property, nested objects must be named
+        readonly property Connections _connections1: Connections {
             target: virtualDesktopInfo
-            onDesktopIdsChanged: Qt.callLater(virtualDesktopsMenu.refresh)
-            onDesktopNamesChanged: Qt.callLater(virtualDesktopsMenu.refresh)
-            onNumberOfDesktopsChanged: Qt.callLater(virtualDesktopsMenu.refresh)
+            function onDesktopIdsChanged() { Qt.callLater(virtualDesktopsMenu.refresh) }
+            function onDesktopNamesChanged() { Qt.callLater(virtualDesktopsMenu.refresh) }
+            function onNumberOfDesktopsChanged() { Qt.callLater(virtualDesktopsMenu.refresh) }
         }
 
-        PlasmaComponents.ContextMenu {
+        readonly property PlasmaExtras.Menu _submenu1: PlasmaExtras.Menu {
             id: virtualDesktopsMenu
 
             visualParent: virtualDesktopsMenuItem.action
@@ -426,7 +427,7 @@ PlasmaComponents.ContextMenu {
     }
 
 
-    PlasmaComponents.MenuItem {
+    PlasmaExtras.MenuItem {
         id: activitiesDesktopsMenuItem
 
         visible: activityInfo.numberOfRunningActivities > 1
@@ -438,13 +439,14 @@ PlasmaComponents.ContextMenu {
 
         text: i18n("Move To &Activity")
 
-        Connections {
+        //! Plasma 6 MenuItem has no default property, nested objects must be named
+        readonly property Connections _connections2: Connections {
             target: activityInfo
 
-            onNumberOfRunningActivitiesChanged: activitiesDesktopsMenu.refresh()
+            function onNumberOfRunningActivitiesChanged() { activitiesDesktopsMenu.refresh() }
         }
 
-        PlasmaComponents.ContextMenu {
+        readonly property PlasmaExtras.Menu _submenu2: PlasmaExtras.Menu {
             id: activitiesDesktopsMenu
 
             visualParent: activitiesDesktopsMenuItem.action
@@ -523,7 +525,7 @@ PlasmaComponents.ContextMenu {
         }
     }
 
-    PlasmaComponents.MenuItem {
+    PlasmaExtras.MenuItem {
         id: moreActionsMenuItem
 
         visible: (visualParent
@@ -537,10 +539,10 @@ PlasmaComponents.ContextMenu {
         text: i18n("More Actions")
         icon: "view-more-symbolic"
 
-        PlasmaComponents.ContextMenu {
+        readonly property PlasmaExtras.Menu _submenu3: PlasmaExtras.Menu {
             visualParent: moreActionsMenuItem.action
 
-            PlasmaComponents.MenuItem {
+            PlasmaExtras.MenuItem {
                 enabled: menu.visualParent && menu.visualParent.m.IsMovable === true
 
                 text: i18n("&Move")
@@ -549,7 +551,7 @@ PlasmaComponents.ContextMenu {
                 onClicked: tasksModel.requestMove(menu.modelIndex)
             }
 
-            PlasmaComponents.MenuItem {
+            PlasmaExtras.MenuItem {
                 enabled: menu.visualParent && menu.visualParent.m.IsResizable === true
 
                 text: i18n("Re&size")
@@ -558,7 +560,7 @@ PlasmaComponents.ContextMenu {
                 onClicked: tasksModel.requestResize(menu.modelIndex)
             }
 
-            PlasmaComponents.MenuItem {
+            PlasmaExtras.MenuItem {
                 visible: (visualParent
                           && visualParent.m.IsLauncher !== true
                           && visualParent.m.IsStartup !== true
@@ -576,7 +578,7 @@ PlasmaComponents.ContextMenu {
                 onClicked: tasksModel.requestToggleMaximized(menu.modelIndex)
             }
 
-            PlasmaComponents.MenuItem {
+            PlasmaExtras.MenuItem {
                 visible: (visualParent
                           && visualParent.m.IsLauncher !== true
                           && visualParent.m.IsStartup !== true
@@ -594,7 +596,7 @@ PlasmaComponents.ContextMenu {
                 onClicked: tasksModel.requestToggleMinimized(menu.modelIndex)
             }
 
-            PlasmaComponents.MenuItem {
+            PlasmaExtras.MenuItem {
                 checkable: true
                 checked: menu.visualParent && menu.visualParent.m.IsKeepAbove === true
 
@@ -604,7 +606,7 @@ PlasmaComponents.ContextMenu {
                 onClicked: tasksModel.requestToggleKeepAbove(menu.modelIndex)
             }
 
-            PlasmaComponents.MenuItem {
+            PlasmaExtras.MenuItem {
                 checkable: true
                 checked: menu.visualParent && menu.visualParent.m.IsKeepBelow === true
 
@@ -614,7 +616,7 @@ PlasmaComponents.ContextMenu {
                 onClicked: tasksModel.requestToggleKeepBelow(menu.modelIndex)
             }
 
-            PlasmaComponents.MenuItem {
+            PlasmaExtras.MenuItem {
                 enabled: menu.visualParent && menu.visualParent.m.IsFullScreenable === true
 
                 checkable: true
@@ -626,7 +628,7 @@ PlasmaComponents.ContextMenu {
                 onClicked: tasksModel.requestToggleFullScreen(menu.modelIndex)
             }
 
-            PlasmaComponents.MenuItem {
+            PlasmaExtras.MenuItem {
                 enabled: menu.visualParent && menu.visualParent.m.IsShadeable === true
 
                 checkable: true
@@ -638,11 +640,11 @@ PlasmaComponents.ContextMenu {
                 onClicked: tasksModel.requestToggleShaded(menu.modelIndex)
             }
 
-            PlasmaComponents.MenuItem {
+            PlasmaExtras.MenuItem {
                 separator: true
             }
 
-            PlasmaComponents.MenuItem {
+            PlasmaExtras.MenuItem {
                 visible: (Plasmoid.configuration.groupingStrategy !== 0) && menu.visualParent.m.IsWindow === true
 
                 checkable: true
@@ -655,7 +657,7 @@ PlasmaComponents.ContextMenu {
         }
     }
 
-    /*    PlasmaComponents.MenuItem {
+    /*    PlasmaExtras.MenuItem {
         separator: true
 
         visible: (visualParent
@@ -665,7 +667,7 @@ PlasmaComponents.ContextMenu {
     }*/
 
     //// NEW Launchers Mechanism
-    PlasmaComponents.MenuItem {
+    PlasmaExtras.MenuItem {
         id: launcherToggleAction
 
         visible: visualParent
@@ -690,7 +692,7 @@ PlasmaComponents.ContextMenu {
         }
     }
 
-    PlasmaComponents.MenuItem {
+    PlasmaExtras.MenuItem {
         id: showLauncherInActivitiesItem
 
         text: i18n("&Pin Launcher")
@@ -702,12 +704,13 @@ PlasmaComponents.ContextMenu {
                  && Plasmoid.immutability !== PlasmaCore.Types.SystemImmutable
                  && (activityInfo.numberOfRunningActivities >= 2)
 
-        Connections {
+        //! Plasma 6 MenuItem has no default property, nested objects must be named
+        readonly property Connections _connections3: Connections {
             target: activityInfo
-            onNumberOfRunningActivitiesChanged: activitiesDesktopsMenu.refresh()
+            function onNumberOfRunningActivitiesChanged() { activitiesDesktopsMenu.refresh() }
         }
 
-        PlasmaComponents.ContextMenu {
+        readonly property PlasmaExtras.Menu _submenu4: PlasmaExtras.Menu {
             id: activitiesLaunchersMenu
             visualParent: showLauncherInActivitiesItem.action
 
@@ -770,7 +773,7 @@ PlasmaComponents.ContextMenu {
         }
     }
 
-    PlasmaComponents.MenuItem {
+    PlasmaExtras.MenuItem {
         visible: (visualParent && !visualParent.isSeparator && get(atm.IsLauncher) === true)
                  && Plasmoid.immutability !== PlasmaCore.Types.SystemImmutable
 
@@ -784,7 +787,7 @@ PlasmaComponents.ContextMenu {
 
     //////END OF NEW ARCHITECTURE
 
-    PlasmaComponents.MenuItem {
+    PlasmaExtras.MenuItem {
         id: addInternalSeparatorItem
         enabled: !visualParent.tailItemIsSeparator || !visualParent.headItemIsSeparator
         visible: visualParent.hasShownLauncher
@@ -802,7 +805,7 @@ PlasmaComponents.ContextMenu {
         }
     }
 
-    PlasmaComponents.MenuItem {
+    PlasmaExtras.MenuItem {
         id: removeFollowingInternalSeparatorItem
         visible: visualParent && visualParent.headItemIsSeparator
 
@@ -816,7 +819,7 @@ PlasmaComponents.ContextMenu {
         }
     }
 
-    PlasmaComponents.MenuItem {
+    PlasmaExtras.MenuItem {
         id: removeTailInternalSeparatorItem
         visible: visualParent && visualParent.tailItemIsSeparator
 
@@ -830,7 +833,7 @@ PlasmaComponents.ContextMenu {
         }
     }
 
-    PlasmaComponents.MenuItem {
+    PlasmaExtras.MenuItem {
         id: alternativesMenuItem
         visible: (appletAbilities.myView.isReady && appletAbilities.myView.inEditMode)
                  || (!appletAbilities.myView.isReady && Plasmoid.userConfiguring /*normal Plasmoid in the desktop*/)
@@ -840,18 +843,18 @@ PlasmaComponents.ContextMenu {
         onClicked: Plasmoid.internalAction("alternatives").trigger();
     }
 
-    PlasmaComponents.MenuItem {
+    PlasmaExtras.MenuItem {
         id: myViewActions
         separator: true
         visible: false
     }
 
-    PlasmaComponents.MenuItem {
+    PlasmaExtras.MenuItem {
         separator: true
         visible: removePlasmoidInMyViewEditMode.visible
     }
 
-    PlasmaComponents.MenuItem {
+    PlasmaExtras.MenuItem {
         id: removePlasmoidInMyViewEditMode
         //! Workaround: this is preferred compared to:
         //!   action:plasmoid.action("remove")
@@ -863,7 +866,7 @@ PlasmaComponents.ContextMenu {
         onClicked: Plasmoid.internalAction("remove").trigger();
     }
 
-    PlasmaComponents.MenuItem {
+    PlasmaExtras.MenuItem {
         section: true
         text: i18n("Window")
         visible: closeWindowItem.visible
@@ -871,7 +874,7 @@ PlasmaComponents.ContextMenu {
 
     //!move window Close button at the very bottom in order to not alter users workflow
     //!comparing with the design decisions of other taskmanagers
-    PlasmaComponents.MenuItem {
+    PlasmaExtras.MenuItem {
         id: closeWindowItem
         visible: (visualParent && visualParent.m.IsLauncher !== true && visualParent.m.IsStartup !== true) && !root.disableAllWindowsFunctionality
 

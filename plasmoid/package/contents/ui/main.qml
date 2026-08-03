@@ -1277,6 +1277,11 @@ PlasmoidItem {
     }*/
 
     function createContextMenu(rootTask, modelIndex, args) {
+        if (root.contextMenuComponent.status !== Component.Ready) {
+            console.log("LATTE TASKS, context menu component is broken ::: " + root.contextMenuComponent.errorString());
+            return null;
+        }
+
         var initialArgs = args || {}
         initialArgs.visualParent = rootTask;
         initialArgs.modelIndex = modelIndex;
