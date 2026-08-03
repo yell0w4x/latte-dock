@@ -35,7 +35,7 @@ include(KDEPackageAppTemplates)
 include(WriteBasicConfigVersionFile)
 
 
-find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED NO_MODULE COMPONENTS DBus Gui GuiPrivate Qml Quick)
+find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED NO_MODULE COMPONENTS DBus Gui GuiPrivate Qml Quick Widgets)
 
 #find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
 #    Activities Archive CoreAddons GuiAddons Crash DBusAddons Declarative GlobalAccel Kirigami2
@@ -146,5 +146,19 @@ add_subdirectory(containment)
 add_subdirectory(icons)
 add_subdirectory(plasmoid)
 add_subdirectory(shell)
+
+#! Integration tests, they link against the real application objects
+option(BUILD_TESTING "Build the latte integration test suite" ON)
+
+if(BUILD_TESTING)
+    find_package(GTest)
+
+    if(GTest_FOUND)
+        enable_testing()
+        add_subdirectory(tests)
+    else()
+        message(STATUS "-- GTest was not found, the integration tests are not built")
+    endif()
+endif()
 
 ki18n_install(po)

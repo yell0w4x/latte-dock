@@ -50,14 +50,24 @@ ki18n_wrap_ui(lattedock-app_SRCS settings/screensdialog/screensdialog.ui)
 ki18n_wrap_ui(lattedock-app_SRCS settings/settingsdialog/settingsdialog.ui)
 ki18n_wrap_ui(lattedock-app_SRCS settings/viewsdialog/viewsdialog.ui)
 
-add_executable(latte-dock ${lattedock-app_SRCS})
+#! Everything but main() lives in a static library so that the test suite can link against
+#! the very same objects the application uses instead of reimplementing or mocking them.
+set(lattedock-core_SRCS ${lattedock-app_SRCS})
+list(REMOVE_ITEM lattedock-core_SRCS main.cpp)
+
+add_library(lattedock-core STATIC ${lattedock-core_SRCS})
+set_property(TARGET lattedock-core PROPERTY POSITION_INDEPENDENT_CODE ON)
+
+add_executable(latte-dock main.cpp)
+target_link_libraries(latte-dock lattedock-core)
 
 include(FakeTarget.cmake)
 
-qt6_generate_wayland_protocol_client_sources(latte-dock FILES
+qt6_generate_wayland_protocol_client_sources(lattedock-core FILES
     ${PLASMA_WAYLAND_PROTOCOLS_DIR}/kde-primary-output-v1.xml)
 
-target_link_libraries(latte-dock
+target_link_libraries(lattedock-core
+    PUBLIC
     Qt::DBus
     Qt::Quick
     Qt::Qml
@@ -86,7 +96,8 @@ target_link_libraries(latte-dock
 
 
 if(HAVE_X11)
-    target_link_libraries(latte-dock
+    target_link_libraries(lattedock-core
+        PUBLIC
         Qt::GuiPrivate
         KF6::WindowSystem
         ${X11_LIBRARIES}
