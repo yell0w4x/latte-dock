@@ -13,7 +13,7 @@ import org.kde.plasma.components 3.0 as PlasmaComponents
 import org.kde.kirigami 2.20 as Kirigami
 import org.kde.plasma.plasmoid 2.0
 
-PlasmoidItem {
+Item {
     id: mainItem
 
     width: childrenRect.width

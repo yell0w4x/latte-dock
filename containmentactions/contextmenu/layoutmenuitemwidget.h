@@ -21,6 +21,7 @@ public:
     LayoutMenuItemWidget(QAction* action, QWidget *parent);
 
     QSize minimumSizeHint() const override;
+    QSize sizeHint() const override;
     void paintEvent(QPaintEvent* e) override;
 
     void setIcon(const bool &isBackgroundFile, const QString &iconName);

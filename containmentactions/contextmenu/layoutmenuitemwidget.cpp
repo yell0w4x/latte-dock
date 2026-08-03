@@ -44,12 +44,35 @@ void LayoutMenuItemWidget::setIcon(const bool &isBackgroundFile, const QString &
 
 QSize LayoutMenuItemWidget::minimumSizeHint() const
 {
-   QStyleOptionMenuItem opt;
-   QSize contentSize = fontMetrics().size(Qt::TextSingleLine | Qt::TextShowMnemonic, m_action->text());
+    //! The option must be initialized. Qt6 styles compute the menu item size out of the
+    //! option itself instead of the passed content size, an empty option therefore
+    //! returned an almost invisible size and the layouts submenu ended up clipped.
+    QStyleOptionMenuItem opt;
+    opt.initFrom(this);
+    opt.text = m_action->text();
+    opt.menuItemType = QStyleOptionMenuItem::Normal;
+    opt.menuHasCheckableItems = false;
+    opt.maxIconWidth = qMax(16, style()->pixelMetric(QStyle::PM_SmallIconSize, &opt, this));
 
-   contentSize.setHeight(contentSize.height() + 9);
-   contentSize.setWidth(contentSize.width() + 9);
-   return style()->sizeFromContents(QStyle::CT_MenuItem, &opt, contentSize, this);
+    QSize contentSize = fontMetrics().size(Qt::TextSingleLine | Qt::TextShowMnemonic,
+                                           QString(m_action->text()).remove(QLatin1Char('&')));
+
+    //! account for everything paintEvent() draws, that is the radio button, the layout
+    //! icon and their paddings
+    const int radiosize = contentSize.height() + 2 * MARGIN;
+    contentSize.setWidth(contentSize.width() + radiosize + opt.maxIconWidth + 6 * MARGIN);
+    contentSize.setHeight(contentSize.height() + 2 * MARGIN);
+
+    const QSize styled = style()->sizeFromContents(QStyle::CT_MenuItem, &opt, contentSize, this);
+
+    return QSize(qMax(styled.width(), contentSize.width()),
+                 qMax(styled.height(), contentSize.height()));
+}
+
+QSize LayoutMenuItemWidget::sizeHint() const
+{
+    //! the base implementation would answer with the size of the internal radio button only
+    return minimumSizeHint();
 }
 
 void LayoutMenuItemWidget::paintEvent(QPaintEvent* e)

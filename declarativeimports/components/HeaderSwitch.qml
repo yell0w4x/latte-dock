@@ -17,7 +17,7 @@ import "." as LatteExtraControls
 import "private" as Private
 import org.kde.kirigami 2.20 as Kirigami
 
-PlasmoidItem {
+Item {
     id: item
 
     Layout.rightMargin: {
