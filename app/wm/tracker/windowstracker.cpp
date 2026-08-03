@@ -809,7 +809,7 @@ void Windows::cleanupFaultyWindows()
         auto winfo = m_windows[key];
 
         //! garbage windows removing
-        if (winfo.wid().toInt()<=0 || winfo.geometry() == QRect(0, 0, 0, 0)) {
+        if (winfo.wid().isNil() || winfo.geometry() == QRect(0, 0, 0, 0)) {
             //qDebug() << "Faulty Geometry ::: " << winfo.wid();
             m_windows.remove(key);
         }
@@ -917,15 +917,13 @@ void Windows::updateHints(Latte::View *view)
     WindowId activeTouchWinId;
     WindowId activeTouchEdgeWinId;
 
-    //qDebug() << " -- TRACKING REPORT (SCREEN)--";
-
     //! First Pass
     for (const auto &winfo : m_windows) {
         if (m_wm->isShowingDesktop()) {
             break;
         }
 
-        if (!existsFaultyWindow && (winfo.wid().toInt()<=0 || winfo.geometry() == QRect(0, 0, 0, 0))) {
+        if (!existsFaultyWindow && (winfo.wid().isNil() || winfo.geometry() == QRect(0, 0, 0, 0))) {
             existsFaultyWindow = true;
         }
 
@@ -1095,7 +1093,7 @@ void Windows::updateHints(Latte::Layout::GenericLayout *layout) {
             break;
         }
 
-        if (!existsFaultyWindow && (winfo.wid().toInt()<=0 || winfo.geometry() == QRect(0, 0, 0, 0))) {
+        if (!existsFaultyWindow && (winfo.wid().isNil() || winfo.geometry() == QRect(0, 0, 0, 0))) {
             existsFaultyWindow = true;
         }
 

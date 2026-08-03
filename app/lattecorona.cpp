@@ -322,6 +322,7 @@ void Corona::setupWaylandIntegration()
     }
 
     Registry *registry{new Registry(this)};
+
     registry->create(connection);
 
     connect(registry, &Registry::plasmaShellAnnounced, this

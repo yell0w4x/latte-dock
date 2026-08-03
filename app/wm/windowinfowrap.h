@@ -30,6 +30,18 @@ public:
     {
         return WindowId{};
     }
+
+    //! X11 stores numeric window ids, wayland stores uuid strings. Code checking for a
+    //! garbage id used to rely on toInt()<=0, which is true for every wayland uuid and
+    //! made all wayland windows look faulty.
+    inline bool isNil() const
+    {
+        if (typeId() == QMetaType::QString) {
+            return toString().isEmpty();
+        }
+
+        return toInt() <= 0;
+    }
 };
 }
 }
