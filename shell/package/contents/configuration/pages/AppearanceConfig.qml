@@ -27,6 +27,8 @@ PlasmaComponents.Page {
     readonly property int checkableButtonsHeight: _buttonHeightReference.implicitHeight
     readonly property real checkableButtonsTopPadding: _buttonHeightReference.topPadding
     readonly property real checkableButtonsBottomPadding: _buttonHeightReference.bottomPadding
+    readonly property real checkableButtonsLeftPadding: _buttonHeightReference.leftPadding
+    readonly property real checkableButtonsRightPadding: _buttonHeightReference.rightPadding
 
     PlasmaComponents.Button {
         id: _buttonHeightReference
@@ -1097,6 +1099,8 @@ PlasmaComponents.Page {
                         Layout.maximumHeight: Layout.minimumHeight
                         topPadding: page.checkableButtonsTopPadding
                         bottomPadding: page.checkableButtonsBottomPadding
+                        leftPadding: page.checkableButtonsLeftPadding
+                        rightPadding: page.checkableButtonsRightPadding
                         checkable: true
                         enabled: showBackground.checked && LatteCore.WindowSystem.compositingActive
                         PlasmaComponents.ToolTip.text: i18n("Background is blurred underneath")
@@ -1120,6 +1124,8 @@ PlasmaComponents.Page {
                         Layout.maximumHeight: Layout.minimumHeight
                         topPadding: page.checkableButtonsTopPadding
                         bottomPadding: page.checkableButtonsBottomPadding
+                        leftPadding: page.checkableButtonsLeftPadding
+                        rightPadding: page.checkableButtonsRightPadding
                         checkable: true
                         enabled: showBackground.checked && LatteCore.WindowSystem.compositingActive && themeExtended.hasShadow
                         PlasmaComponents.ToolTip.text: i18n("Background shows its shadows")
@@ -1143,6 +1149,8 @@ PlasmaComponents.Page {
                         Layout.maximumHeight: Layout.minimumHeight
                         topPadding: page.checkableButtonsTopPadding
                         bottomPadding: page.checkableButtonsBottomPadding
+                        leftPadding: page.checkableButtonsLeftPadding
+                        rightPadding: page.checkableButtonsRightPadding
                         checkable: true
                         checked: plasmoid.configuration.panelOutline
                         enabled: showBackground.checked
@@ -1163,6 +1171,8 @@ PlasmaComponents.Page {
                         Layout.maximumHeight: Layout.minimumHeight
                         topPadding: page.checkableButtonsTopPadding
                         bottomPadding: page.checkableButtonsBottomPadding
+                        leftPadding: page.checkableButtonsLeftPadding
+                        rightPadding: page.checkableButtonsRightPadding
                         checkable: true
                         checked: plasmoid.configuration.backgroundAllCorners
                         enabled: showBackground.checked

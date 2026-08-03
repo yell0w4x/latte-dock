@@ -32,6 +32,8 @@ PlasmaComponents.Page {
     readonly property int checkableButtonsHeight: _buttonHeightReference.implicitHeight
     readonly property real checkableButtonsTopPadding: _buttonHeightReference.topPadding
     readonly property real checkableButtonsBottomPadding: _buttonHeightReference.bottomPadding
+    readonly property real checkableButtonsLeftPadding: _buttonHeightReference.leftPadding
+    readonly property real checkableButtonsRightPadding: _buttonHeightReference.rightPadding
 
     PlasmaComponents.Button {
         id: _buttonHeightReference
@@ -191,6 +193,7 @@ PlasmaComponents.Page {
                     PlasmaComponents.Button {
                         id: defaultShadowBtn
                         Layout.fillWidth: true
+                        Layout.preferredWidth: 1
 
                         text: i18nc("default shadow", "Default Color")
                         checked: plasmoid.configuration.shadowColorType === type
@@ -198,6 +201,8 @@ PlasmaComponents.Page {
                         Layout.maximumHeight: Layout.minimumHeight
                         topPadding: page.checkableButtonsTopPadding
                         bottomPadding: page.checkableButtonsBottomPadding
+                        leftPadding: page.checkableButtonsLeftPadding
+                        rightPadding: page.checkableButtonsRightPadding
                         checkable: false
                         QQC2.ButtonGroup.group: shadowColorGroup
                         PlasmaComponents.ToolTip.text: i18n("Default shadow for applets")
@@ -215,6 +220,7 @@ PlasmaComponents.Page {
                     PlasmaComponents.Button {
                         id: themeShadowBtn
                         Layout.fillWidth: true
+                        Layout.preferredWidth: 1
 
                         text: i18nc("theme shadow", "Theme Color")
                         checked: plasmoid.configuration.shadowColorType === type
@@ -222,6 +228,8 @@ PlasmaComponents.Page {
                         Layout.maximumHeight: Layout.minimumHeight
                         topPadding: page.checkableButtonsTopPadding
                         bottomPadding: page.checkableButtonsBottomPadding
+                        leftPadding: page.checkableButtonsLeftPadding
+                        rightPadding: page.checkableButtonsRightPadding
                         checkable: false
                         QQC2.ButtonGroup.group: shadowColorGroup
                         PlasmaComponents.ToolTip.text: i18n("Shadow from theme color palette")
@@ -240,6 +248,7 @@ PlasmaComponents.Page {
                     PlasmaComponents.Button {
                         id: userShadowBtn
                         Layout.fillWidth: true
+                        Layout.preferredWidth: 1
                         Layout.minimumWidth: shadowOpacityLbl.width
                         height: parent.height
                         text: " "
@@ -248,6 +257,8 @@ PlasmaComponents.Page {
                         Layout.maximumHeight: Layout.minimumHeight
                         topPadding: page.checkableButtonsTopPadding
                         bottomPadding: page.checkableButtonsBottomPadding
+                        leftPadding: page.checkableButtonsLeftPadding
+                        rightPadding: page.checkableButtonsRightPadding
                         checkable: false
                         checked: plasmoid.configuration.shadowColorType === type
                         PlasmaComponents.ToolTip.text: i18n("Use set shadow color")
@@ -364,12 +375,15 @@ PlasmaComponents.Page {
 
                         PlasmaComponents.Button {
                             Layout.fillWidth: true
+                            Layout.preferredWidth: 1
                             text: i18n("x1")
                             checked: parent.duration === duration
                             Layout.minimumHeight: page.checkableButtonsHeight
                             Layout.maximumHeight: Layout.minimumHeight
                             topPadding: page.checkableButtonsTopPadding
                             bottomPadding: page.checkableButtonsBottomPadding
+                            leftPadding: page.checkableButtonsLeftPadding
+                            rightPadding: page.checkableButtonsRightPadding
                             checkable: false
                             QQC2.ButtonGroup.group: animationsGroup
 
@@ -383,12 +397,15 @@ PlasmaComponents.Page {
                         }
                         PlasmaComponents.Button {
                             Layout.fillWidth: true
+                            Layout.preferredWidth: 1
                             text: i18n("x2")
                             checked: parent.duration === duration
                             Layout.minimumHeight: page.checkableButtonsHeight
                             Layout.maximumHeight: Layout.minimumHeight
                             topPadding: page.checkableButtonsTopPadding
                             bottomPadding: page.checkableButtonsBottomPadding
+                            leftPadding: page.checkableButtonsLeftPadding
+                            rightPadding: page.checkableButtonsRightPadding
                             checkable: false
                             QQC2.ButtonGroup.group: animationsGroup
 
@@ -402,12 +419,15 @@ PlasmaComponents.Page {
                         }
                         PlasmaComponents.Button {
                             Layout.fillWidth: true
+                            Layout.preferredWidth: 1
                             text: i18n("x3")
                             checked: parent.duration === duration
                             Layout.minimumHeight: page.checkableButtonsHeight
                             Layout.maximumHeight: Layout.minimumHeight
                             topPadding: page.checkableButtonsTopPadding
                             bottomPadding: page.checkableButtonsBottomPadding
+                            leftPadding: page.checkableButtonsLeftPadding
+                            rightPadding: page.checkableButtonsRightPadding
                             checkable: false
                             QQC2.ButtonGroup.group: animationsGroup
 

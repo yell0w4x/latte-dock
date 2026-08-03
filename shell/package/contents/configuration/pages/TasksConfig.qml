@@ -28,6 +28,8 @@ PlasmaComponents.Page {
     readonly property int checkableButtonsHeight: _buttonHeightReference.implicitHeight
     readonly property real checkableButtonsTopPadding: _buttonHeightReference.topPadding
     readonly property real checkableButtonsBottomPadding: _buttonHeightReference.bottomPadding
+    readonly property real checkableButtonsLeftPadding: _buttonHeightReference.leftPadding
+    readonly property real checkableButtonsRightPadding: _buttonHeightReference.rightPadding
 
     PlasmaComponents.Button {
         id: _buttonHeightReference
@@ -396,6 +398,8 @@ PlasmaComponents.Page {
                         Layout.maximumHeight: Layout.minimumHeight
                         topPadding: _tasksPage.checkableButtonsTopPadding
                         bottomPadding: _tasksPage.checkableButtonsBottomPadding
+                        leftPadding: _tasksPage.checkableButtonsLeftPadding
+                        rightPadding: _tasksPage.checkableButtonsRightPadding
                         checkable: false
                         QQC2.ButtonGroup.group: launchersGroup
                         PlasmaComponents.ToolTip.text: i18n("Use a unique set of launchers for this view which is independent from any other view")
@@ -420,6 +424,8 @@ PlasmaComponents.Page {
                         Layout.maximumHeight: Layout.minimumHeight
                         topPadding: _tasksPage.checkableButtonsTopPadding
                         bottomPadding: _tasksPage.checkableButtonsBottomPadding
+                        leftPadding: _tasksPage.checkableButtonsLeftPadding
+                        rightPadding: _tasksPage.checkableButtonsRightPadding
                         checkable: false
                         QQC2.ButtonGroup.group: launchersGroup
                         PlasmaComponents.ToolTip.text: i18n("Use the current layout set of launchers for this latteView. This group provides launchers <b>synchronization</b> between different views in the <b>same layout</b>")
@@ -445,6 +451,8 @@ PlasmaComponents.Page {
                         Layout.maximumHeight: Layout.minimumHeight
                         topPadding: _tasksPage.checkableButtonsTopPadding
                         bottomPadding: _tasksPage.checkableButtonsBottomPadding
+                        leftPadding: _tasksPage.checkableButtonsLeftPadding
+                        rightPadding: _tasksPage.checkableButtonsRightPadding
                         checkable: false
                         QQC2.ButtonGroup.group: launchersGroup
                         PlasmaComponents.ToolTip.text: i18n("Use the global set of launchers for this latteView. This group provides launchers <b>synchronization</b> between different views and between <b>different layouts</b>")
