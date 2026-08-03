@@ -281,9 +281,6 @@ PlasmaExtras.Menu {
     }
 
     function loadMyViewActions() {
-        console.log("LATTE TASKS, myView.isReady:" + appletAbilities.myView.isReady
-                    + " containmentActions:" + (appletAbilities.myView.containmentActions ? appletAbilities.myView.containmentActions.length : -1));
-
         if (!appletAbilities.myView.isReady) {
             return;
         }

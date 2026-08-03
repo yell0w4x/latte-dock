@@ -173,9 +173,14 @@ PlasmoidItem {
 
     //! Real properties are need in order for parabolic effect to be 1px precise perfect.
     //! This way moving from Tasks to Applets and vice versa is pretty stable when hovering with parabolic effect.
-    property real tasksHeight:  mouseHandler.height
-    property real tasksWidth: mouseHandler.width
-    property real tasksLength: root.vertical ? mouseHandler.height : mouseHandler.width
+    //! These used to read back mouseHandler's measured geometry. Under Qt6 that geometry
+    //! collapses to zero after a dock relocation even though the values it is bound to stay
+    //! valid, which starved the whole tasks layout. They are computed from the same inputs
+    //! mouseHandler uses, so the applet no longer depends on it having been laid out.
+    property real tasksHeight: root.vertical ? icList.height : mouseHandler.maxThickness
+    property real tasksWidth: root.vertical ? mouseHandler.maxThickness : icList.width
+
+    property real tasksLength: root.vertical ? icList.height : icList.width
 
     readonly property int alignment: appletAbilities.containment.alignment
 
@@ -526,6 +531,7 @@ PlasmoidItem {
             ActivitiesTools.currentActivity = String(activity);
         }
 
+
         onGroupingAppIdBlacklistChanged: {
             Plasmoid.configuration.groupingAppIdBlacklist = groupingAppIdBlacklist;
         }
@@ -872,13 +878,29 @@ PlasmoidItem {
 
         TasksLayout.MouseHandler {
             id: mouseHandler
-            anchors.bottom: (root.location === PlasmaCore.Types.BottomEdge) ? scrollableList.bottom : undefined
-            anchors.top: (root.location === PlasmaCore.Types.TopEdge) ? scrollableList.top : undefined
-            anchors.left: (root.location === PlasmaCore.Types.LeftEdge) ? scrollableList.left : undefined
-            anchors.right: (root.location === PlasmaCore.Types.RightEdge) ? scrollableList.right : undefined
 
-            anchors.horizontalCenter: !root.vertical ? scrollableList.horizontalCenter : undefined
-            anchors.verticalCenter: root.vertical ? scrollableList.verticalCenter : undefined
+            //! Positioned through x/y on purpose. The previous approach used four conditional
+            //! edge anchors plus a center anchor; while the location is changing two conflicting
+            //! anchors are momentarily set (e.g. horizontalCenter together with left), Qt6 then
+            //! hands the size over to the anchors and the width/height bindings below are lost
+            //! for good, which collapsed this item to 0x0 after every relocation.
+            x: {
+                if (root.vertical) {
+                    return root.location === PlasmaCore.Types.LeftEdge ? scrollableList.x
+                                                                       : scrollableList.x + scrollableList.width - width;
+                }
+
+                return scrollableList.x + (scrollableList.width - width) / 2;
+            }
+
+            y: {
+                if (!root.vertical) {
+                    return root.location === PlasmaCore.Types.TopEdge ? scrollableList.y
+                                                                      : scrollableList.y + scrollableList.height - height;
+                }
+
+                return scrollableList.y + (scrollableList.height - height) / 2;
+            }
 
             width: root.vertical ? maxThickness : icList.width
             height: root.vertical ? icList.height : maxThickness
@@ -974,6 +996,7 @@ PlasmoidItem {
                     delegate: Task.TaskItem{
                         abilities: appletAbilities
                     }
+
 
                     property int currentSpot : -1000
                     property int previousCount : 0
@@ -1277,11 +1300,6 @@ PlasmoidItem {
     }*/
 
     function createContextMenu(rootTask, modelIndex, args) {
-        if (root.contextMenuComponent.status !== Component.Ready) {
-            console.log("LATTE TASKS, context menu component is broken ::: " + root.contextMenuComponent.errorString());
-            return null;
-        }
-
         var initialArgs = args || {}
         initialArgs.visualParent = rootTask;
         initialArgs.modelIndex = modelIndex;

@@ -31,7 +31,7 @@ Item{
     property bool isStartup: IsStartup ? true : false
     property bool isWindow: IsWindow ? true : false
 
-    property int lastActiveWinInGroup: -1
+    property var lastActiveWinInGroup: -1
 
     //states that exist in windows in a Group of windows
     property bool hasMinimized: false;

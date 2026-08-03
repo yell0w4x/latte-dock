@@ -174,6 +174,15 @@ void SubConfigView::initParentView(Latte::View *view)
     //! configuration/location/formFactor.
     rootContext()->setContextProperty(QStringLiteral("plasmoid"), m_latteView->containment());
     rootContext()->setContextProperty(QStringLiteral("latteView"), m_latteView);
+
+    //! the containment may not be assigned yet, e.g. when the view is recreated after
+    //! a location change, in which case "plasmoid" would stay null for the whole
+    //! lifetime of the configuration window
+    viewconnections << connect(m_latteView, &Latte::View::containmentChanged, this, [this]() {
+        if (m_latteView) {
+            rootContext()->setContextProperty(QStringLiteral("plasmoid"), m_latteView->containment());
+        }
+    });
 }
 
 void SubConfigView::requestActivate()
