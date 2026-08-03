@@ -37,7 +37,6 @@
 #include <QDragMoveEvent>
 #include <QDropEvent>
 #include <QMouseEvent>
-#include <functional>
 #include <QQmlContext>
 #include <QQmlEngine>
 #include <QQmlProperty>
@@ -1553,34 +1552,6 @@ bool View::event(QEvent *e)
 
         case QEvent::MouseButtonPress:
             if (auto me = dynamic_cast<QMouseEvent *>(e)) {
-                qDebug() << "CTXDBG view press:" << me->button() << me->pos();
-
-                std::function<void(QQuickItem *, int)> dump = [&](QQuickItem *item, int depth) {
-                    const auto children = item->childItems();
-
-                    for (auto *child : children) {
-                        const QPointF local = child->mapFromScene(QPointF(me->pos()));
-
-                        if (!child->isVisible() || !child->contains(local)) {
-                            continue;
-                        }
-
-                        qDebug().nospace() << "CTXDBG   " << QString(depth * 2, QLatin1Char(' '))
-                                           << child->metaObject()->className()
-                                           << " buttons=" << child->acceptedMouseButtons()
-                                           << " z=" << child->z()
-                                           << " enabled=" << child->isEnabled();
-                        dump(child, depth + 1);
-                    }
-                };
-                dump(contentItem(), 0);
-
-                QTimer::singleShot(0, this, [this]() {
-                    QQuickItem *grabber = mouseGrabberItem();
-                    qDebug() << "CTXDBG grabber after press:"
-                             << (grabber ? grabber->metaObject()->className() : "<none>");
-                });
-
                 emit mousePressed(me->pos(), me->button());
                 sinkableevent = true;
                 verticalUnityViewHasFocus();

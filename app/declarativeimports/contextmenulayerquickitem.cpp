@@ -57,9 +57,6 @@ void ContextMenuLayerQuickItem::setView(QObject *view)
     }
 
     m_latteView = qobject_cast<Latte::View *>(view);
-    qDebug() << "CTXDBG setView:" << (void *)view << "->" << (void *)m_latteView
-             << " item size:" << width() << "x" << height() << " visible:" << isVisible()
-             << " acceptedButtons:" << acceptedMouseButtons();
     emit viewChanged();
 }
 
@@ -160,9 +157,6 @@ void ContextMenuLayerQuickItem::mouseReleaseEvent(QMouseEvent *event)
 
 void ContextMenuLayerQuickItem::mousePressEvent(QMouseEvent *event)
 {
-    qDebug() << "CTXDBG press ..." << (void *)event << " view:" << (void *)m_latteView
-             << " containment:" << (m_latteView ? (void *)m_latteView->containment() : nullptr);
-
     if (!event || !m_latteView || !m_latteView->containment()) {
         return;
     }
@@ -178,9 +172,6 @@ void ContextMenuLayerQuickItem::mousePressEvent(QMouseEvent *event)
 
     const QString trigger = Plasma::ContainmentActions::eventToString(event);
     Plasma::ContainmentActions *plugin = m_latteView->containment()->containmentActions().value(trigger);
-
-    qDebug() << "CTXDBG trigger:" << trigger << " known:" << m_latteView->containment()->containmentActions().keys()
-             << " plugin:" << (void *)plugin << " actions:" << (plugin ? plugin->contextualActions().count() : -1);
 
     if (!plugin || plugin->contextualActions().isEmpty()) {
         event->setAccepted(false);
@@ -241,7 +232,6 @@ void ContextMenuLayerQuickItem::mousePressEvent(QMouseEvent *event)
         applet = m_latteView->containment();
     }
 
-    qDebug() << "CTXDBG applet under mouse:" << (void *)applet;
 
     QMenu *desktopMenu = new QMenu;
 
@@ -307,8 +297,6 @@ void ContextMenuLayerQuickItem::mousePressEvent(QMouseEvent *event)
         globalPos = popUpRelevantToGlobalPoint(QRect(0,0,0,0), popUpRect);
     }
 
-    qDebug() << "CTXDBG menu built, empty:" << desktopMenu->isEmpty()
-             << " actions:" << desktopMenu->actions().count() << " at:" << globalPos;
 
     if (desktopMenu->isEmpty()) {
         //qDebug() << "7.5 ...";
@@ -336,7 +324,6 @@ void ContextMenuLayerQuickItem::mousePressEvent(QMouseEvent *event)
         }
     }
 
-    qDebug() << "CTXDBG popup!";
     desktopMenu->popup(globalPos);
     event->setAccepted(true);
 }

@@ -470,7 +470,9 @@ void PrimaryConfigView::hideEvent(QHideEvent *ev)
         m_latteView->layout()->recreateView(m_latteView->containment());
     }
 
-    setVisible(false);
+    //! Qt6 sends the hide event before it updates the window visibility flag, so calling
+    //! setVisible(false) from here recurses into this very handler until the stack blows up.
+    //! The window is being hidden already, the call was redundant in the first place.
 }
 
 bool PrimaryConfigView::hasFocus() const
