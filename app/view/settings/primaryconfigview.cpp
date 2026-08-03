@@ -659,6 +659,10 @@ void PrimaryConfigView::updateEffects()
 
     QRegion fixedMask = mask.isNull() ? QRegion(QRect(0,0,width(),height())) : mask;
 
+    qDebug() << "CFGDBG updateEffects, window:" << size() << " rootObject:"
+             << (rootObject() ? QSizeF(rootObject()->width(), rootObject()->height()) : QSizeF())
+             << " maskBounds:" << mask.boundingRect() << " borders:" << (int)m_enabledBorders;
+
     if (!fixedMask.isEmpty()) {
         setMask(fixedMask);
     } else {

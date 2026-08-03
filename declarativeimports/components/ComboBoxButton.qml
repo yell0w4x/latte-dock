@@ -17,8 +17,20 @@ Rectangle {
     id: root
     color: "transparent"
 
+    //! buttonMetrics never existed in this file, both bindings were dangling and left the
+    //! component without any implicit size. A hidden normal state button provides it and
+    //! at the same time the paddings that keep mainButton's contents from being squeezed
+    //! when it turns checked, which used to drop its icon.
     implicitWidth: buttonMetrics.implicitWidth
     implicitHeight: buttonMetrics.implicitHeight
+
+    PlasmaComponents.Button {
+        id: buttonMetrics
+        visible: false
+        checked: false
+        text: root.buttonText
+        icon.name: root.buttonIconSource
+    }
 
     property QQC2.ButtonGroup exclusiveGroup: null
     property bool checked: false
@@ -79,6 +91,11 @@ Rectangle {
 
         width: parent.width
         height: mainComboBox.height
+
+        topPadding: buttonMetrics.topPadding
+        bottomPadding: buttonMetrics.bottomPadding
+        leftPadding: buttonMetrics.leftPadding
+        rightPadding: buttonMetrics.rightPadding
 
         text: root.checkable ?  " " : buttonText
         icon.name: buttonIconSource

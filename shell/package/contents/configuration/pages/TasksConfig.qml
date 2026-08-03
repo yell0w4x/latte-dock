@@ -20,6 +20,22 @@ import org.kde.kirigami 2.20 as Kirigami
 
 PlasmaComponents.Page {
     id: _tasksPage
+
+    //! Plasma6 buttons take their paddings from the frame of their current state and the
+    //! "pressed" frame used by a checked button is thicker than "normal", every selected
+    //! button would therefore become taller than the rest. This hidden unchecked button
+    //! provides the smaller, normal state height that is applied to all of them.
+    readonly property int checkableButtonsHeight: _buttonHeightReference.implicitHeight
+    readonly property real checkableButtonsTopPadding: _buttonHeightReference.topPadding
+    readonly property real checkableButtonsBottomPadding: _buttonHeightReference.bottomPadding
+
+    PlasmaComponents.Button {
+        id: _buttonHeightReference
+        visible: false
+        checked: false
+        text: "Ag"
+        icon.name: "arrow-down"
+    }
     width: content.width + content.Layout.leftMargin * 2
     height: content.height + Kirigami.Units.smallSpacing * 2
 
@@ -376,6 +392,10 @@ PlasmaComponents.Page {
                         Layout.maximumWidth: Layout.minimumWidth
                         text: i18nc("unique launchers group","Unique Group")
                         checked: parent.group === group
+                        Layout.minimumHeight: _tasksPage.checkableButtonsHeight
+                        Layout.maximumHeight: Layout.minimumHeight
+                        topPadding: _tasksPage.checkableButtonsTopPadding
+                        bottomPadding: _tasksPage.checkableButtonsBottomPadding
                         checkable: false
                         QQC2.ButtonGroup.group: launchersGroup
                         PlasmaComponents.ToolTip.text: i18n("Use a unique set of launchers for this view which is independent from any other view")
@@ -396,6 +416,10 @@ PlasmaComponents.Page {
                         Layout.maximumWidth: Layout.minimumWidth
                         text: i18nc("layout launchers group","Layout Group")
                         checked: parent.group === group
+                        Layout.minimumHeight: _tasksPage.checkableButtonsHeight
+                        Layout.maximumHeight: Layout.minimumHeight
+                        topPadding: _tasksPage.checkableButtonsTopPadding
+                        bottomPadding: _tasksPage.checkableButtonsBottomPadding
                         checkable: false
                         QQC2.ButtonGroup.group: launchersGroup
                         PlasmaComponents.ToolTip.text: i18n("Use the current layout set of launchers for this latteView. This group provides launchers <b>synchronization</b> between different views in the <b>same layout</b>")
@@ -417,6 +441,10 @@ PlasmaComponents.Page {
                         Layout.maximumWidth: Layout.minimumWidth
                         text: i18nc("global launchers group","Global Group")
                         checked: parent.group === group
+                        Layout.minimumHeight: _tasksPage.checkableButtonsHeight
+                        Layout.maximumHeight: Layout.minimumHeight
+                        topPadding: _tasksPage.checkableButtonsTopPadding
+                        bottomPadding: _tasksPage.checkableButtonsBottomPadding
                         checkable: false
                         QQC2.ButtonGroup.group: launchersGroup
                         PlasmaComponents.ToolTip.text: i18n("Use the global set of launchers for this latteView. This group provides launchers <b>synchronization</b> between different views and between <b>different layouts</b>")

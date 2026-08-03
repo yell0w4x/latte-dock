@@ -25,10 +25,20 @@ T.ComboBox {
     baselineOffset: contentItem.y + contentItem.baselineOffset
 
     hoverEnabled: true
-    topPadding: surfaceNormal.margins.top
-    leftPadding: surfaceNormal.margins.left
-    rightPadding: surfaceNormal.margins.right + Kirigami.Units.gridUnit * 2
-    bottomPadding: surfaceNormal.margins.bottom
+    //! surfaceNormal swaps between the "normal" and the "pressed" frame and their margins
+    //! differ, taking paddings from it made the contents and the arrow move whenever the
+    //! control became selected. surfaceMetrics always describes the normal state.
+    topPadding: surfaceMetrics.margins.top
+    leftPadding: surfaceMetrics.margins.left
+    rightPadding: surfaceMetrics.margins.right + Kirigami.Units.gridUnit * 2
+    bottomPadding: surfaceMetrics.margins.bottom
+
+    KSvg.FrameSvgItem {
+        id: surfaceMetrics
+        visible: false
+        imagePath: "widgets/button"
+        prefix: "normal"
+    }
 
     wheelEnabled: false
 
@@ -108,7 +118,7 @@ T.ComboBox {
         implicitHeight: implicitWidth
         anchors {
             right: parent.right
-            rightMargin: control.buttonIsTransparent ? 0 : surfaceNormal.margins.right
+            rightMargin: control.buttonIsTransparent ? 0 : surfaceMetrics.margins.right
             verticalCenter: parent.verticalCenter
         }
         svg: KSvg.Svg {

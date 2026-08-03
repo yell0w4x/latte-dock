@@ -24,6 +24,22 @@ import org.kde.kirigami 2.20 as Kirigami
 
 PlasmaComponents.Page {
     id: page
+
+    //! Plasma6 buttons take their paddings from the frame of their current state and the
+    //! "pressed" frame used by a checked button is thicker than "normal", every selected
+    //! button would therefore become taller than the rest. This hidden unchecked button
+    //! provides the smaller, normal state height that is applied to all of them.
+    readonly property int checkableButtonsHeight: _buttonHeightReference.implicitHeight
+    readonly property real checkableButtonsTopPadding: _buttonHeightReference.topPadding
+    readonly property real checkableButtonsBottomPadding: _buttonHeightReference.bottomPadding
+
+    PlasmaComponents.Button {
+        id: _buttonHeightReference
+        visible: false
+        checked: false
+        text: "Ag"
+        icon.name: "arrow-down"
+    }
     width: content.width + content.Layout.leftMargin * 2
     height: content.height + Kirigami.Units.smallSpacing
 
@@ -178,6 +194,10 @@ PlasmaComponents.Page {
 
                         text: i18nc("default shadow", "Default Color")
                         checked: plasmoid.configuration.shadowColorType === type
+                        Layout.minimumHeight: page.checkableButtonsHeight
+                        Layout.maximumHeight: Layout.minimumHeight
+                        topPadding: page.checkableButtonsTopPadding
+                        bottomPadding: page.checkableButtonsBottomPadding
                         checkable: false
                         QQC2.ButtonGroup.group: shadowColorGroup
                         PlasmaComponents.ToolTip.text: i18n("Default shadow for applets")
@@ -198,6 +218,10 @@ PlasmaComponents.Page {
 
                         text: i18nc("theme shadow", "Theme Color")
                         checked: plasmoid.configuration.shadowColorType === type
+                        Layout.minimumHeight: page.checkableButtonsHeight
+                        Layout.maximumHeight: Layout.minimumHeight
+                        topPadding: page.checkableButtonsTopPadding
+                        bottomPadding: page.checkableButtonsBottomPadding
                         checkable: false
                         QQC2.ButtonGroup.group: shadowColorGroup
                         PlasmaComponents.ToolTip.text: i18n("Shadow from theme color palette")
@@ -220,6 +244,10 @@ PlasmaComponents.Page {
                         height: parent.height
                         text: " "
 
+                        Layout.minimumHeight: page.checkableButtonsHeight
+                        Layout.maximumHeight: Layout.minimumHeight
+                        topPadding: page.checkableButtonsTopPadding
+                        bottomPadding: page.checkableButtonsBottomPadding
                         checkable: false
                         checked: plasmoid.configuration.shadowColorType === type
                         PlasmaComponents.ToolTip.text: i18n("Use set shadow color")
@@ -338,6 +366,10 @@ PlasmaComponents.Page {
                             Layout.fillWidth: true
                             text: i18n("x1")
                             checked: parent.duration === duration
+                            Layout.minimumHeight: page.checkableButtonsHeight
+                            Layout.maximumHeight: Layout.minimumHeight
+                            topPadding: page.checkableButtonsTopPadding
+                            bottomPadding: page.checkableButtonsBottomPadding
                             checkable: false
                             QQC2.ButtonGroup.group: animationsGroup
 
@@ -353,6 +385,10 @@ PlasmaComponents.Page {
                             Layout.fillWidth: true
                             text: i18n("x2")
                             checked: parent.duration === duration
+                            Layout.minimumHeight: page.checkableButtonsHeight
+                            Layout.maximumHeight: Layout.minimumHeight
+                            topPadding: page.checkableButtonsTopPadding
+                            bottomPadding: page.checkableButtonsBottomPadding
                             checkable: false
                             QQC2.ButtonGroup.group: animationsGroup
 
@@ -368,6 +404,10 @@ PlasmaComponents.Page {
                             Layout.fillWidth: true
                             text: i18n("x3")
                             checked: parent.duration === duration
+                            Layout.minimumHeight: page.checkableButtonsHeight
+                            Layout.maximumHeight: Layout.minimumHeight
+                            topPadding: page.checkableButtonsTopPadding
+                            bottomPadding: page.checkableButtonsBottomPadding
                             checkable: false
                             QQC2.ButtonGroup.group: animationsGroup
 

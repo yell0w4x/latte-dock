@@ -19,6 +19,22 @@ import org.kde.kirigami 2.20 as Kirigami
 
 PlasmaComponents.Page {
     id: page
+
+    //! Plasma6 buttons take their paddings from the frame of their current state and the
+    //! "pressed" frame used by a checked button is thicker than "normal", every selected
+    //! button would therefore become taller than the rest. This hidden unchecked button
+    //! provides the smaller, normal state height that is applied to all of them.
+    readonly property int checkableButtonsHeight: _buttonHeightReference.implicitHeight
+    readonly property real checkableButtonsTopPadding: _buttonHeightReference.topPadding
+    readonly property real checkableButtonsBottomPadding: _buttonHeightReference.bottomPadding
+
+    PlasmaComponents.Button {
+        id: _buttonHeightReference
+        visible: false
+        checked: false
+        text: "Ag"
+        icon.name: "arrow-down"
+    }
     width: content.width + content.Layout.leftMargin * 2
     height: content.height + Kirigami.Units.smallSpacing * 2
 
@@ -1077,6 +1093,10 @@ PlasmaComponents.Page {
                         Layout.minimumWidth: parent.buttonSize
                         Layout.maximumWidth: Layout.minimumWidth
                         text: i18n("Blur")
+                        Layout.minimumHeight: page.checkableButtonsHeight
+                        Layout.maximumHeight: Layout.minimumHeight
+                        topPadding: page.checkableButtonsTopPadding
+                        bottomPadding: page.checkableButtonsBottomPadding
                         checkable: true
                         enabled: showBackground.checked && LatteCore.WindowSystem.compositingActive
                         PlasmaComponents.ToolTip.text: i18n("Background is blurred underneath")
@@ -1096,6 +1116,10 @@ PlasmaComponents.Page {
                         Layout.minimumWidth: parent.buttonSize
                         Layout.maximumWidth: Layout.minimumWidth
                         text: i18n("Shadows")
+                        Layout.minimumHeight: page.checkableButtonsHeight
+                        Layout.maximumHeight: Layout.minimumHeight
+                        topPadding: page.checkableButtonsTopPadding
+                        bottomPadding: page.checkableButtonsBottomPadding
                         checkable: true
                         enabled: showBackground.checked && LatteCore.WindowSystem.compositingActive && themeExtended.hasShadow
                         PlasmaComponents.ToolTip.text: i18n("Background shows its shadows")
@@ -1115,6 +1139,10 @@ PlasmaComponents.Page {
                         Layout.minimumWidth: parent.buttonSize
                         Layout.maximumWidth: Layout.minimumWidth
                         text: i18n("Outline")
+                        Layout.minimumHeight: page.checkableButtonsHeight
+                        Layout.maximumHeight: Layout.minimumHeight
+                        topPadding: page.checkableButtonsTopPadding
+                        bottomPadding: page.checkableButtonsBottomPadding
                         checkable: true
                         checked: plasmoid.configuration.panelOutline
                         enabled: showBackground.checked
@@ -1131,6 +1159,10 @@ PlasmaComponents.Page {
                         Layout.minimumWidth: parent.buttonSize
                         Layout.maximumWidth: Layout.minimumWidth
                         text: i18n("All Corners")
+                        Layout.minimumHeight: page.checkableButtonsHeight
+                        Layout.maximumHeight: Layout.minimumHeight
+                        topPadding: page.checkableButtonsTopPadding
+                        bottomPadding: page.checkableButtonsBottomPadding
                         checkable: true
                         checked: plasmoid.configuration.backgroundAllCorners
                         enabled: showBackground.checked

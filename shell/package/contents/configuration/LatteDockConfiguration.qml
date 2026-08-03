@@ -497,9 +497,34 @@ Loader {
 
                 spacing: Kirigami.Units.largeSpacing
 
+                //! Plasma6 buttons take their paddings from the frame of their current
+                //! state and the "pressed" frame is thicker than "normal", so a button
+                //! would grow while it is being clicked. This hidden button provides the
+                //! normal state height that all of them keep.
+                readonly property int buttonsHeight: _actionButtonsHeightReference.implicitHeight
+                readonly property real buttonsTopPadding: _actionButtonsHeightReference.topPadding
+                readonly property real buttonsBottomPadding: _actionButtonsHeightReference.bottomPadding
+                readonly property real buttonsLeftPadding: _actionButtonsHeightReference.leftPadding
+                readonly property real buttonsRightPadding: _actionButtonsHeightReference.rightPadding
+
+                //! all three share the row equally, otherwise they end up with the width of
+                //! their own label and the pressed one grows on top of that
+                readonly property int buttonsWidth: (width - spacing * 2) / 3
+
+                PlasmaComponents.Button {
+                    id: _actionButtonsHeightReference
+                    visible: false
+                    checked: false
+                    text: "Ag"
+                    icon.name: "delete"
+                }
+
                 LatteComponents.ComboBoxButton {
                     id: actionsComboBtn
                     Layout.fillWidth: true
+                    Layout.preferredWidth: actionButtons.buttonsWidth
+                    Layout.minimumHeight: actionButtons.buttonsHeight
+                    Layout.maximumHeight: Layout.minimumHeight
                     implicitWidth: removeView.implicitWidth
                     implicitHeight: removeView.implicitHeight
 
@@ -622,6 +647,13 @@ Loader {
                 PlasmaComponents.Button {
                     id: removeView
                     Layout.fillWidth: true
+                    Layout.preferredWidth: actionButtons.buttonsWidth
+                    Layout.minimumHeight: actionButtons.buttonsHeight
+                    Layout.maximumHeight: Layout.minimumHeight
+                    topPadding: actionButtons.buttonsTopPadding
+                    bottomPadding: actionButtons.buttonsBottomPadding
+                    leftPadding: actionButtons.buttonsLeftPadding
+                    rightPadding: actionButtons.buttonsRightPadding
                     enabled: dialog.advancedLevel
                     text: i18n("Remove")
                     icon.name: "delete"
@@ -635,6 +667,13 @@ Loader {
                 PlasmaComponents.Button {
                     id: closeButton
                     Layout.fillWidth: true
+                    Layout.preferredWidth: actionButtons.buttonsWidth
+                    Layout.minimumHeight: actionButtons.buttonsHeight
+                    Layout.maximumHeight: Layout.minimumHeight
+                    topPadding: actionButtons.buttonsTopPadding
+                    bottomPadding: actionButtons.buttonsBottomPadding
+                    leftPadding: actionButtons.buttonsLeftPadding
+                    rightPadding: actionButtons.buttonsRightPadding
 
                     text: i18n("Close")
                     icon.name: "dialog-close"

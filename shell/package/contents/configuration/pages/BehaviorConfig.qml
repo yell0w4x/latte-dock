@@ -25,6 +25,22 @@ PlasmaComponents.Page {
     width: content.width + content.Layout.leftMargin * 2
     height: content.height + Kirigami.Units.smallSpacing * 2
 
+    //! Plasma6 buttons take their paddings from the frame of their current state and the
+    //! "pressed" frame used by a checked button is thicker than "normal", every selected
+    //! button would therefore become taller than the rest. This hidden unchecked button
+    //! provides the smaller, normal state height that is applied to all of them.
+    readonly property int checkableButtonsHeight: _buttonHeightReference.implicitHeight
+    readonly property real checkableButtonsTopPadding: _buttonHeightReference.topPadding
+    readonly property real checkableButtonsBottomPadding: _buttonHeightReference.bottomPadding
+
+    PlasmaComponents.Button {
+        id: _buttonHeightReference
+        visible: false
+        checked: false
+        text: "Ag"
+        icon.name: "arrow-down"
+    }
+
     ColumnLayout {
         id: content       
         width: (dialog.appliedWidth - Kirigami.Units.smallSpacing * 2) - Layout.leftMargin * 2
@@ -188,6 +204,10 @@ PlasmaComponents.Page {
                     id: bottomEdgeBtn
                     Layout.minimumWidth: parent.buttonSize
                     Layout.maximumWidth: Layout.minimumWidth
+                    Layout.minimumHeight: page.checkableButtonsHeight
+                    Layout.maximumHeight: Layout.minimumHeight
+                    topPadding: page.checkableButtonsTopPadding
+                    bottomPadding: page.checkableButtonsBottomPadding
                     text: i18nc("bottom location", "Bottom")
                     icon.name: "arrow-down"
                     checked: plasmoid.location === edge
@@ -207,6 +227,10 @@ PlasmaComponents.Page {
                     id: leftEdgeBtn
                     Layout.minimumWidth: parent.buttonSize
                     Layout.maximumWidth: Layout.minimumWidth
+                    Layout.minimumHeight: page.checkableButtonsHeight
+                    Layout.maximumHeight: Layout.minimumHeight
+                    topPadding: page.checkableButtonsTopPadding
+                    bottomPadding: page.checkableButtonsBottomPadding
                     text: i18nc("left location", "Left")
                     icon.name: "arrow-left"
                     checked: plasmoid.location === edge
@@ -226,6 +250,10 @@ PlasmaComponents.Page {
                     id: topEdgeBtn
                     Layout.minimumWidth: parent.buttonSize
                     Layout.maximumWidth: Layout.minimumWidth
+                    Layout.minimumHeight: page.checkableButtonsHeight
+                    Layout.maximumHeight: Layout.minimumHeight
+                    topPadding: page.checkableButtonsTopPadding
+                    bottomPadding: page.checkableButtonsBottomPadding
                     text: i18nc("top location", "Top")
                     icon.name: "arrow-up"
                     checked: plasmoid.location === edge
@@ -245,6 +273,10 @@ PlasmaComponents.Page {
                     id: rightEdgeBtn
                     Layout.minimumWidth: parent.buttonSize
                     Layout.maximumWidth: Layout.minimumWidth
+                    Layout.minimumHeight: page.checkableButtonsHeight
+                    Layout.maximumHeight: Layout.minimumHeight
+                    topPadding: page.checkableButtonsTopPadding
+                    bottomPadding: page.checkableButtonsBottomPadding
                     text: i18nc("right location", "Right")
                     icon.name: "arrow-right"
                     checked: plasmoid.location === edge
@@ -291,6 +323,10 @@ PlasmaComponents.Page {
                 PlasmaComponents.Button {
                     Layout.minimumWidth: parent.buttonSize
                     Layout.maximumWidth: Layout.minimumWidth
+                    Layout.minimumHeight: page.checkableButtonsHeight
+                    Layout.maximumHeight: Layout.minimumHeight
+                    topPadding: page.checkableButtonsTopPadding
+                    bottomPadding: page.checkableButtonsBottomPadding
                     text: panelIsVertical ? i18nc("top alignment", "Top") : i18nc("left alignment", "Left")
                     icon.name: panelIsVertical ? "format-align-vertical-top" : "format-justify-left"
                     checked: parent.configAlignment === alignment
@@ -308,6 +344,10 @@ PlasmaComponents.Page {
                 PlasmaComponents.Button {
                     Layout.minimumWidth: parent.buttonSize
                     Layout.maximumWidth: Layout.minimumWidth
+                    Layout.minimumHeight: page.checkableButtonsHeight
+                    Layout.maximumHeight: Layout.minimumHeight
+                    topPadding: page.checkableButtonsTopPadding
+                    bottomPadding: page.checkableButtonsBottomPadding
                     text: i18nc("center alignment", "Center")
                     icon.name: panelIsVertical ? "format-align-vertical-center" : "format-justify-center"
                     checked: parent.configAlignment === alignment
@@ -325,6 +365,10 @@ PlasmaComponents.Page {
                 PlasmaComponents.Button {
                     Layout.minimumWidth: parent.buttonSize
                     Layout.maximumWidth: Layout.minimumWidth
+                    Layout.minimumHeight: page.checkableButtonsHeight
+                    Layout.maximumHeight: Layout.minimumHeight
+                    topPadding: page.checkableButtonsTopPadding
+                    bottomPadding: page.checkableButtonsBottomPadding
                     text: panelIsVertical ? i18nc("bottom alignment", "Bottom") : i18nc("right alignment", "Right")
                     icon.name: panelIsVertical ? "format-align-vertical-bottom" : "format-justify-right"
                     checked: parent.configAlignment === alignment
@@ -343,6 +387,10 @@ PlasmaComponents.Page {
                 PlasmaComponents.Button {
                     Layout.minimumWidth: parent.buttonSize
                     Layout.maximumWidth: Layout.minimumWidth
+                    Layout.minimumHeight: page.checkableButtonsHeight
+                    Layout.maximumHeight: Layout.minimumHeight
+                    topPadding: page.checkableButtonsTopPadding
+                    bottomPadding: page.checkableButtonsBottomPadding
                     text: i18nc("justify alignment", "Justify")
                     icon.name: "format-justify-fill"
                     checked: parent.configAlignment === alignment
@@ -390,6 +438,10 @@ PlasmaComponents.Page {
                     id:alwaysVisibleBtn
                     Layout.minimumWidth: parent.buttonSize
                     Layout.maximumWidth: Layout.minimumWidth
+                    Layout.minimumHeight: page.checkableButtonsHeight
+                    Layout.maximumHeight: Layout.minimumHeight
+                    topPadding: page.checkableButtonsTopPadding
+                    bottomPadding: page.checkableButtonsBottomPadding
                     text: i18n("Always Visible")
                     checked: parent.mode === mode
                     checkable: false
@@ -406,6 +458,10 @@ PlasmaComponents.Page {
                 PlasmaComponents.Button {
                     Layout.minimumWidth: parent.buttonSize
                     Layout.maximumWidth: Layout.minimumWidth
+                    Layout.minimumHeight: page.checkableButtonsHeight
+                    Layout.maximumHeight: Layout.minimumHeight
+                    topPadding: page.checkableButtonsTopPadding
+                    bottomPadding: page.checkableButtonsBottomPadding
                     text: i18n("Auto Hide")
                     checked: parent.mode === mode
                     checkable: false
@@ -422,6 +478,10 @@ PlasmaComponents.Page {
                 PlasmaComponents.Button {
                     Layout.minimumWidth: parent.buttonSize
                     Layout.maximumWidth: Layout.minimumWidth
+                    Layout.minimumHeight: page.checkableButtonsHeight
+                    Layout.maximumHeight: Layout.minimumHeight
+                    topPadding: page.checkableButtonsTopPadding
+                    bottomPadding: page.checkableButtonsBottomPadding
                     text: i18n("Dodge Active")
                     checked: parent.mode === mode
                     checkable: false
@@ -440,6 +500,8 @@ PlasmaComponents.Page {
                     id: dodgeModeBtn
                     Layout.minimumWidth: parent.buttonSize
                     Layout.maximumWidth: Layout.minimumWidth
+                    Layout.minimumHeight: page.checkableButtonsHeight
+                    Layout.maximumHeight: Layout.minimumHeight
                     implicitWidth: alwaysVisibleBtn.implicitWidth
                     implicitHeight: alwaysVisibleBtn.implicitHeight
 
@@ -467,6 +529,8 @@ PlasmaComponents.Page {
                     id: windowsModeBtn
                     Layout.minimumWidth: parent.buttonSize
                     Layout.maximumWidth: Layout.minimumWidth
+                    Layout.minimumHeight: page.checkableButtonsHeight
+                    Layout.maximumHeight: Layout.minimumHeight
                     implicitWidth: alwaysVisibleBtn.implicitWidth
                     implicitHeight: alwaysVisibleBtn.implicitHeight
 
@@ -499,6 +563,8 @@ PlasmaComponents.Page {
                     id: sidebarModeBtn
                     Layout.minimumWidth: parent.buttonSize
                     Layout.maximumWidth: Layout.minimumWidth
+                    Layout.minimumHeight: page.checkableButtonsHeight
+                    Layout.maximumHeight: Layout.minimumHeight
                     implicitWidth: alwaysVisibleBtn.implicitWidth
                     implicitHeight: alwaysVisibleBtn.implicitHeight
 
@@ -683,6 +749,10 @@ PlasmaComponents.Page {
 
                         PlasmaComponents.Button {
                             Layout.fillWidth: true
+                            Layout.minimumHeight: page.checkableButtonsHeight
+                            Layout.maximumHeight: Layout.minimumHeight
+                            topPadding: page.checkableButtonsTopPadding
+                            bottomPadding: page.checkableButtonsBottomPadding
                             text: i18n("Drag Active Window")
                             checkable: true
                             PlasmaComponents.ToolTip.text: i18n("The user can use left mouse button to drag and maximized/restore last active window from empty areas")
@@ -709,6 +779,10 @@ PlasmaComponents.Page {
 
                         PlasmaComponents.Button {
                             Layout.fillWidth: true
+                            Layout.minimumHeight: page.checkableButtonsHeight
+                            Layout.maximumHeight: Layout.minimumHeight
+                            topPadding: page.checkableButtonsTopPadding
+                            bottomPadding: page.checkableButtonsBottomPadding
                             text: i18n("Close Active Window")
                             checkable: true
                             PlasmaComponents.ToolTip.text: i18n("The user can use middle mouse button to close last active window from empty areas")
