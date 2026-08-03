@@ -31,15 +31,6 @@ Item {
         TaskManager.ScreencastingRequest {
             id: waylandItem
             uuid: !windowsPreviewDlg.visible ? "" : thumbnailSourceItem.winId
-            onNodeIdChanged: console.log("PWDBG nodeId:" + nodeId + " uuid:" + uuid
-                                         + " dlgVisible:" + windowsPreviewDlg.visible
-                                         + " winId:" + thumbnailSourceItem.winId)
         }
-
-        onReadyChanged: console.log("PWDBG ready:" + ready + " nodeId:" + nodeId
-                                    + " state:" + state + " size:" + width + "x" + height)
-
-        Component.onCompleted: console.log("PWDBG created, winId:" + thumbnailSourceItem.winId
-                                           + " dlgVisible:" + windowsPreviewDlg.visible)
     }
 }

@@ -49,7 +49,6 @@ MouseArea {
         return currentApplet ? currentApplet.parent : null
     }
 
-    property bool _ovldbg: false
     property int lastX
     property int lastY
     property int appletX
@@ -58,23 +57,6 @@ MouseArea {
     readonly property int thickness: metrics.mask.thickness.maxNormal - metrics.extraThicknessForNormal
     readonly property int spacerHandleSize: Kirigami.Units.smallSpacing
 
-
-
-    onVisibleChanged: {
-        if (!visible) {
-            return;
-        }
-
-        var mainpos = mapFromItem(layoutsContainer.mainLayout, 0, 0);
-        console.log("OVLDBG overlay geometry x:" + x + " y:" + y + " " + width + "x" + height
-                    + " | root:" + root.width + "x" + root.height
-                    + " | layoutsContainer y:" + layoutsContainer.y + " h:" + layoutsContainer.height
-                    + " | mainLayout mapped to overlay: x:" + mainpos.x + " y:" + mainpos.y
-                    + " size:" + layoutsContainer.mainLayout.width + "x" + layoutsContainer.mainLayout.height);
-    }
-
-    onEntered: console.log("OVLDBG entered, containsMouse:" + containsMouse)
-    onPressedChanged: console.log("OVLDBG pressedChanged:" + pressed)
 
     onHeightChanged: tooltip.visible = false;
     onWidthChanged: tooltip.visible = false;
@@ -116,7 +98,6 @@ MouseArea {
 
 
     onPositionChanged: {
-        if (!_ovldbg) { _ovldbg = true; console.log("OVLDBG positionChanged fired"); }
         if (pressed) {
             if(currentApplet){
                 if (Plasmoid.formFactor === PlasmaCore.Types.Vertical) {

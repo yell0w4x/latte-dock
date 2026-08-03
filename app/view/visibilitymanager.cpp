@@ -570,13 +570,6 @@ bool VisibilityManager::isHidden() const
 
 void VisibilityManager::setIsHidden(bool isHidden)
 {
-    qDebug() << "OVLDBG setIsHidden:" << isHidden
-             << " mgr:" << (void *)this << " view:" << (void *)m_latteView
-             << " mode:" << (int)m_mode
-             << " inEditMode:" << (m_latteView ? m_latteView->inEditMode() : false)
-             << " hidingIsBlocked:" << hidingIsBlocked()
-             << " blockers:" << m_blockHidingEvents;
-
     if (m_isHidden == isHidden)
         return;
 
@@ -628,8 +621,6 @@ bool VisibilityManager::hasBlockHidingEvent(const QString &type)
 
 void VisibilityManager::addBlockHidingEvent(const QString &type)
 {
-    qDebug() << "OVLDBG addBlockHidingEvent:" << type
-             << " mgr:" << (void *)this << " view:" << (void *)m_latteView;
     if (m_blockHidingEvents.contains(type) || type.isEmpty()) {
         return;
     }

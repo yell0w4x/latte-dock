@@ -428,9 +428,6 @@ ContainmentItem {
             dndSpacer.parent = root;
         }
 
-        console.log("OVLDBG qml editMode:" + editMode + " latteView:" + latteView
-                    + " visibility:" + (latteView ? latteView.visibility : "noview"));
-
         //Block Hiding events
         if (editMode) {
             latteView.visibility.addBlockHidingEvent("main[qml]::inEditMode()");

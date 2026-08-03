@@ -309,9 +309,6 @@ void Effects::setInputMask(QRect area)
 
     m_inputMask = area;
 
-    qDebug() << "OVLDBG inputMask set to" << area << " view size:" << m_view->size()
-             << " editMode:" << m_view->inEditMode();
-
     if (KWindowSystem::isPlatformX11()) {
         if (m_view->devicePixelRatio() != 1.0) {
             //!Fix for X11 Global Scale
