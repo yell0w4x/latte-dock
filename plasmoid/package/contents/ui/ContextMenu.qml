@@ -281,6 +281,9 @@ PlasmaExtras.Menu {
     }
 
     function loadMyViewActions() {
+        console.log("LATTE TASKS, myView.isReady:" + appletAbilities.myView.isReady
+                    + " containmentActions:" + (appletAbilities.myView.containmentActions ? appletAbilities.myView.containmentActions.length : -1));
+
         if (!appletAbilities.myView.isReady) {
             return;
         }
@@ -288,10 +291,12 @@ PlasmaExtras.Menu {
         var actionsCount = appletAbilities.myView.containmentActions.length;
 
         for (var i=0; i<actionsCount; ++i) {
-            var item = newMenuItem(menu);
-            item.action = appletAbilities.myView.containmentActions[i];
+            //! "let" is needed, the binding below must capture this iteration's action
+            let item = newMenuItem(menu);
+            let action = appletAbilities.myView.containmentActions[i];
+            item.action = action;
             item.visible = Qt.binding(function() {
-                return this.action.visible;
+                return action.visible;
             });
             menu.addMenuItem(item, myViewActions);
         }

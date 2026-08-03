@@ -32,7 +32,20 @@ Item{
 
     property Item appletRootItem: appletDiscoveredRootItem ? appletDiscoveredRootItem : appletDefaultRootItem
     property Item appletDiscoveredRootItem: null
-    property Item appletDefaultRootItem: applet && applet.children && applet.children.length>0 ? applet.children[0] : null
+    //! Plasma 6 applets declare a PlasmoidItem as their root object, meaning that the applet
+    //! graphic item IS the applet root item. Plasma 5 applets were plain Items wrapped inside
+    //! the graphic item and were reachable as its first child, that is kept as a fallback.
+    property Item appletDefaultRootItem: {
+        if (!applet) {
+            return null;
+        }
+
+        if (applet.hasOwnProperty("compactRepresentation")) {
+            return applet;
+        }
+
+        return applet.children && applet.children.length>0 ? applet.children[0] : null;
+    }
 
     property Item appletIconItem: null //first applet's IconItem to be used by Latte
     property Item appletImageItem: null //first applet's ImageItem to be used by Latte
