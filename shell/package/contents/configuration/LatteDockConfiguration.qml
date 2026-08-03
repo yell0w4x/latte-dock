@@ -403,10 +403,16 @@ Loader {
                     QtQuickControls212.ScrollBar.vertical.policy: QtQuickControls212.ScrollBar.AsNeeded
                     QtQuickControls212.ScrollBar.horizontal.policy: QtQuickControls212.ScrollBar.AlwaysOff
 
+                    //! A QtQuick Controls 2 ScrollView derives its scrollable area from the
+                    //! implicit size of its content, and StackView has none. Without these the
+                    //! content height stayed zero and the vertical scrollbar never appeared.
+                    contentWidth: availableWidth
+                    contentHeight: pagesStackView.height
+
                     QtQuickControls212.StackView {
                         id: pagesStackView
-                        width: currentItem.width
-                        height: currentItem.height
+                        width: scrollArea.availableWidth
+                        height: currentItem ? currentItem.height : 0
 
                         property bool forwardSliding: true
 
