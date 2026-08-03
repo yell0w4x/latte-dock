@@ -19,6 +19,7 @@ Ability.IndicatorsPrivate {
                                                    && view.indicator.configuration)
                                                 : false
 
+
     type: view && view.indicator ? view.indicator.type : "org.kde.latte.default"
 
     indicatorComponent: view && view.indicator ? view.indicator.component : null
