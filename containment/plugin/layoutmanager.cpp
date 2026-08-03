@@ -269,8 +269,11 @@ void LayoutManager::updateOrder()
     auto nextorder = m_appletOrder;
 
     if (alignment==Latte::Types::Justify) {
-        nextorder.insert(m_splitterPosition-1, JUSTIFYSPLITTERID);
-        nextorder.insert(m_splitterPosition2-1, JUSTIFYSPLITTERID);
+        //! splitter positions are stored 1-based and may be out of sync with the applets
+        //! order, e.g. for a view that has just been created out of a template. QList::insert
+        //! asserts for an out of range index, so they must be clamped.
+        nextorder.insert(qBound(0, m_splitterPosition-1, nextorder.count()), JUSTIFYSPLITTERID);
+        nextorder.insert(qBound(0, m_splitterPosition2-1, nextorder.count()), JUSTIFYSPLITTERID);
     }
 
     setOrder(nextorder);
@@ -343,8 +346,9 @@ void LayoutManager::restore()
 
     if (alignment==Latte::Types::Justify) {
         if (splitterPosition!=-1 && splitterPosition2!=-1) {
-            appletIdsOrder.insert(splitterPosition-1, -1);
-            appletIdsOrder.insert(splitterPosition2-1, -1);
+            //! see updateOrder(), the stored splitter positions can not be trusted blindly
+            appletIdsOrder.insert(qBound(0, splitterPosition-1, appletIdsOrder.count()), -1);
+            appletIdsOrder.insert(qBound(0, splitterPosition2-1, appletIdsOrder.count()), -1);
         } else {
             appletIdsOrder.insert(0, -1);
             appletIdsOrder << -1;
