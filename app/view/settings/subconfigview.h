@@ -68,6 +68,13 @@ protected:
 
     virtual void init();
     virtual void initParentView(Latte::View *view);
+
+    //! Window layer the view asks the window manager for. Configuration windows sit above
+    //! everything by default, the canvas is a backdrop and overrides this.
+    //! Applies the window manager layer flags for this configuration window.
+    //! Overridden by windows that must not sit in the panel layer, e.g. the canvas
+    //! that would otherwise cover the very dock it is drawn around.
+    virtual void applyViewExtraFlags(QObject *target);
     virtual void updateEnabledBorders() = 0;
 
     void showEvent(QShowEvent *ev) override;

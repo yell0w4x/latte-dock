@@ -51,7 +51,7 @@ SubConfigView::SubConfigView(Latte::View *view, const QString &title, const bool
 
     if (!m_isNormalWindow) {
         setFlags(wFlags());
-        m_corona->wm()->setViewExtraFlags(this, true);
+        applyViewExtraFlags(this);
     }
 
     m_screenSyncTimer.setSingleShot(true);
@@ -244,6 +244,11 @@ KWayland::Client::PlasmaShellSurface *SubConfigView::surface()
     return m_shellSurface;
 }
 
+void SubConfigView::applyViewExtraFlags(QObject *target)
+{
+    m_corona->wm()->setViewExtraFlags(target, true, Latte::Types::WindowsGoBelow);
+}
+
 void SubConfigView::setupWaylandIntegration()
 {
     if (m_shellSurface || !KWindowSystem::isPlatformWayland() || !m_latteView || !m_latteView->containment()) {
@@ -272,7 +277,7 @@ void SubConfigView::setupWaylandIntegration()
         if (m_isNormalWindow) {
             m_corona->wm()->setViewExtraFlags(m_shellSurface, false);
         } else {
-            m_corona->wm()->setViewExtraFlags(m_shellSurface, true);
+            applyViewExtraFlags(m_shellSurface);
         }
 
         updateWaylandId();

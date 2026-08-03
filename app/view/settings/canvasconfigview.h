@@ -65,6 +65,11 @@ signals:
     void showSignal();
 
 protected:
+    //! The canvas only draws the editing grid around the dock, it must never be stacked
+    //! above it. Asking for the keep above layer, as the other configuration windows do,
+    //! covered the dock and swallowed all of its mouse events.
+    void applyViewExtraFlags(QObject *target) override;
+
     void showEvent(QShowEvent *ev) override;
     void focusOutEvent(QFocusEvent *ev) override;
     bool event(QEvent *ev) override;

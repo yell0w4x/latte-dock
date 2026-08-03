@@ -192,6 +192,7 @@ View::View(Plasma::Corona *corona, QScreen *targetScreen, bool byPassX11WM)
         connect(this->containment(), SIGNAL(statusChanged(Plasma::Types::ItemStatus)), SLOT(statusChanged(Plasma::Types::ItemStatus)));
         connect(this->containment(), &Plasma::Containment::showAddWidgetsInterface, this, &View::showWidgetExplorer);
         connect(this->containment(), &Plasma::Containment::userConfiguringChanged, this, [&]() {
+            qDebug() << "OVLDBG userConfiguringChanged:" << containment()->isUserConfiguring() << " view:" << this;
             emit inEditModeChanged();
         });
 
@@ -1516,6 +1517,13 @@ bool View::event(QEvent *e)
         emit eventTriggered(e);
 
         bool sinkableevent{false};
+
+        if (inEditMode() && (e->type() == QEvent::MouseButtonPress
+                             || e->type() == QEvent::MouseMove
+                             || e->type() == QEvent::Enter)) {
+            qDebug() << "OVLDBG view event in editmode:" << e->type()
+                     << " view:" << (void *)this;
+        }
 
         switch (e->type()) {
         case QEvent::Enter:

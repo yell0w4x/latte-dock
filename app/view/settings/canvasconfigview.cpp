@@ -9,6 +9,7 @@
 #include "primaryconfigview.h"
 #include "../panelshadows_p.h"
 #include "../view.h"
+#include "../visibilitymanager.h"
 #include "../../lattecorona.h"
 #include "../../wm/abstractwindowinterface.h"
 
@@ -49,6 +50,15 @@ void CanvasConfigView::init()
     if (m_parent && KWindowSystem::isPlatformX11()) {
         m_parent->requestActivate();
     }
+}
+
+void CanvasConfigView::applyViewExtraFlags(QObject *target)
+{
+    //! The canvas is only the editing backdrop drawn around the dock, it must never
+    //! share the panel layer with it. Under wayland two Role::Panel surfaces end up in
+    //! the same layer and the canvas, being mapped last, covers the dock and swallows
+    //! every mouse event meant for the widgets.
+    m_corona->wm()->setViewExtraFlags(target, false, Latte::Types::NormalWindow);
 }
 
 QRect CanvasConfigView::geometryWhenVisible() const
@@ -133,12 +143,19 @@ void CanvasConfigView::showEvent(QShowEvent *ev)
 
     syncGeometry();
 
-    //! show Canvas on top of all other panels/docks and show
-    //! its parent view on top afterwards
-    m_corona->wm()->setViewExtraFlags(this, true);
+    //! The canvas is only the editing backdrop that draws the rulers/grid around the
+    //! dock, it must never cover the dock itself. Under X11 the stacking was fixed up
+    //! by activating the parent config window afterwards, which does not restack
+    //! anything under wayland, so the canvas is kept out of the keep-above layer and
+    //! the parent view is explicitly put back on the front layer instead.
+    applyViewExtraFlags(this);
 
     QTimer::singleShot(100, [this]() {
         //! delay execution in order to take influence after last Canvas on top call
+        if (m_latteView && m_latteView->visibility()) {
+            m_latteView->visibility()->setViewOnFrontLayer();
+        }
+
         if (m_parent) {
             m_parent->requestActivate();
         }
