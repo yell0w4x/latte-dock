@@ -15,7 +15,7 @@ import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.draganddrop 2.0
 import org.kde.kirigami 2.20 as Kirigami
 
-PlasmoidItem {
+Item {
     id: delegate
 
     readonly property string pluginName: model.pluginName

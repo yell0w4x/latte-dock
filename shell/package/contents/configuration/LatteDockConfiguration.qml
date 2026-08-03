@@ -15,7 +15,6 @@ import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 3.0 as PlasmaComponents
 import org.kde.plasma.components 3.0 as PlasmaComponents3
 import org.kde.plasma.extras 2.0 as PlasmaExtras
-import QtQuick.Controls.Styles.Plasma 2.0 as Styles
 
 import org.kde.kquickcontrolsaddons 2.0 as KQuickControlAddons
 
@@ -101,8 +100,8 @@ Loader {
         onAdvancedLevelChanged: {
             //! switch to appearancePage when effectsPage becomes hidden because
             //! advancedLevel was disabled by the user
-            if (!advancedLevel && tabBar.currentTab === effectsTabBtn) {
-                tabBar.currentTab = appearanceTabBtn;
+            if (!advancedLevel && tabBar.currentItem === effectsTabBtn) {
+                tabBar.selectTabButton(appearanceTabBtn);
             }
         }
 
@@ -297,6 +296,17 @@ Loader {
 
                 readonly property int visibleStaticPages: dialog.advancedLevel ? 3 : 2
 
+                //! Plasma 6 TabBar is a QtQuick Controls 2 Container, the current tab
+                //! is chosen through its index and not through the button itself
+                function selectTabButton(button) {
+                    for (var i=0; i<tabBar.count; ++i) {
+                        if (tabBar.itemAt(i) === button) {
+                            tabBar.currentIndex = i;
+                            return;
+                        }
+                    }
+                }
+
                 PlasmaComponents.TabButton {
                     id: behaviorTabBtn
                     text: i18n("Behavior")
@@ -311,7 +321,7 @@ Loader {
                         target: viewConfig
                         onIsReadyChanged: {
                             if (viewConfig.isReady) {
-                                tabBar.currentTab = behaviorTabBtn;
+                                tabBar.selectTabButton(behaviorTabBtn);
                             }
                         }
                     }

@@ -471,13 +471,24 @@ PlasmaComponents.Page {
                             }
                         }
 
+                        //! Plasma 6 TabBar is a QtQuick Controls 2 Container, the current tab
+                        //! is chosen through its index and not through the button itself
+                        function selectTabButton(button) {
+                            for (var i=0; i<tabBar.count; ++i) {
+                                if (tabBar.itemAt(i) === button) {
+                                    tabBar.currentIndex = i;
+                                    return;
+                                }
+                            }
+                        }
+
                         function selectTab(type) {
                             if (type === latteBtn.type) {
-                                tabBar.currentTab = latteBtn;
+                                selectTabButton(latteBtn);
                             } else if (type === plasmaBtn.type) {
-                                tabBar.currentTab = plasmaBtn;
+                                selectTabButton(plasmaBtn);
                             } else if (type === customIndicator.type) {
-                                tabBar.currentTab = customBtn;
+                                selectTabButton(customBtn);
                             }
                         }
 
