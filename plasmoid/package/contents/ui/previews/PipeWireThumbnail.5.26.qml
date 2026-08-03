@@ -15,27 +15,31 @@ import org.kde.kirigami 2.20 as Kirigami
 Item {
     anchors.fill: parent
 
+    readonly property bool hasThumbnail: pipeWireSourceItem.ready
+
     PipeWire.PipeWireSourceItem {
         id: pipeWireSourceItem
 
-        enabled: false // Must be set in pipewiresourceitem.cpp so opacity animation can work
-        visible: waylandItem.nodeId > 0
-        nodeId: waylandItem.nodeId
-
         anchors.fill: parent
 
-        opacity: enabled ? 1 : 0
+        //! The plasma5 version kept the item disabled and faded it in from
+        //! pipewiresourceitem.cpp once the stream produced frames. Plasma6 does not touch
+        //! "enabled" any longer, it exposes "ready" instead, so the old approach left
+        //! every window preview fully transparent.
+        nodeId: waylandItem.nodeId
 
         TaskManager.ScreencastingRequest {
             id: waylandItem
             uuid: !windowsPreviewDlg.visible ? "" : thumbnailSourceItem.winId
+            onNodeIdChanged: console.log("PWDBG nodeId:" + nodeId + " uuid:" + uuid
+                                         + " dlgVisible:" + windowsPreviewDlg.visible
+                                         + " winId:" + thumbnailSourceItem.winId)
         }
 
-        /*Behavior on opacity {
-            OpacityAnimator {
-                duration: Kirigami.Units.longDuration
-                easing.type: Easing.OutCubic
-            }
-        }*/
+        onReadyChanged: console.log("PWDBG ready:" + ready + " nodeId:" + nodeId
+                                    + " state:" + state + " size:" + width + "x" + height)
+
+        Component.onCompleted: console.log("PWDBG created, winId:" + thumbnailSourceItem.winId
+                                           + " dlgVisible:" + windowsPreviewDlg.visible)
     }
 }

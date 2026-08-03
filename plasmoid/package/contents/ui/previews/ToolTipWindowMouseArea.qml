@@ -12,7 +12,8 @@ import org.kde.latte.core 0.2 as LatteCore
 
 MouseArea {
     property var modelIndex
-    property int winId // FIXME Legacy
+    //! wayland window ids are uuids, x11 ones are numeric, so this can not be an int
+    property var winId
     property Item rootTask
 
     acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
