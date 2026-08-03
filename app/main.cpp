@@ -47,6 +47,7 @@
 #define CRED     "\e[0;31m"
 
 inline void configureAboutData();
+inline void registerInstallationPaths();
 inline void registerTaskManagerAppletQmlTypes();
 inline void detectPlatform(int argc, char **argv);
 inline void filterDebugMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
@@ -72,6 +73,11 @@ int main(int argc, char **argv)
     }
 
     QQuickWindow::setDefaultAlphaBuffer(true);
+
+    //! must run before the QApplication is created and long before any QQmlEngine,
+    //! otherwise the Latte qml modules and plugins are unreachable when Latte has
+    //! not been installed inside the Qt prefix
+    registerInstallationPaths();
 
     qputenv("QT_WAYLAND_DISABLE_FIXED_POSITIONS", {});
     const bool qpaVariable = qEnvironmentVariableIsSet("QT_QPA_PLATFORM");
@@ -582,6 +588,38 @@ inline void detectPlatform(int argc, char **argv)
 //! SmartLauncherItem/Backend inside the task manager applet plugin, which registers them under
 //! "plasma.applet.org.kde.plasma.taskmanager" when it is loaded. Latte Tasks needs both, so the
 //! plugin is loaded explicitly before any QML is instantiated.
+inline void registerInstallationPaths()
+{
+#ifdef LATTE_PLUGINDIR
+    //! Latte binary plugins, e.g. the containmentactions context menu, are found through
+    //! the Qt library paths. When Latte is installed outside of the Qt prefix, e.g. in
+    //! ~/.local, that directory is unknown to Qt and every plugin lookup fails silently.
+    const QString pluginDir = QStringLiteral(LATTE_PLUGINDIR);
+
+    if (QDir(pluginDir).exists() && !QCoreApplication::libraryPaths().contains(pluginDir)) {
+        QCoreApplication::addLibraryPath(pluginDir);
+    }
+#endif
+
+#ifdef LATTE_QMLDIR
+    //! same story for the org.kde.latte.* qml modules; QML_IMPORT_PATH is read by every
+    //! QQmlEngine on creation, which is the only way to reach the engines that Plasma
+    //! creates internally for applets, containments and configuration views.
+    const QString qmlDir = QStringLiteral(LATTE_QMLDIR);
+
+    if (QDir(qmlDir).exists()) {
+        for (const auto &variable : {"QML_IMPORT_PATH", "QML2_IMPORT_PATH"}) {
+            const QString current = qEnvironmentVariable(variable);
+            const QStringList paths = current.split(QDir::listSeparator(), Qt::SkipEmptyParts);
+
+            if (!paths.contains(qmlDir)) {
+                qputenv(variable, (current.isEmpty() ? qmlDir : current + QDir::listSeparator() + qmlDir).toLocal8Bit());
+            }
+        }
+    }
+#endif
+}
+
 inline void registerTaskManagerAppletQmlTypes()
 {
     const QStringList libraryPaths = QCoreApplication::libraryPaths();

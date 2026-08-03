@@ -83,6 +83,18 @@ void InfoView::init()
     auto source = QUrl::fromLocalFile(m_corona->kPackage().filePath("infoviewui"));
     setSource(source);
 
+    if (!rootObject()) {
+        //! the qml may fail to load, e.g. when the latte qml modules are not reachable.
+        //! that must not take the whole application down along with it
+        qWarning() << "Latte::InfoView, the qml source could not be loaded ::" << source;
+
+        for (const auto &error : errors()) {
+            qWarning() << "    " << error.toString();
+        }
+
+        return;
+    }
+
     rootObject()->setProperty("message", m_message);
 
     syncGeometry();
@@ -106,6 +118,10 @@ inline Qt::WindowFlags InfoView::wFlags() const
 
 void InfoView::syncGeometry()
 {
+    if (!rootObject()) {
+        return;
+    }
+
     const QSize size(rootObject()->width(), rootObject()->height());
     const auto sGeometry = screen()->geometry();
 
