@@ -43,6 +43,21 @@ T.ComboBox {
     property int popUpRelativeX: 0
     property int popUpTextHorizontalAlignment: Text.AlignLeft
 
+
+    //! Qt6 hands over qml declared lists as list wrappers, for which Array.isArray()
+    //! is false while they still have no get() function
+    function modelValue(index, role) {
+        var themodel = control.model;
+
+        if (!themodel || index < 0 || role.length <= 0) {
+            return "";
+        }
+
+        var item = (typeof themodel.get === "function") ? themodel.get(index) : themodel[index];
+
+        return item ? item[role] : "";
+    }
+
     property string enabledRole
     property string iconRole
     property string iconToolTipRole
@@ -82,7 +97,6 @@ T.ComboBox {
                 if (!pressed) {
                     control.currentIndex = index;
                     control.down = false;
-                    control.pressed = false;
                     control.popup.visible = false;
                 }
             }
@@ -134,7 +148,6 @@ T.ComboBox {
         onReleased: onGenericReleased()
         onCanceled: {
             control.down = false;
-            control.pressed = false;
         }
         onPositionChanged: {
             var pos = listView.mapFromItem(this, mouse.x, mouse.y);
@@ -147,7 +160,6 @@ T.ComboBox {
             target: popup
             onClosed: {
                 control.down = false;
-                control.pressed = false;
             }
         }
 
@@ -155,14 +167,12 @@ T.ComboBox {
             indexUnderMouse = -1;
             listView.currentIndex = control.highlightedIndex;
             control.down = true;
-            control.pressed = true;
             control.popup.visible = !control.popup.visible;
         }
 
         function onGenericReleased() {
             if (!containsMouse && !hiddenTooltipButton.hovered) {
                 control.down = false;
-                control.pressed = false;
                 control.popup.visible = false;
             }
             if (indexUnderMouse > -1) {
@@ -182,11 +192,7 @@ T.ComboBox {
                     return "";
                 }
 
-                if (Array.isArray(control.model)) {
-                    return control.model[control.currentIndex][control.toolTipRole];
-                } else {
-                    return control.model.get(control.currentIndex)[control.toolTipRole];
-                }
+                return control.modelValue(control.currentIndex, control.toolTipRole);
             }
 
             onPressedChanged: {
@@ -219,11 +225,7 @@ T.ComboBox {
                             && control.currentIndex>=0
                             && control.iconRole.length>0) {
 
-                        if (Array.isArray(control.model)) {
-                            return control.model[control.currentIndex][control.iconRole];
-                        } else {
-                            return control.model.get(control.currentIndex)[control.iconRole];
-                        }
+                        return control.modelValue(control.currentIndex, control.iconRole);
                     }
 
                     return "";
