@@ -56,7 +56,7 @@ T.ComboBox {
         width: control.popup.width
         enabled: !isSeparator && (control.enabledRole.length>0 ? (isArray ? modelData[control.enabledRole] : model[control.enabledRole]) : true)
         text: control.textRole.length>0 ? (isArray ? modelData[control.textRole] : model[control.textRole]) : modelData
-        icon: control.iconRole.length>0 ? (isArray ? modelData[control.iconRole] : model[control.iconRole]) : ''
+        iconSource: control.iconRole.length>0 ? (isArray ? modelData[control.iconRole] : model[control.iconRole]) : ''
         iconToolTip: control.iconToolTipRole.length>0 ? (isArray ? modelData[control.iconToolTipRole] : model[control.iconToolTipRole]) : ''
         iconOnlyWhenHovered: control.iconOnlyWhenHoveredRole.length>0 ? (isArray ? modelData[control.iconOnlyWhenHoveredRole] : model[control.iconOnlyWhenHoveredRole]) : ''
         isSeparator: control.isSeparatorRole.length>0 ? (isArray ? modelData[control.isSeparatorRole] : model[control.isSeparatorRole]) : false
@@ -73,8 +73,10 @@ T.ComboBox {
             id: tooltipBtn
             anchors.fill: parent
             opacity: 0
-            tooltip: parent.toolTip
-            visible: tooltip !== ''
+            visible: parent.toolTip !== ''
+
+            PlasmaComponents.ToolTip.text: parent.toolTip
+            PlasmaComponents.ToolTip.visible: hovered && visible
 
             onPressedChanged: {
                 if (!pressed) {
@@ -173,7 +175,9 @@ T.ComboBox {
             anchors.fill: parent
             opacity: 0
             visible: control && control.currentIndex>=0 && control.toolTipRole.length>0
-            tooltip: {
+
+            PlasmaComponents.ToolTip.visible: hovered && visible
+            PlasmaComponents.ToolTip.text: {
                 if (!visible) {
                     return "";
                 }
@@ -208,7 +212,8 @@ T.ComboBox {
                 implicitWidth: textLabel.height
                 implicitHeight: textLabel.height
 
-                colorSet: KSvg.Svg.Button
+                Kirigami.Theme.colorSet: Kirigami.Theme.Button
+                Kirigami.Theme.inherit: false
                 source: {
                     if (control
                             && control.currentIndex>=0

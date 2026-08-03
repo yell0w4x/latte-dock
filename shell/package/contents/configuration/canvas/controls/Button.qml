@@ -102,7 +102,11 @@ Item{
         id: tooltipBtn
         anchors.fill: visibleButtonRoot
         opacity: 0
-        tooltip: button.tooltip
+
+        //! Plasma Components 3 buttons do not provide a "tooltip" property any longer
+        PlasmaComponents.ToolTip.text: button.tooltip
+        PlasmaComponents.ToolTip.visible: hovered && button.tooltip !== ""
+        PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
 
         onPressedChanged: button.pressedChanged(pressed)
     }

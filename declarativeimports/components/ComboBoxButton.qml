@@ -82,7 +82,9 @@ Rectangle {
 
         text: root.checkable ?  " " : buttonText
         icon.name: buttonIconSource
-        tooltip: buttonToolTip
+
+        PlasmaComponents.ToolTip.text: buttonToolTip
+        PlasmaComponents.ToolTip.visible: hovered && buttonToolTip !== ""
 
         onClicked: {
             if (buttonIsTriggeringMenu) {

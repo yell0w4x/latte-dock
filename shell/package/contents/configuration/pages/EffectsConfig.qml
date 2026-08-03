@@ -7,7 +7,7 @@ import QtQuick 2.7
 import QtQuick.Controls 2.15 as QQC2
 import QtQuick.Layouts 1.3
 import Qt5Compat.GraphicalEffects
-import QtQuick.Dialogs 1.2
+import QtQuick.Dialogs
 import QtQuick.Controls 2.12 as QtQuickControls212
 
 import org.kde.plasma.core 2.0 as PlasmaCore
@@ -180,7 +180,8 @@ PlasmaComponents.Page {
                         checked: plasmoid.configuration.shadowColorType === type
                         checkable: false
                         QQC2.ButtonGroup.group: shadowColorGroup
-                        tooltip: i18n("Default shadow for applets")
+                        PlasmaComponents.ToolTip.text: i18n("Default shadow for applets")
+                        PlasmaComponents.ToolTip.visible: hovered && PlasmaComponents.ToolTip.text !== ""
 
                         readonly property int type: LatteContainment.Types.DefaultColorShadow
 
@@ -199,7 +200,8 @@ PlasmaComponents.Page {
                         checked: plasmoid.configuration.shadowColorType === type
                         checkable: false
                         QQC2.ButtonGroup.group: shadowColorGroup
-                        tooltip: i18n("Shadow from theme color palette")
+                        PlasmaComponents.ToolTip.text: i18n("Shadow from theme color palette")
+                        PlasmaComponents.ToolTip.visible: hovered && PlasmaComponents.ToolTip.text !== ""
 
                         readonly property int type: LatteContainment.Types.ThemeColorShadow
 
@@ -220,7 +222,8 @@ PlasmaComponents.Page {
 
                         checkable: false
                         checked: plasmoid.configuration.shadowColorType === type
-                        tooltip: i18n("Use set shadow color")
+                        PlasmaComponents.ToolTip.text: i18n("Use set shadow color")
+                        PlasmaComponents.ToolTip.visible: hovered && PlasmaComponents.ToolTip.text !== ""
                         QQC2.ButtonGroup.group: shadowColorGroup
 
                         readonly property int type: LatteContainment.Types.UserColorShadow
@@ -264,11 +267,9 @@ PlasmaComponents.Page {
 
                             sourceComponent: ColorDialog {
                                 title: i18n("Please choose shadow color")
-                                showAlphaChannel: false
 
                                 onAccepted: {
-                                    //console.log("You chose: " + String(color));
-                                    var strC = String(color);
+                                    var strC = String(selectedColor);
                                     if (strC.indexOf("#") === 0) {
                                         plasmoid.configuration.shadowColor = strC.substr(1);
                                     }
@@ -281,7 +282,7 @@ PlasmaComponents.Page {
                                     viewConfig.setSticker(false);
                                 }
                                 Component.onCompleted: {
-                                    color = String("#" + plasmoid.configuration.shadowColor);
+                                    selectedColor = String("#" + plasmoid.configuration.shadowColor);
                                     visible = true;
                                 }
                             }

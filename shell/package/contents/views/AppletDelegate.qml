@@ -166,7 +166,8 @@ Item {
                     }
                     icon.name: delegate.pendingUninstall ? "edit-undo" : "edit-delete"
                     // we don't really "undo" anything but we'll pretend to the user that we do
-                    tooltip: delegate.pendingUninstall ? i18nd("plasma_shell_org.kde.plasma.desktop", "Undo uninstall")
+                    PlasmaComponents.ToolTip.text: delegate.pendingUninstall ? i18nd("plasma_shell_org.kde.plasma.desktop", "Undo uninstall")
+                    PlasmaComponents.ToolTip.visible: hovered && PlasmaComponents.ToolTip.text !== ""
                                                        : i18nd("plasma_shell_org.kde.plasma.desktop", "Uninstall widget")
                     flat: false
                     visible: model.local && delegate.GridView.isCurrentItem

@@ -4,19 +4,23 @@
 */
 
 import org.kde.plasma.components 3.0 as PlasmaComponents
-import "private" as Private
 
 PlasmaComponents.CheckBox {
     property int value: 0
 
+    //! Plasma Components 3 checkboxes do not provide a "tooltip" property, it is
+    //! reintroduced here because it is used all over the latte configuration windows
+    property string tooltip: ""
+
     onValueChanged: {
-        if (partiallyCheckedEnabled) {
-            checkedState = value;
+        //! QtQuick Controls 1 partiallyCheckedEnabled/checkedState became tristate/checkState
+        if (tristate) {
+            checkState = value;
         } else {
             checked = value;
         }
     }
 
-    style: Private.CheckBoxStyle {}
+    PlasmaComponents.ToolTip.text: tooltip
+    PlasmaComponents.ToolTip.visible: hovered && tooltip !== ""
 }
-

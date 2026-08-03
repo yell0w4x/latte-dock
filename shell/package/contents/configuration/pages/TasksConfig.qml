@@ -378,7 +378,8 @@ PlasmaComponents.Page {
                         checked: parent.group === group
                         checkable: false
                         QQC2.ButtonGroup.group: launchersGroup
-                        tooltip: i18n("Use a unique set of launchers for this view which is independent from any other view")
+                        PlasmaComponents.ToolTip.text: i18n("Use a unique set of launchers for this view which is independent from any other view")
+                        PlasmaComponents.ToolTip.visible: hovered && PlasmaComponents.ToolTip.text !== ""
 
                         readonly property int group: LatteCore.Types.UniqueLaunchers
 
@@ -397,7 +398,8 @@ PlasmaComponents.Page {
                         checked: parent.group === group
                         checkable: false
                         QQC2.ButtonGroup.group: launchersGroup
-                        tooltip: i18n("Use the current layout set of launchers for this latteView. This group provides launchers <b>synchronization</b> between different views in the <b>same layout</b>")
+                        PlasmaComponents.ToolTip.text: i18n("Use the current layout set of launchers for this latteView. This group provides launchers <b>synchronization</b> between different views in the <b>same layout</b>")
+                        PlasmaComponents.ToolTip.visible: hovered && PlasmaComponents.ToolTip.text !== ""
                         //! it is shown only when the user has activated that option manually from the text layout file
                         visible: tasks.configuration.launchersGroup === group
 
@@ -417,7 +419,8 @@ PlasmaComponents.Page {
                         checked: parent.group === group
                         checkable: false
                         QQC2.ButtonGroup.group: launchersGroup
-                        tooltip: i18n("Use the global set of launchers for this latteView. This group provides launchers <b>synchronization</b> between different views and between <b>different layouts</b>")
+                        PlasmaComponents.ToolTip.text: i18n("Use the global set of launchers for this latteView. This group provides launchers <b>synchronization</b> between different views and between <b>different layouts</b>")
+                        PlasmaComponents.ToolTip.visible: hovered && PlasmaComponents.ToolTip.text !== ""
 
                         readonly property int group: LatteCore.Types.GlobalLaunchers
 
@@ -744,7 +747,8 @@ PlasmaComponents.Page {
 
                 text: i18n("Remove Latte Tasks Applet")
                 enabled: latteView.latteTasksArePresent
-                tooltip: i18n("Remove Latte Tasks plasmoid")
+                PlasmaComponents.ToolTip.text: i18n("Remove Latte Tasks plasmoid")
+                PlasmaComponents.ToolTip.visible: hovered && PlasmaComponents.ToolTip.text !== ""
 
                 onClicked: {
                     latteView.removeTasksPlasmoid();

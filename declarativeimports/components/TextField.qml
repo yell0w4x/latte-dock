@@ -26,7 +26,7 @@ PlasmaComponents.TextField {
     placeholderText: i18n("none")
     horizontalAlignment: Text.AlignLeft
 
-    readonly property int implicitWidth: internalContent.width + Kirigami.Units.gridUnit * 2.45
+    implicitWidth: internalContent.width + Kirigami.Units.gridUnit * 2.45
 
     readonly property int value: text === "" ? minValue : parseInt(text)
     property int step: 100

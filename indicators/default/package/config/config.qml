@@ -44,7 +44,8 @@ ColumnLayout {
             checked: parent.indicatorType === indicatorType
             checkable: false
             QQC2.ButtonGroup.group: activeIndicatorTypeGroup
-            tooltip: i18n("Show a line indicator for active items")
+            PlasmaComponents.ToolTip.text: i18n("Show a line indicator for active items")
+            PlasmaComponents.ToolTip.visible: hovered && PlasmaComponents.ToolTip.text !== ""
 
             readonly property int indicatorType: 0 /*Line*/
 
@@ -62,7 +63,8 @@ ColumnLayout {
             checked: parent.indicatorType === indicatorType
             checkable: false
             QQC2.ButtonGroup.group: activeIndicatorTypeGroup
-            tooltip: i18n("Show a dot indicator for active items")
+            PlasmaComponents.ToolTip.text: i18n("Show a dot indicator for active items")
+            PlasmaComponents.ToolTip.visible: hovered && PlasmaComponents.ToolTip.text !== ""
 
             readonly property int indicatorType: 1 /*Dot*/
 
@@ -257,7 +259,8 @@ ColumnLayout {
             checked: parent.option === option
             checkable: false
             QQC2.ButtonGroup.group:  glowGroup
-            tooltip: i18n("Add glow only to active task/applet indicator")
+            PlasmaComponents.ToolTip.text: i18n("Add glow only to active task/applet indicator")
+            PlasmaComponents.ToolTip.visible: hovered && PlasmaComponents.ToolTip.text !== ""
 
             readonly property int option: 1 /*OnActive*/
 
@@ -275,7 +278,8 @@ ColumnLayout {
             checked: parent.option === option
             checkable: false
             QQC2.ButtonGroup.group: glowGroup
-            tooltip: i18n("Add glow to all task/applet indicators")
+            PlasmaComponents.ToolTip.text: i18n("Add glow to all task/applet indicators")
+            PlasmaComponents.ToolTip.visible: hovered && PlasmaComponents.ToolTip.text !== ""
 
             readonly property int option: 2 /*All*/
 

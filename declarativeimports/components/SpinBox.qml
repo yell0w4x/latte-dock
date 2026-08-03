@@ -3,44 +3,12 @@
     SPDX-License-Identifier: GPL-2.0-or-later
 */
 
-import QtQuick 2.0
-import QtQuick.Controls.Styles.Plasma 2.0 as Styles
-import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.components 3.0 as PlasmaComponents
 import org.kde.kirigami 2.20 as Kirigami
-import org.kde.ksvg 1.0 as KSvg
 
-Controls.SpinBox {
+//! Plasma 6 dropped QtQuick Controls 1 along with its styling api, meaning that the
+//! hand drawn svg increment/decrement controls are gone. The Plasma Components 3
+//! spinbox already draws itself through the plasma theme.
+PlasmaComponents.SpinBox {
     implicitWidth: Kirigami.Units.gridUnit * 7
-
-    style: Styles.SpinBoxStyle {
-        KSvg.Svg {
-            id: arrowSvg
-            imagePath: "widgets/arrows"
-            colorSet: KSvg.Svg.Button
-        }
-        incrementControl: KSvg.SvgItem {
-            implicitWidth: Kirigami.Units.gridUnit * 1.26
-            anchors {
-                centerIn: parent
-                margins: 1
-                leftMargin: 0
-                rightMargin: 3
-            }
-            svg: arrowSvg
-            elementId: "up-arrow"
-            opacity: control.enabled ? (styleData.upPressed ? 1 : 0.6) : 0.5
-        }
-        decrementControl: KSvg.SvgItem {
-            implicitWidth: Kirigami.Units.gridUnit * 1.26
-            anchors {
-                centerIn: parent
-                margins: 1
-                leftMargin: 0
-                rightMargin: 3
-            }
-            svg: arrowSvg
-            elementId: "down-arrow"
-            opacity: control.enabled ? (styleData.upPressed ? 1 : 0.6) : 0.5
-        }
-    }
 }

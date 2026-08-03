@@ -399,10 +399,9 @@ Loader {
                     id: scrollArea
 
                     anchors.fill: parent
-                    verticalScrollBarPolicy: Qt.ScrollBarAsNeeded
-                    horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
 
-                    flickableItem.flickableDirection: Flickable.VerticalFlick
+                    QtQuickControls212.ScrollBar.vertical.policy: QtQuickControls212.ScrollBar.AsNeeded
+                    QtQuickControls212.ScrollBar.horizontal.policy: QtQuickControls212.ScrollBar.AlwaysOff
 
                     QtQuickControls212.StackView {
                         id: pagesStackView
@@ -627,7 +626,8 @@ Loader {
                     text: i18n("Remove")
                     icon.name: "delete"
                     opacity: enabled ? 1 : 0
-                    tooltip: i18n("Remove current dock")
+                    PlasmaComponents.ToolTip.text: i18n("Remove current dock")
+                    PlasmaComponents.ToolTip.visible: hovered && PlasmaComponents.ToolTip.text !== ""
 
                     onClicked: latteView.removeView()
                 }
@@ -638,7 +638,8 @@ Loader {
 
                     text: i18n("Close")
                     icon.name: "dialog-close"
-                    tooltip: i18n("Close settings window")
+                    PlasmaComponents.ToolTip.text: i18n("Close settings window")
+                    PlasmaComponents.ToolTip.visible: hovered && PlasmaComponents.ToolTip.text !== ""
 
                     onClicked: viewConfig.hideConfigWindow();
                 }

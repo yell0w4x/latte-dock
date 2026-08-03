@@ -55,7 +55,8 @@ Grid {
         checked: latteView.type === LatteCore.Types.DockView
         text: i18nc("dock type","Dock")
         QQC2.ButtonGroup.group: viewTypeGroup
-        tooltip: i18n("Change the behavior and appearance to Dock type")
+        PlasmaComponents.ToolTip.text: i18n("Change the behavior and appearance to Dock type")
+        PlasmaComponents.ToolTip.visible: hovered && PlasmaComponents.ToolTip.text !== ""
 
         onPressedChanged: {
             if (pressed && !checked) {
@@ -99,7 +100,8 @@ Grid {
         checked: latteView.type === LatteCore.Types.PanelView
         text: i18nc("panel type","Panel")
         QQC2.ButtonGroup.group: viewTypeGroup
-        tooltip: i18n("Change the behavior and appearance to Panel type")
+        PlasmaComponents.ToolTip.text: i18n("Change the behavior and appearance to Panel type")
+        PlasmaComponents.ToolTip.visible: hovered && PlasmaComponents.ToolTip.text !== ""
 
         onPressedChanged: {
             if (pressed && !checked) {

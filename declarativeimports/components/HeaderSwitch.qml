@@ -94,8 +94,10 @@ PlasmoidItem {
         PlasmaComponents.Button {
             //tooltip ghost
             anchors.fill: textElement
-            tooltip: item.tooltip
             opacity: 0
+
+            PlasmaComponents.ToolTip.text: item.tooltip
+            PlasmaComponents.ToolTip.visible: hovered && item.tooltip !== ""
             onPressedChanged: {
                 if (pressed) {
                     item.pressed();
@@ -104,20 +106,22 @@ PlasmoidItem {
         }
     }
 
-    Switch {
+    PlasmaComponents.Switch {
         id: itemSwitch
         anchors.verticalCenter: row.verticalCenter
         anchors.right: row.right
         checked: item.checked
         enabled: item.enabled
 
-        style: Private.SwitchStyle {}
-
         PlasmaComponents.Button {
             //tooltip ghost
             anchors.fill: parent
-            tooltip: item.tooltip
             opacity: 0
+
+            //! Plasma Components 3 buttons have no "tooltip" property any longer
+            PlasmaComponents.ToolTip.text: item.tooltip
+            PlasmaComponents.ToolTip.visible: hovered && item.tooltip !== ""
+
             onPressedChanged: {
                 if (pressed) {
                     item.pressed();
