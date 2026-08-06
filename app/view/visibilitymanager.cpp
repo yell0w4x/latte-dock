@@ -994,6 +994,14 @@ void VisibilityManager::saveConfig()
     config.writeEntry("raiseOnActivityChange", m_raiseOnActivityChange);
     config.writeEntry("visibility", static_cast<int>(m_mode));
 
+    //! Writes to the containment config group only live in memory until the corona
+    //! flushes them. Nothing else in this path asks for that, so the settings survived
+    //! only when an unrelated change happened to trigger a save before latte exited.
+    //! requestConfigSync() compresses the events, which matters because every keystroke
+    //! in the delay fields lands here.
+    if (m_corona) {
+        m_corona->requestConfigSync();
+    }
 }
 
 void VisibilityManager::restoreConfig()
