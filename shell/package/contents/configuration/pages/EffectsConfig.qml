@@ -289,7 +289,16 @@ PlasmaComponents.Page {
                             MouseArea{
                                 anchors.fill: parent
                                 onClicked: {
-                                    shadowColorGroup.current = userShadowBtn;
+                                    //! QtQuick Controls 1 named this "current", Controls 2 uses "checkedButton".
+                                    //! Assigning the old one threw and aborted this handler before the
+                                    //! color dialog was ever requested.
+                                    shadowColorGroup.checkedButton = userShadowBtn;
+
+                                    //! This area covers the whole button, so the button never sees the
+                                    //! press and its own handler that stores the shadow color type does
+                                    //! not run. Without it the picked color is saved but never used,
+                                    //! because it is only read for UserColorShadow.
+                                    plasmoid.configuration.shadowColorType = userShadowBtn.type;
                                     viewConfig.setSticker(true);
                                     colorDialogLoader.showDialog = true;
                                 }
