@@ -31,6 +31,7 @@ AbilityHost.Indicators {
 
     //! Bindings in order to inform View::Indicator
     Binding{
+        restoreMode: Binding.RestoreNone
         target: view && view.indicator ? view.indicator : null
         property:"enabledForApplets"
         when: view && view.indicator
@@ -39,6 +40,7 @@ AbilityHost.Indicators {
 
     //! Bindings in order to inform View::Indicator::Info
     Binding{
+        restoreMode: Binding.RestoreNone
         target: view && view.indicator ? view.indicator.info : null
         property:"needsIconColors"
         when: view && view.indicator
@@ -46,6 +48,7 @@ AbilityHost.Indicators {
     }
 
     Binding{
+        restoreMode: Binding.RestoreNone
         target: view && view.indicator ? view.indicator.info : null
         property:"needsMouseEventCoordinates"
         when: view && view.indicator
@@ -53,6 +56,7 @@ AbilityHost.Indicators {
     }
 
     Binding{
+        restoreMode: Binding.RestoreNone
         target: view && view.indicator ? view.indicator.info : null
         property:"providesClickedAnimation"
         when: view && view.indicator
@@ -60,6 +64,7 @@ AbilityHost.Indicators {
     }
 
     Binding{
+        restoreMode: Binding.RestoreNone
         target: view && view.indicator ? view.indicator.info : null
         property:"providesHoveredAnimation"
         when: view && view.indicator
@@ -67,6 +72,7 @@ AbilityHost.Indicators {
     }
 
     Binding{
+        restoreMode: Binding.RestoreNone
         target: view && view.indicator ? view.indicator.info : null
         property:"providesInAttentionAnimation"
         when: view && view.indicator
@@ -74,6 +80,7 @@ AbilityHost.Indicators {
     }
 
     Binding{
+        restoreMode: Binding.RestoreNone
         target: view && view.indicator ? view.indicator.info : null
         property:"providesTaskLauncherAnimation"
         when: view && view.indicator
@@ -81,6 +88,7 @@ AbilityHost.Indicators {
     }
 
     Binding{
+        restoreMode: Binding.RestoreNone
         target: view && view.indicator ? view.indicator.info : null
         property:"providesGroupedWindowAddedAnimation"
         when: view && view.indicator
@@ -88,6 +96,7 @@ AbilityHost.Indicators {
     }
 
     Binding{
+        restoreMode: Binding.RestoreNone
         target: view && view.indicator ? view.indicator.info : null
         property:"providesGroupedWindowRemovedAnimation"
         when: view && view.indicator
@@ -95,6 +104,7 @@ AbilityHost.Indicators {
     }
 
     Binding{
+        restoreMode: Binding.RestoreNone
         target: view && view.indicator ? view.indicator.info : null
         property:"providesFrontLayer"
         when: view && view.indicator
@@ -102,6 +112,7 @@ AbilityHost.Indicators {
     }
 
     Binding{
+        restoreMode: Binding.RestoreNone
         target: view && view.indicator ? view.indicator.info : null
         property:"extraMaskThickness"
         when: view && view.indicator
@@ -109,6 +120,7 @@ AbilityHost.Indicators {
     }
 
     Binding{
+        restoreMode: Binding.RestoreNone
         target: view && view.indicator ? view.indicator.info : null
         property:"minLengthPadding"
         when: view && view.indicator
@@ -116,6 +128,7 @@ AbilityHost.Indicators {
     }
 
     Binding{
+        restoreMode: Binding.RestoreNone
         target: view && view.indicator ? view.indicator.info : null
         property:"minThicknessPadding"
         when: view && view.indicator

@@ -387,6 +387,7 @@ ContainmentItem {
 
     //! Wait until the mouse leaves the view
     Binding {
+        restoreMode: Binding.RestoreNone
         target: root
         property: "hideThickScreenGap"
         when: !(Plasmoid.configuration.floatingGapHidingWaitsMouse && dockContainsMouse)
@@ -399,6 +400,7 @@ ContainmentItem {
     //! Binding is needed in order for hideLengthScreenGaps to be activated or not only after
     //! View sliding in/out has finished. This way the animation is smoother for behaveAsPlasmaPanels
     Binding{
+        restoreMode: Binding.RestoreNone
         target: root
         property: "hideLengthScreenGaps"
         when: latteView && latteView.positioner && latteView.visibility

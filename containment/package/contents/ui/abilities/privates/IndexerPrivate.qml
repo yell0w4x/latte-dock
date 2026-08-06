@@ -21,6 +21,7 @@ AbilityDefinition.Indexer {
     property int clientsTrackingWindowsCount: 0
 
     Binding{
+        restoreMode: Binding.RestoreNone
         target: indxr
         property: "separators"
         when: !updateIsBlocked
@@ -56,6 +57,7 @@ AbilityDefinition.Indexer {
     }
 
     Binding {
+        restoreMode: Binding.RestoreNone
         target: indxr
         property: "hidden"
         when: !updateIsBlocked
@@ -91,6 +93,7 @@ AbilityDefinition.Indexer {
     }
 
     Binding{
+        restoreMode: Binding.RestoreNone
         target: indxr
         property: "marginsAreaSeparators"
         when: !updateIsBlocked
@@ -122,6 +125,7 @@ AbilityDefinition.Indexer {
     }
 
     Binding {
+        restoreMode: Binding.RestoreNone
         target: indxr
         property: "clients"
         when: !updateIsBlocked
@@ -166,6 +170,7 @@ AbilityDefinition.Indexer {
     }
 
     Binding {
+        restoreMode: Binding.RestoreNone
         target: indxr
         property: "clientsBridges"
         when: !updateIsBlocked
@@ -216,6 +221,7 @@ AbilityDefinition.Indexer {
     }
 
     Binding{
+        restoreMode: Binding.RestoreNone
         target: indxr
         property: "clientsTrackingWindowsCount"
         when: !(root.appletIsDragged || updateIsBlocked)

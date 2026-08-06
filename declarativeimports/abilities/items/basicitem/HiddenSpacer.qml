@@ -32,6 +32,7 @@ Item{
     readonly property int maxSize: Math.max(0,Math.ceil(0.55*abilityItem.abilities.metrics.iconSize) - abilityItem.abilities.metrics.totals.lengthEdges)
 
     Binding{
+        restoreMode: Binding.RestoreNone
         target: hiddenSpacer
         property: "nHiddenSize"
         when: !hiddenSizeDelayer.running && itemIndex > -1 //! helps to solve BUGLOCALREF: #1

@@ -69,6 +69,7 @@ AbilityHost.ParabolicEffect {
     readonly property bool isBindingUpdateEnabled: !(root.dragOverlay && root.dragOverlay.pressed)
 
     Binding{
+        restoreMode: Binding.RestoreNone
         target: parabolic
         property: "restoreZoomIsBlockedFromApplet"
         when: isBindingUpdateEnabled

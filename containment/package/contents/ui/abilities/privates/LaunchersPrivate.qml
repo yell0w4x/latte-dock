@@ -18,6 +18,7 @@ Item {
     signal currentAppletStealingDroppedLaunchers(int id);
 
     Binding {
+        restoreMode: Binding.RestoreNone
         target: _launchersprivate
         property: "appletIdStealingDroppedLaunchers"
         when: !updateIsBlocked
@@ -65,6 +66,7 @@ Item {
 
 
     Binding {
+        restoreMode: Binding.RestoreNone
         target: _launchersprivate
         property: "appletStealingDroppedLaunchers"
         when: !updateIsBlocked

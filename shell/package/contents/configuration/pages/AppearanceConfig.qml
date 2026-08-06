@@ -485,6 +485,7 @@ PlasmaComponents.Page {
                         property real offsetValue: plasmoid.configuration.offset
 
                         Binding {
+                            restoreMode: Binding.RestoreNone
                             target: offsetSlider
                             property: "from"
                             when: viewConfig.isReady
@@ -492,6 +493,7 @@ PlasmaComponents.Page {
                         }
 
                         Binding {
+                            restoreMode: Binding.RestoreNone
                             target: offsetSlider
                             property: "to"
                             when: viewConfig.isReady

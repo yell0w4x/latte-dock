@@ -56,6 +56,7 @@ AbilityDefinition.Indexer {
     }
 
     Binding {
+        restoreMode: Binding.RestoreNone
         target: _privates
         property: "firstTailItemIsSeparator"
         when: isReady
@@ -75,6 +76,7 @@ AbilityDefinition.Indexer {
     }
 
     Binding {
+        restoreMode: Binding.RestoreNone
         target: _privates
         property: "lastHeadItemIsSeparator"
         when: isReady
@@ -96,6 +98,7 @@ AbilityDefinition.Indexer {
     }
 
     Binding {
+        restoreMode: Binding.RestoreNone
         target: _privates
         property: "firstVisibleItemIndex"
         when: isReady
@@ -116,6 +119,7 @@ AbilityDefinition.Indexer {
     }
 
     Binding {
+        restoreMode: Binding.RestoreNone
         target: _privates
         property: "lastVisibleItemIndex"
         when: isReady
@@ -173,6 +177,7 @@ AbilityDefinition.Indexer {
     }
 
     Binding {
+        restoreMode: Binding.RestoreNone
         target: _indexer
         property: "hidden"
         when: isReady
@@ -191,6 +196,7 @@ AbilityDefinition.Indexer {
     }
 
     Binding {
+        restoreMode: Binding.RestoreNone
         target: _indexer
         property: "separators"
         when: isReady

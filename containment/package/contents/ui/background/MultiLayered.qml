@@ -302,6 +302,7 @@ BackgroundProperties{
     }
 
     Binding {
+        restoreMode: Binding.RestoreNone
         target: barLine
         property: "themeExtendedBackground"
         when: themeExtended

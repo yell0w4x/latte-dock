@@ -17,6 +17,7 @@ AbilityHost.Animations {
     property bool updateIsBlocked: false
 
     Binding{
+        restoreMode: Binding.RestoreNone
         target: animationsPrivate.requirements
         property: "zoomFactor"
         when: !updateIsBlocked

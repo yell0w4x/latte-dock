@@ -219,6 +219,7 @@ PlasmaCore.ToolTipArea {
 
     ////Indicators API ////
     Binding {
+        restoreMode: Binding.RestoreNone
         target: compactRepresentation ? compactRepresentation.anchors : null
         property: "horizontalCenterOffset"
         when: compactRepresentation
@@ -226,6 +227,7 @@ PlasmaCore.ToolTipArea {
     }
 
     Binding {
+        restoreMode: Binding.RestoreNone
         target: compactRepresentation ? compactRepresentation.anchors : null
         property: "verticalCenterOffset"
         when: compactRepresentation

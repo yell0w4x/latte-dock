@@ -616,6 +616,7 @@ Item {
     //! Bindings
 
     Binding {
+        restoreMode: Binding.RestoreNone
         //! is used to aboid loop binding warnings on startup
         target: appletItem
         property: "lengthAppletFullMargin"

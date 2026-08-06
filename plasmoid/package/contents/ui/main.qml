@@ -265,6 +265,7 @@ PlasmoidItem {
     }
 
     Binding {
+        restoreMode: Binding.RestoreNone
         target: root
         property: "hasTaskDemandingAttention"
         when: appletAbilities.indexer.isReady
@@ -968,6 +969,7 @@ PlasmoidItem {
             }
 
             Binding {
+                restoreMode: Binding.RestoreNone
                 target: scrollableList
                 property: "thickness"
                 when: !appletAbilities.myView.inRelocationHiding
@@ -981,6 +983,7 @@ PlasmoidItem {
             }
 
             Binding {
+                restoreMode: Binding.RestoreNone
                 target: scrollableList
                 property: "length"
                 when: !appletAbilities.myView.inRelocationHiding

@@ -208,9 +208,19 @@ QEvent *EventsSink::onEvent(QEvent *e)
     return sunkevent;
 }
 
+QRectF EventsSink::destinationSceneRect() const
+{
+    //! an item with no width/height would produce a rect with negative dimensions here,
+    //! for which left()>right() and qBound() aborts the application
+    return m_destinationItem->mapRectToScene(QRectF(0,
+                                                    0,
+                                                    qMax(qreal(0), m_destinationItem->width() - 1),
+                                                    qMax(qreal(0), m_destinationItem->height() - 1)));
+}
+
 QPointF EventsSink::positionAdjustedForDestination(const QPointF &point) const
 {
-    QRectF destinationRectToScene = m_destinationItem->mapRectToScene(QRectF(0, 0, m_destinationItem->width() - 1, m_destinationItem->height() - 1));
+    QRectF destinationRectToScene = destinationSceneRect();
 
     return QPointF(qBound(destinationRectToScene.left(), point.x(), destinationRectToScene.right()),
                    qBound(destinationRectToScene.top(), point.y(), destinationRectToScene.bottom()));
@@ -218,9 +228,7 @@ QPointF EventsSink::positionAdjustedForDestination(const QPointF &point) const
 
 bool EventsSink::destinationContains(const QPointF &point) const
 {
-    QRectF destinationRectToScene = m_destinationItem->mapRectToScene(QRectF(0, 0, m_destinationItem->width() - 1, m_destinationItem->height() - 1));
-
-    return destinationRectToScene.contains(point);
+    return destinationSceneRect().contains(point);
 }
 
 bool EventsSink::originSinksContain(const QPointF &point) const

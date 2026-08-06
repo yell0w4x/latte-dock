@@ -37,6 +37,7 @@ Item{
     signal contentsLengthChanged();
 
     Binding {
+        restoreMode: Binding.RestoreNone
         target: layoutsContainer
         property: "x"
         when: !visibilityManager.inRelocationAnimation
@@ -70,6 +71,7 @@ Item{
     }
 
     Binding{
+        restoreMode: Binding.RestoreNone
         target: layoutsContainer
         property: "y"
         when: !visibilityManager.inRelocationAnimation
@@ -373,6 +375,7 @@ Item{
         }
 
         Binding{
+            restoreMode: Binding.RestoreNone
             target: _mainLayout
             property:"inJustifyCenterOffset"
             when: !layouter.appletsInParentChange && layouter.inNormalFillCalculationsState

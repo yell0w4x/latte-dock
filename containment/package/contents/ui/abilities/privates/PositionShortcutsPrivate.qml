@@ -23,6 +23,7 @@ AbilityDefinition.PositionShortcuts {
     signal currentAppletStealingPositionShortcuts(int id);
 
     Binding {
+        restoreMode: Binding.RestoreNone
         target: _shortcutsprivate
         property: "badges"
         when: !updateIsBlocked && shortcutsEngine
@@ -30,6 +31,7 @@ AbilityDefinition.PositionShortcuts {
     }
 
     Binding {
+        restoreMode: Binding.RestoreNone
         target: _shortcutsprivate
         property: "appletIdStealingPositionShortcuts"
         when: !updateIsBlocked

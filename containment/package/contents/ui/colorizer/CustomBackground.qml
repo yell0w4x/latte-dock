@@ -64,6 +64,7 @@ Item{
     readonly property Item painterRectangle: painter
 
     Binding{
+        restoreMode: Binding.RestoreNone
         target: main
         property: "topBorder"
         when: latteView
@@ -73,6 +74,7 @@ Item{
     }
 
     Binding{
+        restoreMode: Binding.RestoreNone
         target: main
         property: "leftBorder"
         when: latteView
@@ -82,6 +84,7 @@ Item{
     }
 
     Binding{
+        restoreMode: Binding.RestoreNone
         target: main
         property: "bottomBorder"
         when: latteView
@@ -91,6 +94,7 @@ Item{
     }
 
     Binding{
+        restoreMode: Binding.RestoreNone
         target: main
         property: "rightBorder"
         when: latteView

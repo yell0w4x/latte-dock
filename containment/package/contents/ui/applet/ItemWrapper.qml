@@ -275,6 +275,7 @@ Item{
     }
 
     Binding {
+        restoreMode: Binding.RestoreNone
         target: wrapper
         property: "layoutThickness"
         when: latteView && (wrapper.zoomScale === 1 || communicator.parabolicEffectIsSupported)
@@ -293,6 +294,7 @@ Item{
     }
 
     Binding {
+        restoreMode: Binding.RestoreNone
         target: wrapper
         property: "layoutLength"
         when: latteView && !appletItem.isAutoFillApplet && (wrapper.zoomScale === 1)
@@ -317,6 +319,7 @@ Item{
     }
 
     Binding {
+        restoreMode: Binding.RestoreNone
         target: wrapper
         property: "disableLengthScale"
         when: latteView && !(appletItem.isAutoFillApplet || appletItem.indexerIsSupported)
@@ -355,6 +358,7 @@ Item{
     }
 
     Binding {
+        restoreMode: Binding.RestoreNone
         target: wrapper
         property: "marginsLength"
         when: latteView && (!root.inStartup || visibilityManager.inRelocationHiding)
@@ -482,6 +486,7 @@ Item{
         readonly property real zoomScaleThickness: wrapper.zoomScaleThickness
 
         Binding {
+            restoreMode: Binding.RestoreNone
             target: _wrapperContainer
             property: "_thickness"
             when: !visibilityManager.inRelocationHiding
@@ -497,6 +502,7 @@ Item{
         }
 
         Binding {
+            restoreMode: Binding.RestoreNone
             target: _wrapperContainer
             property: "_length"
             when: !visibilityManager.inRelocationHiding
@@ -562,6 +568,7 @@ Item{
                 usesPlasmaTheme: communicator.appletIconItem && communicator.appletIconItem.visible ? (communicator.appletIconItem.usesPlasmaTheme === true) : false
 
                 Binding{
+                    restoreMode: Binding.RestoreNone
                     target: _overlayIconLoader
                     property: "backgroundColor"
                     when: overlayIconItem.providesColors
@@ -569,6 +576,7 @@ Item{
                 }
 
                 Binding{
+                    restoreMode: Binding.RestoreNone
                     target: _overlayIconLoader
                     property: "glowColor"
                     when: overlayIconItem.providesColors

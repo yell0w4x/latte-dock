@@ -57,6 +57,7 @@ private:
 
     bool originSinksContain(const QPointF &point) const;
     bool destinationContains(const QPointF &point) const;
+    QRectF destinationSceneRect() const;
 private:
     QPointer<Latte::View> m_view;
 

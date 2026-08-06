@@ -18,6 +18,7 @@ AbilityHost.ThinTooltip {
     readonly property bool isBindingUpdateEnabled: !(root.dragOverlay && root.dragOverlay.pressed)
 
     Binding{
+        restoreMode: Binding.RestoreNone
         target: _tooltip
         property: "showIsBlockedFromApplet"
         when: isBindingUpdateEnabled

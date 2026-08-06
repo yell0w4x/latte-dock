@@ -50,6 +50,7 @@ AbilityHost.MyView {
     }
 
     Binding{
+        restoreMode: Binding.RestoreNone
         target: _myView
         property: "isHidingBlockedFromApplet"
         when: isBindingUpdateEnabled

@@ -39,6 +39,7 @@ Loader{
     }
 
     Binding{
+        restoreMode: Binding.RestoreNone
         target: appletNumberLoader
         property:"badgeString"
         when: appletItem.shortcuts.showMetaBadge || appletItem.shortcuts.showAppletShortcutBadges
