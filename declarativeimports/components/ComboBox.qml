@@ -79,19 +79,23 @@ T.ComboBox {
 
     delegate: ItemDelegate {
         width: control.popup.width
-        enabled: !isSeparator && (control.enabledRole.length>0 ? (isArray ? modelData[control.enabledRole] : model[control.enabledRole]) : true)
-        text: control.textRole.length>0 ? (isArray ? modelData[control.textRole] : model[control.textRole]) : modelData
-        iconSource: control.iconRole.length>0 ? (isArray ? modelData[control.iconRole] : model[control.iconRole]) : ''
-        iconToolTip: control.iconToolTipRole.length>0 ? (isArray ? modelData[control.iconToolTipRole] : model[control.iconToolTipRole]) : ''
-        iconOnlyWhenHovered: control.iconOnlyWhenHoveredRole.length>0 ? (isArray ? modelData[control.iconOnlyWhenHoveredRole] : model[control.iconOnlyWhenHoveredRole]) : ''
-        isSeparator: control.isSeparatorRole.length>0 ? (isArray ? modelData[control.isSeparatorRole] : model[control.isSeparatorRole]) : false
-        toolTip: control.toolTipRole.length>0 ? (isArray ? modelData[control.toolTipRole] : model[control.toolTipRole]) : ''
+        enabled: !isSeparator && (control.enabledRole.length>0 ? itemData[control.enabledRole] : true)
+        text: control.textRole.length>0 ? itemData[control.textRole] : itemData
+        iconSource: control.iconRole.length>0 ? itemData[control.iconRole] : ''
+        iconToolTip: control.iconToolTipRole.length>0 ? itemData[control.iconToolTipRole] : ''
+        iconOnlyWhenHovered: control.iconOnlyWhenHoveredRole.length>0 ? itemData[control.iconOnlyWhenHoveredRole] : ''
+        isSeparator: control.isSeparatorRole.length>0 ? itemData[control.isSeparatorRole] : false
+        toolTip: control.toolTipRole.length>0 ? itemData[control.toolTipRole] : ''
 
         highlighted: mouseArea.pressed ? listView.currentIndex == index : control.currentIndex == index
         blankSpaceForEmptyIcons: control.blankSpaceForEmptyIcons
         textHorizontalAlignment: popUpTextHorizontalAlignment
 
-        readonly property bool isArray: Array.isArray(control.model)
+        //! Array.isArray() is false for the list wrappers Qt6 hands over for qml declared
+        //! lists, so it can not be used to tell which of the two context properties holds
+        //! the row. "modelData" is defined for list-like models and "model" for the ones
+        //! exposing roles, so the one that exists is the right one to read from.
+        readonly property var itemData: (typeof modelData !== "undefined" && modelData !== null) ? modelData : model
         property bool separatorVisible: false
 
         PlasmaComponents.Button {
