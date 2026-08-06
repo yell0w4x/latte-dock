@@ -387,6 +387,9 @@ Item{
         sourceComponent: PlasmaExtras.Highlight {
             id: visualIndicatorRectangle
             opacity: 0
+            //! this is a standalone flash indicator and not a view highlight, "hovered"
+            //! must be requested explicitly or nothing is painted under Plasma 6
+            hovered: true
 
             Component.onCompleted: showVisualIndicatorAnimation.running = true;
 

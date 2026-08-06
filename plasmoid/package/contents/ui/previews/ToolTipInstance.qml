@@ -183,6 +183,10 @@ Column {
             PlasmaExtras.Highlight {
                 anchors.fill: hoverHandler
                 visible: hoverHandler.containsMouse
+                //! Plasma 6 picks the drawn svg element from "hovered", which defaults to
+                //! false outside a ListView/GridView. Without it the highlight is shown
+                //! but paints the empty "normal" viewitem element instead of "hover".
+                hovered: hoverHandler.containsMouse
                 pressed: hoverHandler.containsPress
             }
 
