@@ -193,7 +193,6 @@ PlasmaComponents.Page {
                     PlasmaComponents.Button {
                         id: defaultShadowBtn
                         Layout.fillWidth: true
-                        Layout.preferredWidth: 1
 
                         text: i18nc("default shadow", "Default Color")
                         checked: plasmoid.configuration.shadowColorType === type
@@ -220,7 +219,6 @@ PlasmaComponents.Page {
                     PlasmaComponents.Button {
                         id: themeShadowBtn
                         Layout.fillWidth: true
-                        Layout.preferredWidth: 1
 
                         text: i18nc("theme shadow", "Theme Color")
                         checked: plasmoid.configuration.shadowColorType === type
@@ -248,7 +246,6 @@ PlasmaComponents.Page {
                     PlasmaComponents.Button {
                         id: userShadowBtn
                         Layout.fillWidth: true
-                        Layout.preferredWidth: 1
                         Layout.minimumWidth: shadowOpacityLbl.width
                         height: parent.height
                         text: " "
