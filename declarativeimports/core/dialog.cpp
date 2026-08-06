@@ -9,6 +9,9 @@
 #include <QScreen>
 #include <QWindow>
 
+// KDE
+#include <KWindowSystem>
+
 
 namespace Latte {
 namespace Quick {
@@ -17,6 +20,20 @@ Dialog::Dialog(QQuickItem *parent)
     : PlasmaQuick::Dialog(parent)
 {
     connect(this, &PlasmaQuick::Dialog::visualParentChanged, this, &Dialog::onVisualParentChanged);
+
+    //! The dialog is reused for every item that requests it, so moving to a different
+    //! visual parent must reposition it. Its size settles only after the new contents
+    //! have been laid out, and popupPosition() centers the dialog on its parent, so the
+    //! position is recalculated on size changes too, otherwise the dialog stays centered
+    //! on the measurements of the previously shown item.
+    connect(this, &QWindow::widthChanged, this, &Dialog::onSizeChanged);
+    connect(this, &QWindow::heightChanged, this, &Dialog::onSizeChanged);
+
+    //! a visual parent change and the contents resize that follows it are coalesced
+    //! into a single reposition
+    m_repositionTimer.setSingleShot(true);
+    m_repositionTimer.setInterval(0);
+    connect(&m_repositionTimer, &QTimer::timeout, this, &Dialog::applyPendingPosition);
 }
 
 bool Dialog::containsMouse() const
@@ -68,6 +85,52 @@ int Dialog::appletsPopUpMargin() const
     return margin.isValid() ? margin.toInt() : -1;
 }
 
+void Dialog::onSizeChanged()
+{
+    requestReposition();
+}
+
+void Dialog::requestReposition()
+{
+    if (isVisible() && visualParent()) {
+        m_repositionTimer.start();
+    }
+}
+
+void Dialog::applyPendingPosition()
+{
+    if (!isVisible() || !visualParent()) {
+        return;
+    }
+
+    const QPoint target = popupPosition(visualParent(), size());
+
+    if (!KWindowSystem::isPlatformWayland()) {
+        //! x11 windows are moved in place, the position reported by the window is
+        //! authoritative there
+        if (position() != target) {
+            setPosition(target);
+        }
+
+        return;
+    }
+
+    //! A wayland surface can not be moved once it has been mapped, the compositor keeps
+    //! placing it back where it was first shown. This dialog is reused by every item that
+    //! requests it, so it has to be remapped in order to show up next to its new visual
+    //! parent. position() can not be trusted to decide that, because setPosition() updates
+    //! it even when the compositor ignores the move, so the position the surface was last
+    //! mapped at is tracked explicitly.
+    if (m_mappedPosition == target) {
+        return;
+    }
+
+    setVisible(false);
+    setPosition(target);
+    setVisible(true);
+    m_mappedPosition = target;
+}
+
 void Dialog::onVisualParentChanged()
 {
     // clear mode
@@ -84,6 +147,8 @@ void Dialog::onVisualParentChanged()
     if (hassignal) {
         m_visualParentConnections[0] = connect(visualParent(), SIGNAL(anchoredTooltipPositionChanged()) , this, SLOT(updateGeometry()));
     }
+
+    requestReposition();
 }
 
 void Dialog::updateGeometry()
@@ -253,6 +318,11 @@ bool Dialog::event(QEvent *e)
     } else if (e->type() == QEvent::Leave
                || e->type() == QEvent::Hide) {
         setContainsMouse(false);
+    }
+
+    if (e->type() == QEvent::Hide) {
+        //! the surface is gone, wherever it is mapped next is decided from scratch
+        m_mappedPosition = QPoint(-1, -1);
     }
 
     return PlasmaQuick::Dialog::event(e);

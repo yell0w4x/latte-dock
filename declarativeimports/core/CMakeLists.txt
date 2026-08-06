@@ -24,11 +24,8 @@ target_link_libraries(lattecoreplugin
     KF6::Svg
     Plasma::Plasma
     Plasma::PlasmaQuick
+    KF6::WindowSystem
 )
-
-if(HAVE_X11)
-    target_link_libraries(lattecoreplugin KF6::WindowSystem)
-endif()
 
 install(TARGETS lattecoreplugin DESTINATION ${KDE_INSTALL_QMLDIR}/org/kde/latte/core)
 

@@ -54,11 +54,18 @@ void CanvasConfigView::init()
 
 void CanvasConfigView::applyViewExtraFlags(QObject *target)
 {
-    //! The canvas is only the editing backdrop drawn around the dock, it must never
-    //! share the panel layer with it. Under wayland two Role::Panel surfaces end up in
-    //! the same layer and the canvas, being mapped last, covers the dock and swallows
-    //! every mouse event meant for the widgets.
-    m_corona->wm()->setViewExtraFlags(target, false, Latte::Types::NormalWindow);
+    if (KWindowSystem::isPlatformWayland()) {
+        //! The canvas is only the editing backdrop drawn around the dock, it must never
+        //! share the panel layer with it. Under wayland two Role::Panel surfaces end up
+        //! in the same layer and the canvas, being mapped last, covers the dock and
+        //! swallows every mouse event meant for the widgets. Under x11 the dock is a
+        //! keep-above NET::Dock window and is raised over the canvas explicitly, so the
+        //! panel layer is kept there in order to stay above regular windows.
+        m_corona->wm()->setViewExtraFlags(target, false, Latte::Types::NormalWindow);
+        return;
+    }
+
+    SubConfigView::applyViewExtraFlags(target);
 }
 
 QRect CanvasConfigView::geometryWhenVisible() const

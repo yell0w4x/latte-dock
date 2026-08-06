@@ -9,6 +9,8 @@
 // Qt
 #include <QEvent>
 #include <QObject>
+#include <QPoint>
+#include <QTimer>
 
 #include <QMetaObject>
 
@@ -52,6 +54,8 @@ private slots:
     void updatePopUpEnabledBorders();
 
     void onVisualParentChanged();
+    void onSizeChanged();
+    void applyPendingPosition();
     void updateGeometry();
 
 private:
@@ -61,7 +65,15 @@ private:
     int appletsPopUpMargin() const;
 
 private:
+    void requestReposition();
+
+private:
     bool m_containsMouse{false};
+
+    QTimer m_repositionTimer;
+
+    //! position the wayland surface was last mapped at, invalid while it is not mapped
+    QPoint m_mappedPosition{-1, -1};
 
     Plasma::Types::Location m_edge{Plasma::Types::BottomEdge};
 
