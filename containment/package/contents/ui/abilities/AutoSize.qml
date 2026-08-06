@@ -175,6 +175,13 @@ Item {
                         layouts.startLayout.length+layouts.mainLayout.length+layouts.endLayout.length : layouts.mainLayout.length
 
 
+            if (layoutLength <= 0) {
+                //! Nothing has been laid out yet, e.g. while a layout is being activated.
+                //! Every candidate length below would be computed from a zero length and
+                //! would stay zero, so the search loops could never reach their limits.
+                return;
+            }
+
             var itemLength = metrics.totals.length;
 
             var toShrinkLimit = maxLength - (parabolic.factor.zoom * itemLength);
@@ -191,11 +198,14 @@ Item {
                 var nextIconSize = metrics.maxIconSize;
 
                 do {
-                    nextIconSize = nextIconSize - automaticStep;
+                    //! the step does not necessarily divide the distance to the limit, so
+                    //! the bound is clamped and compared with an inequality, otherwise the
+                    //! loop walks past it and never terminates
+                    nextIconSize = Math.max(16, nextIconSize - automaticStep);
                     var factor = nextIconSize / metrics.iconSize;
                     var nextLength = factor * layoutLength;
 
-                } while ( (nextLength>toShrinkLimit) && (nextIconSize !== 16));
+                } while ( (nextLength>toShrinkLimit) && (nextIconSize > 16));
 
                 var intLength = Math.round(layoutLength);
                 var intNextLength = Math.round(nextLength);
@@ -212,14 +222,14 @@ Item {
                 var foundGoodSize = -1;
 
                 do {
-                    nextIconSize2 = nextIconSize2 + automaticStep;
+                    nextIconSize2 = Math.min(metrics.maxIconSize, nextIconSize2 + automaticStep);
                     var factor2 = nextIconSize2 / iconSize;
                     var nextLength2 = factor2 * layoutLength;
 
                     if (nextLength2 < toGrowLimit) {
                         foundGoodSize = nextIconSize2;
                     }
-                } while ( (nextLength2<toGrowLimit) && (nextIconSize2 !== metrics.maxIconSize ));
+                } while ( (nextLength2<toGrowLimit) && (nextIconSize2 < metrics.maxIconSize ));
 
                 var intLength2 = Math.round(layoutLength);
                 var intNextLength2 = Math.round(nextLength2);

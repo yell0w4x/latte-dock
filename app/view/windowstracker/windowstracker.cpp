@@ -44,6 +44,13 @@ WindowsTracker::~WindowsTracker()
 {
     qDebug() << "WindowsTracker removing...";
 
+    //! The view must be unregistered by the same object that registered it and at the
+    //! same moment its own lifetime ends. Leaving this to CurrentScreenTracker's
+    //! destructor made it run through deleteLater(), so a view that was recreated stayed
+    //! in the tracker under its old pointer while the live one was never tracked and
+    //! every window hint queried for it silently returned false.
+    m_wm->windowsTracker()->removeView(m_latteView);
+
     if (m_allScreensTracker) {
         m_allScreensTracker->deleteLater();
     }

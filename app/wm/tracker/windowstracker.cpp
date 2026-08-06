@@ -161,6 +161,13 @@ void Windows::addView(Latte::View *view)
 
     m_views[view] = new TrackedViewInfo(this, view);
 
+    //! safety net for views that are destroyed without being unregistered first, so that
+    //! a stale entry can never shadow a view that is created at the same address later
+    connect(view, &QObject::destroyed, this, [this, view]() {
+        m_views.remove(view);
+        updateRelevantLayouts();
+    });
+
     updateScreenGeometries();
 
     //! Consider Layouts
@@ -186,6 +193,11 @@ void Windows::removeView(Latte::View *view)
     if (!m_views.contains(view)) {
         return;
     }
+
+    //! Drop the safety-net connection together with the entry it guards. Without this the
+    //! destroyed() signal of an already unregistered view would still fire later and could
+    //! remove the entry of a different view that the allocator placed at the same address.
+    disconnect(view, &QObject::destroyed, this, nullptr);
 
     m_views[view]->deleteLater();
     m_views.remove(view);
@@ -369,6 +381,7 @@ void Windows::setExistsWindowActive(Latte::View *view, bool windowActive)
 
 bool Windows::existsWindowMaximized(Latte::View *view) const
 {
+
     if (!m_views.contains(view)) {
         return false;
     }

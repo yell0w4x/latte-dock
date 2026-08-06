@@ -134,6 +134,15 @@ BackgroundProperties{
             return root.maxLength;
         }
 
+        //! In Justify the layouts already span maxLength, so the background follows them
+        //! for free. In every other alignment the background hugs its contents, which
+        //! would ignore "Maximize panel length in presence of maximized windows"
+        //! completely; the items stay where their alignment puts them and only the
+        //! background is stretched.
+        if (root.maximizedWindowForcesFullLength) {
+            return root.maxLength;
+        }
+
         return Math.max(root.minLength, layoutsContainerItem.mainLayout.length + totals.paddingsLength);
     }
 

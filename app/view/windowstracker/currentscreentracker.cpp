@@ -25,7 +25,8 @@ CurrentScreenTracker::CurrentScreenTracker(WindowsTracker *parent)
 
 CurrentScreenTracker::~CurrentScreenTracker()
 {
-    m_wm->windowsTracker()->removeView(m_latteView);
+    //! the view is unregistered from Latte::ViewPart::WindowsTracker, which is the object
+    //! that registered it in the first place
 }
 
 void  CurrentScreenTracker::init()

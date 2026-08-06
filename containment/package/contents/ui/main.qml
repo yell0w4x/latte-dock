@@ -217,9 +217,16 @@ ContainmentItem {
         }
     }
 
+    //! "Maximize panel length in presence of maximized windows". The tracker is not
+    //! available yet while the containment is being created, so it is guarded here
+    //! instead of at each use.
+    readonly property bool maximizedWindowForcesFullLength: maximizeWhenMaximized
+                                                            && latteView
+                                                            && latteView.windowsTracker
+                                                            && latteView.windowsTracker.currentScreen.existsWindowMaximized
+
     property int maxLength: {
-        const maximize = behaveAsPlasmaPanel
-          || (maximizeWhenMaximized && latteView.windowsTracker.currentScreen.existsWindowMaximized);
+        const maximize = behaveAsPlasmaPanel || maximizedWindowForcesFullLength;
         if (root.isHorizontal) {
             return maximize ? width : width * (maxLengthPerCentage/100)
         } else {
@@ -530,6 +537,7 @@ ContainmentItem {
     }
 
     Component.onCompleted: {
+
         upgrader_v010_alignment();
 
         fastLayoutManager.restore();

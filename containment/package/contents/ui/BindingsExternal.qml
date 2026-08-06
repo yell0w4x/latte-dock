@@ -375,6 +375,7 @@ Item {
                     || root.windowColors !== LatteContainment.Types.NoneWindowColors))
                || (root.screenEdgeMarginsEnabled                             /*Dynamic Screen Edge Margin*/
                    && Plasmoid.configuration.hideFloatingGapForMaximized)
+               || root.maximizeWhenMaximized                                 /*Dynamic Length Adjustments*/
     }
 
     //! View::ExtendedInterface bindings
