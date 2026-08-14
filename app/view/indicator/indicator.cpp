@@ -33,6 +33,15 @@ Indicator::Indicator(Latte::View *parent)
       m_info(new IndicatorPart::Info(this)),
       m_resources(new IndicatorPart::Resources(this))
 {
+
+    //! writes are coalesced, e.g. while a slider is being dragged
+    m_configSaveTimer.setSingleShot(true);
+    m_configSaveTimer.setInterval(500);
+    connect(&m_configSaveTimer, &QTimer::timeout, this, [this]() {
+        if (m_configuration) {
+            m_configuration->writeConfig();
+        }
+    });
     m_corona = qobject_cast<Latte::Corona *>(m_view->corona());
     loadConfig();
 
@@ -313,6 +322,12 @@ void Indicator::updateScheme()
         QFile file(m_pluginPath + "/package/" + xmlPath);
         m_configLoader = new KConfigLoader(m_view->containment()->config().group("Indicator").group(m_metadata.pluginId()), &file);
         m_configuration = new KConfigPropertyMap(m_configLoader, this);
+
+        //! KConfigPropertyMap only keeps the values in memory, writing them out is up to
+        //! its user. Without this every indicator option is forgotten on restart.
+        connect(m_configuration, &QQmlPropertyMap::valueChanged, this, [this]() {
+            m_configSaveTimer.start();
+        });
     } else {
         m_configLoader = nullptr;
         m_configuration = nullptr;

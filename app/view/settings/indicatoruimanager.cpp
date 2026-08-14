@@ -91,6 +91,32 @@ void IndicatorUiManager::showNextIndicator()
     }
 }
 
+void IndicatorUiManager::trackIndicatorOf(Latte::View *view)
+{
+    if (!view || m_trackedViews.contains(view)) {
+        return;
+    }
+
+    m_trackedViews << view;
+
+    //! The config uis keep the Indicator object as a context property. Views are recreated
+    //! in several occasions, e.g. when their screen or location changes, and that destroys
+    //! the Indicator the uis were given. QML turns a context property into null once its
+    //! QObject is gone, and from that moment every indicator option reads and writes into
+    //! nothing. Re-publishing the current Indicator keeps the uis usable.
+    connect(view, &Latte::View::indicatorChanged, this, [this, view]() {
+        for (int i=0; i<m_uidata.count(); ++i) {
+            if (m_uidata[i].view == view && m_uidata[i].ui) {
+                m_uidata[i].ui->rootContext()->setContextProperty(QStringLiteral("indicator"), view->indicator());
+            }
+        }
+    });
+
+    connect(view, &QObject::destroyed, this, [this, view]() {
+        m_trackedViews.removeAll(view);
+    });
+}
+
 void IndicatorUiManager::ui(const QString &type, Latte::View *view)
 {
     if (!m_parentItem) {
@@ -102,6 +128,7 @@ void IndicatorUiManager::ui(const QString &type, Latte::View *view)
     if (typeIndex > -1 && m_uidata[typeIndex].ui) {
         m_uidata[typeIndex].ui->rootContext()->setContextProperty(QStringLiteral("indicator"), view->indicator());
         m_uidata[typeIndex].view = view;
+        trackIndicatorOf(view);
 
         //! config ui has already been created and can be provided again
         QQuickItem *qmlItem = qobject_cast<QQuickItem*>(m_uidata[typeIndex].ui->rootObject());
@@ -133,6 +160,7 @@ void IndicatorUiManager::ui(const QString &type, Latte::View *view)
             uidata.ui->rootContext()->setContextProperty(QStringLiteral("dialog"), m_parentItem);
             uidata.ui->rootContext()->setContextProperty(QStringLiteral("indicator"), view->indicator());
             uidata.ui->completeInitialization();
+            trackIndicatorOf(view);
 
             int newTypeIndex = view->indicator()->index(type);
             int newPos = -1;

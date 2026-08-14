@@ -15,6 +15,12 @@ import org.kde.kirigami 2.20 as Kirigami
 
 ColumnLayout {
     id: root
+
+    //! QtQuick Controls buttons and checkboxes declare an "indicator" property of
+    //! their own, which shadows the context property of the same name inside their
+    //! scope. Reading it through the root item makes sure the Latte indicator object
+    //! is used everywhere instead of a button's own (null) indicator item.
+    readonly property QtObject latteIndicator: indicator
     Layout.fillWidth: true
 
     LatteComponents.SubHeader {
@@ -34,7 +40,7 @@ ColumnLayout {
             id: lengthIntMarginSlider
             Layout.fillWidth: true
 
-            value: Math.round(indicator.configuration.lengthPadding * 100)
+            value: Math.round(root.latteIndicator.configuration.lengthPadding * 100)
             from: 0
             to: maxMargin
             stepSize: 1
@@ -44,7 +50,7 @@ ColumnLayout {
 
             onPressedChanged: {
                 if (!pressed) {
-                    indicator.configuration.lengthPadding = value / 100;
+                    root.latteIndicator.configuration.lengthPadding = value / 100;
                 }
             }
         }
@@ -72,7 +78,7 @@ ColumnLayout {
             id: backgroundCornerMarginSlider
             Layout.fillWidth: true
 
-            value: Math.round(indicator.configuration.backgroundCornerMargin * 100)
+            value: Math.round(root.latteIndicator.configuration.backgroundCornerMargin * 100)
             from: 0
             to: 100
             stepSize: 1
@@ -80,7 +86,7 @@ ColumnLayout {
 
             onPressedChanged: {
                 if (!pressed) {
-                    indicator.configuration.backgroundCornerMargin = value / 100;
+                    root.latteIndicator.configuration.backgroundCornerMargin = value / 100;
                 }
             }
         }
@@ -105,20 +111,20 @@ ColumnLayout {
        /* LatteComponents.CheckBox {
             Layout.maximumWidth: dialog.optionsWidth
             text: i18n("Reverse indicator style")
-            value: indicator.configuration.reversed
+            value: root.latteIndicator.configuration.reversed
 
             onClicked: {
-                indicator.configuration.reversed = !indicator.configuration.reversed;
+                root.latteIndicator.configuration.reversed = !root.latteIndicator.configuration.reversed;
             }
         }*/
 
         LatteComponents.CheckBox {
             Layout.maximumWidth: dialog.optionsWidth
             text: i18n("Growing circle animation when clicked")
-            value: indicator.configuration.clickedAnimationEnabled
+            value: root.latteIndicator.configuration.clickedAnimationEnabled
 
             onClicked: {
-                indicator.configuration.clickedAnimationEnabled = !indicator.configuration.clickedAnimationEnabled;
+                root.latteIndicator.configuration.clickedAnimationEnabled = !root.latteIndicator.configuration.clickedAnimationEnabled;
             }
         }
 
@@ -126,10 +132,10 @@ ColumnLayout {
             Layout.maximumWidth: dialog.optionsWidth
             text: i18n("Show indicators for applets")
             tooltip: i18n("Indicators are shown for applets")
-            value: indicator.configuration.enabledForApplets
+            value: root.latteIndicator.configuration.enabledForApplets
 
             onClicked: {
-                indicator.configuration.enabledForApplets = !indicator.configuration.enabledForApplets;
+                root.latteIndicator.configuration.enabledForApplets = !root.latteIndicator.configuration.enabledForApplets;
             }
         }*/
     }

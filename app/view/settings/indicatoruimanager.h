@@ -56,6 +56,9 @@ public slots:
     Q_INVOKABLE void ui(const QString &type, Latte::View *view);
 
     Q_INVOKABLE int index(const QString &type);
+
+private:
+    void trackIndicatorOf(Latte::View *view);
 private:
     bool contains(const QString &type);
 
@@ -67,6 +70,8 @@ private:
     PrimaryConfigView *m_primary{nullptr};
 
     QList<IndicatorUiData> m_uidata;
+
+    QList<QPointer<Latte::View>> m_trackedViews;
 
 };
 

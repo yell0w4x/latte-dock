@@ -18,7 +18,30 @@ import org.kde.kirigami 2.20 as Kirigami
 
 ColumnLayout {
     id: root
+
+    //! QtQuick Controls buttons and checkboxes declare an "indicator" property of
+    //! their own, which shadows the context property of the same name inside their
+    //! scope. Reading it through the root item makes sure the Latte indicator object
+    //! is used everywhere instead of a button's own (null) indicator item.
+    readonly property QtObject latteIndicator: indicator
     Layout.fillWidth: true
+
+    //! A Plasma button uses wider frame margins once it is checked, which makes the
+    //! selected button of a group taller than its siblings. Pinning the height and the
+    //! paddings of every button in this page to an unchecked reference keeps them equal.
+    readonly property int checkableButtonsHeight: _buttonMetrics.implicitHeight
+    readonly property real checkableButtonsTopPadding: _buttonMetrics.topPadding
+    readonly property real checkableButtonsBottomPadding: _buttonMetrics.bottomPadding
+    readonly property real checkableButtonsLeftPadding: _buttonMetrics.leftPadding
+    readonly property real checkableButtonsRightPadding: _buttonMetrics.rightPadding
+
+    PlasmaComponents.Button {
+        id: _buttonMetrics
+        visible: false
+        checked: false
+        checkable: false
+        text: "reference"
+    }
 
     LatteComponents.SubHeader {
         text: i18nc("indicator style","Style")
@@ -28,7 +51,7 @@ ColumnLayout {
         Layout.fillWidth: true
         spacing: 2
 
-        property int indicatorType: indicator.configuration.activeStyle
+        property int indicatorType: root.latteIndicator.configuration.activeStyle
 
         readonly property int buttonsCount: 2
         readonly property int buttonSize: (dialog.optionsWidth - (spacing * buttonsCount-1)) / buttonsCount
@@ -38,6 +61,12 @@ ColumnLayout {
         }
 
         PlasmaComponents.Button {
+            Layout.minimumHeight: root.checkableButtonsHeight
+            Layout.maximumHeight: Layout.minimumHeight
+            topPadding: root.checkableButtonsTopPadding
+            bottomPadding: root.checkableButtonsBottomPadding
+            leftPadding: root.checkableButtonsLeftPadding
+            rightPadding: root.checkableButtonsRightPadding
             Layout.minimumWidth: parent.buttonSize
             Layout.maximumWidth: Layout.minimumWidth
             text: i18nc("line indicator","Line")
@@ -51,12 +80,18 @@ ColumnLayout {
 
             onPressedChanged: {
                 if (pressed) {
-                    indicator.configuration.activeStyle = indicatorType;
+                    root.latteIndicator.configuration.activeStyle = indicatorType;
                 }
             }
         }
 
         PlasmaComponents.Button {
+            Layout.minimumHeight: root.checkableButtonsHeight
+            Layout.maximumHeight: Layout.minimumHeight
+            topPadding: root.checkableButtonsTopPadding
+            bottomPadding: root.checkableButtonsBottomPadding
+            leftPadding: root.checkableButtonsLeftPadding
+            rightPadding: root.checkableButtonsRightPadding
             Layout.minimumWidth: parent.buttonSize
             Layout.maximumWidth: Layout.minimumWidth
             text: i18nc("dots indicator", "Dots")
@@ -70,7 +105,7 @@ ColumnLayout {
 
             onPressedChanged: {
                 if (pressed) {
-                    indicator.configuration.activeStyle = indicatorType;
+                    root.latteIndicator.configuration.activeStyle = indicatorType;
                 }
             }
         }
@@ -89,7 +124,7 @@ ColumnLayout {
             id: sizeSlider
             Layout.fillWidth: true
 
-            value: Math.round(indicator.configuration.size * 100)
+            value: Math.round(root.latteIndicator.configuration.size * 100)
             from: 3
             to: 25
             stepSize: 1
@@ -97,7 +132,7 @@ ColumnLayout {
 
             onPressedChanged: {
                 if (!pressed) {
-                    indicator.configuration.size = Number(value / 100).toFixed(2);
+                    root.latteIndicator.configuration.size = Number(value / 100).toFixed(2);
                 }
             }
         }
@@ -125,7 +160,7 @@ ColumnLayout {
             id: thickMarginSlider
             Layout.fillWidth: true
 
-            value: Math.round(indicator.configuration.thickMargin * 100)
+            value: Math.round(root.latteIndicator.configuration.thickMargin * 100)
             from: 0
             to: 30
             stepSize: 1
@@ -133,7 +168,7 @@ ColumnLayout {
 
             onPressedChanged: {
                 if (!pressed) {
-                    indicator.configuration.thickMargin = value / 100;
+                    root.latteIndicator.configuration.thickMargin = value / 100;
                 }
             }
         }
@@ -161,7 +196,7 @@ ColumnLayout {
             id: lengthIntMarginSlider
             Layout.fillWidth: true
 
-            value: Math.round(indicator.configuration.lengthPadding * 100)
+            value: Math.round(root.latteIndicator.configuration.lengthPadding * 100)
             from: 0
             to: maxMargin
             stepSize: 1
@@ -171,7 +206,7 @@ ColumnLayout {
 
             onPressedChanged: {
                 if (!pressed) {
-                    indicator.configuration.lengthPadding = value / 100;
+                    root.latteIndicator.configuration.lengthPadding = value / 100;
                 }
             }
         }
@@ -199,7 +234,7 @@ ColumnLayout {
             id: backgroundCornerMarginSlider
             Layout.fillWidth: true
 
-            value: Math.round(indicator.configuration.backgroundCornerMargin * 100)
+            value: Math.round(root.latteIndicator.configuration.backgroundCornerMargin * 100)
             from: 0
             to: 100
             stepSize: 1
@@ -207,7 +242,7 @@ ColumnLayout {
 
             onPressedChanged: {
                 if (!pressed) {
-                    indicator.configuration.backgroundCornerMargin = value / 100;
+                    root.latteIndicator.configuration.backgroundCornerMargin = value / 100;
                 }
             }
         }
@@ -228,22 +263,22 @@ ColumnLayout {
         Layout.minimumHeight: implicitHeight
         Layout.bottomMargin: Kirigami.Units.smallSpacing
 
-        checked: indicator.configuration.glowEnabled
+        checked: root.latteIndicator.configuration.glowEnabled
         level: 2
         text: i18n("Glow")
         tooltip: i18n("Enable/disable indicator glow")
 
         onPressed: {
-            indicator.configuration.glowEnabled = !indicator.configuration.glowEnabled;
+            root.latteIndicator.configuration.glowEnabled = !root.latteIndicator.configuration.glowEnabled;
         }
     }
 
     RowLayout {
         Layout.fillWidth: true
         spacing: 2
-        enabled: indicator.configuration.glowEnabled
+        enabled: root.latteIndicator.configuration.glowEnabled
 
-        property int option: indicator.configuration.glowApplyTo
+        property int option: root.latteIndicator.configuration.glowApplyTo
 
         readonly property int buttonsCount: 2
         readonly property int buttonSize: (dialog.optionsWidth - (spacing * buttonsCount-1)) / buttonsCount
@@ -253,6 +288,12 @@ ColumnLayout {
         }
 
         PlasmaComponents.Button {
+            Layout.minimumHeight: root.checkableButtonsHeight
+            Layout.maximumHeight: Layout.minimumHeight
+            topPadding: root.checkableButtonsTopPadding
+            bottomPadding: root.checkableButtonsBottomPadding
+            leftPadding: root.checkableButtonsLeftPadding
+            rightPadding: root.checkableButtonsRightPadding
             Layout.minimumWidth: parent.buttonSize
             Layout.maximumWidth: Layout.minimumWidth
             text: i18nc("glow only to active task/applet indicators","On Active")
@@ -266,12 +307,18 @@ ColumnLayout {
 
             onPressedChanged: {
                 if (pressed) {
-                    indicator.configuration.glowApplyTo = option;
+                    root.latteIndicator.configuration.glowApplyTo = option;
                 }
             }
         }
 
         PlasmaComponents.Button {
+            Layout.minimumHeight: root.checkableButtonsHeight
+            Layout.maximumHeight: Layout.minimumHeight
+            topPadding: root.checkableButtonsTopPadding
+            bottomPadding: root.checkableButtonsBottomPadding
+            leftPadding: root.checkableButtonsLeftPadding
+            rightPadding: root.checkableButtonsRightPadding
             Layout.minimumWidth: parent.buttonSize
             Layout.maximumWidth: Layout.minimumWidth
             text: i18nc("glow to all task/applet indicators","All")
@@ -285,7 +332,7 @@ ColumnLayout {
 
             onPressedChanged: {
                 if (pressed) {
-                    indicator.configuration.glowApplyTo = option;
+                    root.latteIndicator.configuration.glowApplyTo = option;
                 }
             }
         }
@@ -295,7 +342,7 @@ ColumnLayout {
         Layout.fillWidth: true
         spacing: 2
 
-        enabled: indicator.configuration.glowEnabled
+        enabled: root.latteIndicator.configuration.glowEnabled
 
         PlasmaComponents.Label {
             Layout.minimumWidth: implicitWidth
@@ -309,7 +356,7 @@ ColumnLayout {
             Layout.fillWidth: true
 
             leftPadding: 0
-            value: indicator.configuration.glowOpacity * 100
+            value: root.latteIndicator.configuration.glowOpacity * 100
             from: 0
             to: 100
             stepSize: 5
@@ -317,7 +364,7 @@ ColumnLayout {
 
             function updateGlowOpacity() {
                 if (!pressed)
-                    indicator.configuration.glowOpacity = value/100;
+                    root.latteIndicator.configuration.glowOpacity = value/100;
             }
 
             onPressedChanged: {
@@ -343,10 +390,10 @@ ColumnLayout {
 
     ColumnLayout {
         spacing: 0
-        visible: indicator.latteTasksArePresent
+        visible: root.latteIndicator.latteTasksArePresent
 
         LatteComponents.SubHeader {
-            enabled: indicator.configuration.glowApplyTo!==0/*None*/
+            enabled: root.latteIndicator.configuration.glowApplyTo!==0/*None*/
             text: i18n("Tasks")
         }
 
@@ -354,10 +401,10 @@ ColumnLayout {
             LatteComponents.CheckBox {
                 Layout.maximumWidth: dialog.optionsWidth
                 text: i18n("Different color for minimized windows")
-                value: indicator.configuration.minimizedTaskColoredDifferently
+                value: root.latteIndicator.configuration.minimizedTaskColoredDifferently
 
                 onClicked: {
-                    indicator.configuration.minimizedTaskColoredDifferently = !indicator.configuration.minimizedTaskColoredDifferently;
+                    root.latteIndicator.configuration.minimizedTaskColoredDifferently = !root.latteIndicator.configuration.minimizedTaskColoredDifferently;
                 }
             }
 
@@ -365,18 +412,18 @@ ColumnLayout {
                 Layout.maximumWidth: dialog.optionsWidth
                 text: i18n("Show an extra dot for grouped windows when active")
                 tooltip: i18n("Grouped windows show both a line and a dot when one of them is active and the Line Active Indicator is enabled")
-                enabled: indicator.configuration.activeStyle === 0 /*Line*/
-                value: indicator.configuration.extraDotOnActive
+                enabled: root.latteIndicator.configuration.activeStyle === 0 /*Line*/
+                value: root.latteIndicator.configuration.extraDotOnActive
 
                 onClicked: {
-                    indicator.configuration.extraDotOnActive = !indicator.configuration.extraDotOnActive;
+                    root.latteIndicator.configuration.extraDotOnActive = !root.latteIndicator.configuration.extraDotOnActive;
                 }
             }
         }
     }
 
     LatteComponents.SubHeader {
-        enabled: indicator.configuration.glowApplyTo!==0/*None*/
+        enabled: root.latteIndicator.configuration.glowApplyTo!==0/*None*/
         text: i18n("Options")
     }
 
@@ -384,20 +431,20 @@ ColumnLayout {
         Layout.maximumWidth: dialog.optionsWidth
         text: i18n("Show indicators for applets")
         tooltip: i18n("Indicators are shown for applets")
-        value: indicator.configuration.enabledForApplets
+        value: root.latteIndicator.configuration.enabledForApplets
 
         onClicked: {
-            indicator.configuration.enabledForApplets = !indicator.configuration.enabledForApplets;
+            root.latteIndicator.configuration.enabledForApplets = !root.latteIndicator.configuration.enabledForApplets;
         }
     }
 
     LatteComponents.CheckBox {
         Layout.maximumWidth: dialog.optionsWidth
         text: i18n("Reverse indicator style")
-        value: indicator.configuration.reversed
+        value: root.latteIndicator.configuration.reversed
 
         onClicked: {
-            indicator.configuration.reversed = !indicator.configuration.reversed;
+            root.latteIndicator.configuration.reversed = !root.latteIndicator.configuration.reversed;
         }
     }
 }

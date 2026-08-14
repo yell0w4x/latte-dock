@@ -13,6 +13,7 @@
 // Qt
 #include <QObject>
 #include <QPointer>
+#include <QTimer>
 #include <QQmlComponent>
 #include <QQmlContext>
 #include <QQuickItem>
@@ -158,6 +159,9 @@ private:
     QPointer<IndicatorPart::Resources> m_resources;
 
     QPointer<KConfigPropertyMap> m_configuration;
+
+    //! KConfigPropertyMap does not write to disk on its own, the saves are coalesced here
+    QTimer m_configSaveTimer;
 };
 
 }
