@@ -46,9 +46,12 @@ void TabPreferences::initUi()
     m_thicknessMarginInfluenceButtons->addButton(m_ui->fullMarginInfluenceBtn, 100); // 100%
     m_thicknessMarginInfluenceButtons->setExclusive(true);
 
-    m_ui->noMarginInfluenceBtn->setText(i18nc("number in percentage, e.g. 85%","%1%").arg(0));
-    m_ui->halfMarginInfluenceBtn->setText(i18nc("number in percentage, e.g. 85%","%1%").arg(50));
-    m_ui->fullMarginInfluenceBtn->setText(i18nc("number in percentage, e.g. 85%","%1%").arg(100));
+    //! i18nc() substitutes the placeholders while it builds the string, so a "%1" left
+    //! without an argument of its own becomes I18N_ARGUMENT_MISSING and the later arg()
+    //! finds nothing to replace. The number belongs to the i18nc() call itself.
+    m_ui->noMarginInfluenceBtn->setText(i18nc("number in percentage, e.g. 85%","%1%", 0));
+    m_ui->halfMarginInfluenceBtn->setText(i18nc("number in percentage, e.g. 85%","%1%", 50));
+    m_ui->fullMarginInfluenceBtn->setText(i18nc("number in percentage, e.g. 85%","%1%", 100));
 
     //! Buttons
     connect(m_ui->contextMenuActionsBtn, &QPushButton::clicked, this, &TabPreferences::onActionsBtnPressed);
