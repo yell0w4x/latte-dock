@@ -106,6 +106,48 @@ private:
     KConfigPropertyMap *m_configuration{nullptr};
 };
 
+//! Stands in for the Plasma::Applet a layout item carries. Real applets can not be built
+//! outside of a corona, and this only needs to answer the id the layout manager reads.
+class AppletObject : public QObject
+{
+    Q_OBJECT
+    Q_PROPERTY(uint id READ id CONSTANT)
+
+public:
+    explicit AppletObject(uint id, QObject *parent = nullptr)
+        : QObject(parent)
+        , m_id(id)
+    {
+    }
+
+    uint id() const { return m_id; }
+
+private:
+    uint m_id{0};
+};
+
+//! Stands in for the applet graphic item. PlasmaQuick::AppletQuickItem has no way of being
+//! given an applet outside of a plasma shell, so this mirrors the part of its API the layout
+//! manager depends on: the applet is reached through "plasmoid" and the item itself carries
+//! no id of its own.
+class AppletItemObject : public QObject
+{
+    Q_OBJECT
+    Q_PROPERTY(QObject *plasmoid READ plasmoid CONSTANT)
+
+public:
+    explicit AppletItemObject(uint appletid, QObject *parent = nullptr)
+        : QObject(parent)
+        , m_applet(new AppletObject(appletid, this))
+    {
+    }
+
+    QObject *plasmoid() const { return m_applet; }
+
+private:
+    AppletObject *m_applet{nullptr};
+};
+
 class LayoutManagerTest : public ::testing::Test
 {
 protected:
@@ -136,6 +178,16 @@ protected:
         map->insert(QStringLiteral("splitterPosition"), splitter);
         map->insert(QStringLiteral("splitterPosition2"), splitter2);
         map->insert(QStringLiteral("appletOrder"), appletorder);
+    }
+
+    //! creates the item a layout holds for an applet, carrying its applet like the
+    //! containment does
+    QQuickItem *addAppletItem(QQuickItem *layout, uint appletid)
+    {
+        auto *item = new QQuickItem(layout);
+        auto *appletitem = new AppletItemObject(appletid, item);
+        item->setProperty("applet", QVariant::fromValue<QObject *>(appletitem));
+        return item;
     }
 
     ContainmentObject *m_containment{nullptr};
@@ -210,6 +262,106 @@ TEST_F(LayoutManagerTest, HasNotRestoredAppletsImmediately)
 
     //! the flag is raised by a timer once the applets had a chance to settle
     EXPECT_FALSE(m_manager->hasRestoredApplets());
+}
+
+TEST_F(LayoutManagerTest, AppletIdsAreReadThroughTheGraphicItem)
+{
+    setConfiguration(int(Latte::Types::Center), -1, -1, QString());
+
+    //! The item of a layout carries the applet graphic item, not the applet, and only the
+    //! applet knows its id. Reading the id from the item answers with nothing, which used to
+    //! leave every applet out of the stored order.
+    addAppletItem(m_manager->mainLayout(), 40);
+
+    m_manager->save();
+
+    EXPECT_EQ(m_manager->appletOrder(), QList<int>({40}));
+}
+
+TEST_F(LayoutManagerTest, SavingWritesTheAppletOrder)
+{
+    setConfiguration(int(Latte::Types::Center), -1, -1, QString());
+
+    addAppletItem(m_manager->mainLayout(), 40);
+    addAppletItem(m_manager->mainLayout(), 41);
+
+    m_manager->save();
+
+    //! the order is what places the applets again on the next start, an empty one leaves
+    //! the view to be rebuilt from whatever its template happened to provide
+    EXPECT_EQ(m_containment->propertyMap()->value(QStringLiteral("appletOrder")).toString(),
+              QStringLiteral("40;41"));
+    EXPECT_EQ(m_manager->appletOrder(), QList<int>({40, 41}));
+}
+
+TEST_F(LayoutManagerTest, SavingKeepsTheOrderOfTheThreeLayouts)
+{
+    setConfiguration(int(Latte::Types::Justify), -1, -1, QString());
+
+    addAppletItem(m_manager->startLayout(), 40);
+    addAppletItem(m_manager->mainLayout(), 41);
+    addAppletItem(m_manager->endLayout(), 42);
+
+    m_manager->save();
+
+    //! start, main and end are stored as one sequence
+    EXPECT_EQ(m_containment->propertyMap()->value(QStringLiteral("appletOrder")).toString(),
+              QStringLiteral("40;41;42"));
+}
+
+TEST_F(LayoutManagerTest, SavingAJustifiedLayoutWritesTheSplitterPositions)
+{
+    setConfiguration(int(Latte::Types::Justify), 0, 2, QString());
+
+    addAppletItem(m_manager->startLayout(), 40);
+    addAppletItem(m_manager->mainLayout(), 41);
+
+    m_manager->save();
+
+    //! the positions say how the applets are shared between the three layouts. Leaving them
+    //! at what the view template provided put every applet into the end layout, which moved
+    //! them to the far side of the view.
+    EXPECT_EQ(m_containment->propertyMap()->value(QStringLiteral("splitterPosition")).toInt(), 2);
+    EXPECT_EQ(m_containment->propertyMap()->value(QStringLiteral("splitterPosition2")).toInt(), 4);
+
+    EXPECT_EQ(m_manager->splitterPosition(), 2);
+    EXPECT_EQ(m_manager->splitterPosition2(), 4);
+}
+
+TEST_F(LayoutManagerTest, SavedSplitterPositionsRestoreTheSameArrangement)
+{
+    setConfiguration(int(Latte::Types::Justify), -1, -1, QString());
+
+    addAppletItem(m_manager->startLayout(), 40);
+    addAppletItem(m_manager->mainLayout(), 41);
+    m_manager->save();
+
+    const QString order = m_containment->propertyMap()->value(QStringLiteral("appletOrder")).toString();
+    const int splitter = m_containment->propertyMap()->value(QStringLiteral("splitterPosition")).toInt();
+    const int splitter2 = m_containment->propertyMap()->value(QStringLiteral("splitterPosition2")).toInt();
+
+    //! feeding the stored values back is what happens on the next start
+    setConfiguration(int(Latte::Types::Justify), splitter, splitter2, order);
+    m_manager->restore();
+
+    //! the first applet stays ahead of the first splitter, so it belongs to the start layout
+    const QList<int> restored = m_manager->order();
+    ASSERT_GE(restored.count(), 2);
+    EXPECT_EQ(restored[0], 40);
+    EXPECT_EQ(restored[1], LayoutManager::JUSTIFYSPLITTERID);
+}
+
+TEST_F(LayoutManagerTest, SavingANonJustifiedLayoutKeepsTheStoredSplitters)
+{
+    //! a centered view has no splitters of its own, the stored ones belong to the justified
+    //! arrangement it had before and have to survive
+    setConfiguration(int(Latte::Types::Center), 3, 5, QString());
+
+    addAppletItem(m_manager->mainLayout(), 40);
+    m_manager->save();
+
+    EXPECT_EQ(m_containment->propertyMap()->value(QStringLiteral("splitterPosition")).toInt(), 3);
+    EXPECT_EQ(m_containment->propertyMap()->value(QStringLiteral("splitterPosition2")).toInt(), 5);
 }
 
 #include "layoutmanagertest.moc"

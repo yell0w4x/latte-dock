@@ -309,7 +309,19 @@ static uint appletIdOf(const QVariant &appletVariant)
     }
 
     QObject *applet = appletVariant.value<QObject *>();
-    return applet ? applet->property("id").toUInt() : 0;
+
+    if (!applet) {
+        return 0;
+    }
+
+    //! the graphic item publishes the applet it wraps as "plasmoid", which is the same
+    //! object the cast above reaches, for the cases where the item arrives as a plain
+    //! QObject wrapper instead
+    if (QObject *plasmoid = applet->property("plasmoid").value<QObject *>()) {
+        return plasmoid->property("id").toUInt();
+    }
+
+    return applet->property("id").toUInt();
 }
 
 QList<QObject *> LayoutManager::appletsList() const

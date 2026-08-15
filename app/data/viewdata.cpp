@@ -239,6 +239,18 @@ bool View::isCreated() const
     return m_state == IsCreated;
 }
 
+//! declared next to the error and warning counters but never defined, the counterparts in
+//! Data::Layout are what the settings dialog uses to decorate a row
+bool View::hasErrors() const
+{
+    return errors > 0;
+}
+
+bool View::hasWarnings() const
+{
+    return warnings > 0;
+}
+
 bool View::isOriginal() const
 {
     return !isCloned();

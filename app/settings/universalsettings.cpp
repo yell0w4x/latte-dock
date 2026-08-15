@@ -41,6 +41,12 @@ UniversalSettings::UniversalSettings(KSharedConfig::Ptr config, QObject *parent)
       m_config(config),
       m_universalGroup(KConfigGroup(config, QStringLiteral("UniversalSettings")))
 {
+    //! saveScalesConfig() writes into this group and is reachable through setScreenScales()
+    //! before load() has run, in which case it used to write through a group that was never
+    //! set up. It is initialized here instead of during loading. It can not be part of the
+    //! initializer list, m_universalGroup it derives from is declared after it.
+    m_screenScalesGroup = m_universalGroup.group(QStringLiteral("ScreenScales"));
+
     m_corona = qobject_cast<Latte::Corona *>(parent);
 
     connect(this, &UniversalSettings::actionsChanged, this, &UniversalSettings::saveConfig);
@@ -88,9 +94,6 @@ void UniversalSettings::load()
         setAutostart(true);
         m_universalGroup.writeEntry("userConfiguredAutostart", true);
     }
-
-    //! init screen scales
-    m_screenScalesGroup = m_universalGroup.group("ScreenScales");
 
     //! load configuration
     loadConfig();

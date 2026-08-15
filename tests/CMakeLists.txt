@@ -4,6 +4,10 @@
 
 find_package(GTest REQUIRED)
 
+#! QSignalSpy lives in QtTest and is used to assert that the tested objects announce their
+#! changes, it is only needed by the tests themselves
+find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS Test)
+
 set(LATTE_TEST_LIBS
     GTest::gtest
     GTest::gmock
@@ -13,7 +17,7 @@ set(LATTE_TEST_LIBS
 #! every test drives real QObjects, a few of them real QWidgets, so they all need a
 #! QApplication which the shared main() below creates on the offscreen platform
 add_library(lattetestmain STATIC testmain.cpp)
-target_link_libraries(lattetestmain PUBLIC GTest::gtest Qt::Widgets)
+target_link_libraries(lattetestmain PUBLIC GTest::gtest Qt::Widgets Qt::Test)
 
 macro(latte_add_test _name)
     add_executable(${_name} ${_name}.cpp ${ARGN})
@@ -30,6 +34,13 @@ endmacro()
 latte_add_test(windowidtest)
 latte_add_test(schemecolorstest)
 latte_add_test(indicatorfactorytest)
+latte_add_test(viewdatatest)
+latte_add_test(universalsettingstest)
+
+#! the qml package test compiles the shipped qml files, so it needs to know where they are
+latte_add_test(qmlpackagetest)
+target_compile_definitions(qmlpackagetest PRIVATE LATTE_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+target_link_libraries(qmlpackagetest Qt::Qml)
 
 #! the containment layout manager is built into a qml plugin, compile the very same
 #! sources into the test so the tested code is identical to the shipped one
