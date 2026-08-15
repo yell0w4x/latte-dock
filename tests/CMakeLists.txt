@@ -47,6 +47,11 @@ latte_add_test(qmlpackagetest)
 target_compile_definitions(qmlpackagetest PRIVATE LATTE_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 target_link_libraries(qmlpackagetest Qt::Qml)
 
+#! the window view is built into the tasks qml plugin, compile it into the test the same way
+latte_add_test(windowviewtest ${CMAKE_SOURCE_DIR}/plasmoid/plugin/windowview.cpp)
+target_include_directories(windowviewtest PRIVATE ${CMAKE_SOURCE_DIR}/plasmoid)
+target_link_libraries(windowviewtest Qt::DBus)
+
 #! the containment layout manager is built into a qml plugin, compile the very same
 #! sources into the test so the tested code is identical to the shipped one
 latte_add_test(layoutmanagertest

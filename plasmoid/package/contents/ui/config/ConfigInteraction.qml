@@ -86,6 +86,7 @@ Item {
                             i18n("Preview Windows"),
                             i18n("Highlight Windows"),
                             i18n("Preview and Highlight Windows"),
+                            i18nc("present windows action", "Present Windows"),
                         ]
 
                         currentIndex: {
@@ -98,6 +99,8 @@ Item {
                                 return 2;
                             case LatteTasks.Types.PreviewAndHighlightWindows:
                                 return 3;
+                            case LatteTasks.Types.PresentWindows:
+                                return 4;
                             }
 
                             return 0;
@@ -116,6 +119,9 @@ Item {
                                 break;
                             case 3:
                                 Plasmoid.configuration.hoverAction = LatteTasks.Types.PreviewAndHighlightWindows;
+                                break;
+                            case 4:
+                                Plasmoid.configuration.hoverAction = LatteTasks.Types.PresentWindows;
                                 break;
                             }
                         }

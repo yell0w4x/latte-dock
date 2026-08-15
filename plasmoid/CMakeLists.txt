@@ -5,12 +5,14 @@ plasma_install_package(package org.kde.latte.plasmoid)
 set(tasks_SRCS
     plugin/types.cpp
     plugin/lattetasksplugin.cpp
+    plugin/windowview.cpp
 )
 
 qt_add_library(lattetasksplugin SHARED ${tasks_SRCS})
 
 target_link_libraries(lattetasksplugin
                       Qt::Core
+                      Qt::DBus
                       Qt::Qml
                       Plasma::Plasma
                       Plasma::PlasmaQuick)

@@ -434,10 +434,13 @@ AbilityItem.BasicItem {
             activateLauncher();
         } else{
             if (model.IsGroupParent) {
-                //! At least Plasma 5.25 case
-                var isWindowViewAvailable = LatteCore.WindowSystem.compositingActive && false /*Plasma 6 dropped Backend::windowViewAvailable*/;
-                if (isWindowViewAvailable) {
+                if (root.windowViewIsAvailable) {
+                    //! kwin presents the windows of the group and activates the one picked
                     root.activateWindowView(model.WinIdList);
+                } else {
+                    //! without the effect there is nothing to select from, so the previews
+                    //! of the group are shown instead of leaving the click without an answer
+                    showPreviewWindow();
                 }
             } else {
                 if (windowsPreviewDlg.visible) {

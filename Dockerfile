@@ -41,6 +41,7 @@ RUN zypper --non-interactive refresh \
         tar \
         gzip \
         AppStream \
+        dbus-1-daemon \
         kf6-extra-cmake-modules \
         gtest \
         gmock \
@@ -110,11 +111,12 @@ RUN cmake --install /src/build
 
 # The tests drive real Qt objects and need a platform plugin; offscreen is the one that works
 # without a display. HOME is set because they write into the configuration paths of the user
-# running them, which is root here.
+# running them, which is root here. The session bus is started for them as well: the window
+# view is asked for over it, and the test publishes a stand in for kwin to receive that.
 ENV QT_QPA_PLATFORM=offscreen \
     HOME=/tmp/latte-build-home
 RUN mkdir -p "${HOME}" \
- && ctest --test-dir /src/build --output-on-failure
+ && dbus-run-session -- ctest --test-dir /src/build --output-on-failure
 
 # A tarball of the install tree, so the build can be carried to a host without rebuilding.
 RUN LATTE_VERSION="$(sed -n 's/^set(VERSION *\([^)]*\))/\1/p' /src/CMakeLists.txt | head -1)" \

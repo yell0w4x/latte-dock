@@ -140,6 +140,10 @@ PlasmoidItem {
     property bool showOnlyCurrentDesktop: Plasmoid.configuration.showOnlyCurrentDesktop
     property bool showOnlyCurrentActivity: Plasmoid.configuration.showOnlyCurrentActivity
     property bool showPreviews:  hoverAction === LatteTasks.Types.PreviewWindows || hoverAction === LatteTasks.Types.PreviewAndHighlightWindows
+    //! hovering a group presents its windows through kwin, the same selection the rest of
+    //! the workspace shows, so the user picks one of them from there
+    property bool presentWindowsOnHover: hoverAction === LatteTasks.Types.PresentWindows
+    readonly property bool windowViewIsAvailable: LatteCore.WindowSystem.compositingActive && windowView.available
     property bool showWindowActions: Plasmoid.configuration.showWindowActions && !disableAllWindowsFunctionality
     property bool showWindowsOnlyFromLaunchers: Plasmoid.configuration.showWindowsOnlyFromLaunchers && !disableAllWindowsFunctionality
 
@@ -209,6 +213,9 @@ PlasmoidItem {
     signal hiddenTasksUpdated();
     signal presentWindows(variant winIds);
     signal activateWindowView(variant winIds);
+
+    onPresentWindows: (winIds) => windowView.activate(winIds);
+    onActivateWindowView: (winIds) => windowView.activate(winIds);
     signal requestLayout;
     signal signalPreviewsShown();
     //signal signalDraggingState(bool value);
@@ -582,6 +589,10 @@ PlasmoidItem {
         location: root.location
     }
 
+
+    LatteTasks.WindowView {
+        id: windowView
+    }
 
     TaskManagerApplet.Backend {
         id: backend
@@ -1315,15 +1326,11 @@ PlasmoidItem {
     }
 
     Component.onCompleted:  {
-        //! Plasma 6 dropped Backend::activateWindowView
-
         //! Plasma 6 dropped Backend::windowsHovered
         updateListViewParent();
     }
 
     Component.onDestruction: {
-        //! Plasma 6 dropped Backend::activateWindowView
-
         //! Plasma 6 dropped Backend::windowsHovered
     }
 

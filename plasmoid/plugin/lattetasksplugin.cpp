@@ -7,6 +7,7 @@
 
 // local
 #include "types.h"
+#include "windowview.h"
 
 // Qt
 #include <QtQml>
@@ -16,5 +17,6 @@ void LatteTasksPlugin::registerTypes(const char *uri)
 {
     Q_ASSERT(uri == QLatin1String("org.kde.latte.private.tasks"));
     qmlRegisterUncreatableType<Latte::Tasks::Types>(uri, 0, 1, "Types", "Latte Tasks Types uncreatable");
+    qmlRegisterType<Latte::Tasks::WindowView>(uri, 0, 1, "WindowView");
 }
 

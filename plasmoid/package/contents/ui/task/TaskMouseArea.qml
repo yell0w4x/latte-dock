@@ -56,6 +56,15 @@ MouseArea {
             }
         }
 
+        //! present the windows of a group through kwin, after the same delay the previews
+        //! wait for, so that passing over a group on the way somewhere else does not take
+        //! the screen over
+        if (root.presentWindowsOnHover && isGroupParent && !isLauncher
+                && !root.disableAllWindowsFunctionality && root.windowViewIsAvailable
+                && !hoveredTimer.running) {
+            hoveredTimer.start();
+        }
+
         taskItem.showPreviewsIsBlockedFromReleaseEvent = false;
 
         if (root.autoScrollTasksEnabled) {
@@ -184,8 +193,7 @@ MouseArea {
                     activateTask();
                 }
             } else if (mouse.button == Qt.LeftButton){
-                //! Plasma 6 dropped the present windows/window view api from the task manager backend
-                var canPresentWindowsIsSupported = false;
+                var canPresentWindowsIsSupported = root.windowViewIsAvailable;
 
                 if( !taskItem.isLauncher && !root.disableAllWindowsFunctionality ){
                     if ( (root.leftClickAction === LatteTasks.Types.PreviewWindows && isGroupParent)
@@ -325,6 +333,10 @@ MouseArea {
             }
 
             if (taskItem.containsMouse) {
+                if (root.presentWindowsOnHover && isGroupParent && root.windowViewIsAvailable) {
+                    root.activateWindowView(model.WinIdList);
+                }
+
                 if (root.showPreviews || (windowsPreviewDlg.visible && !isLauncher)) {
                     taskItem.showPreviewWindow();
                 }
