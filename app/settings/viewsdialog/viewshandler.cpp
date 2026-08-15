@@ -269,7 +269,7 @@ void ViewsHandler::save()
 {
     int viewsforremoval = m_viewsController->viewsForRemovalCount();
 
-    if (viewsforremoval <=0 || removalConfirmation(viewsforremoval) == KMessageBox::PrimaryAction) {
+    if (removalConfirmation(viewsforremoval)) {
         m_viewsController->save();
     }
 }
@@ -463,9 +463,8 @@ void ViewsHandler::onCurrentLayoutIndexChanged(int row)
 
             if (result == KMessageBox::PrimaryAction) {
                 int removalviews = m_viewsController->viewsForRemovalCount();
-                KMessageBox::ButtonCode removalresponse = removalConfirmation(removalviews);
 
-                if (removalresponse == KMessageBox::PrimaryAction) {
+                if (removalConfirmation(removalviews)) {
                     switchtonewlayout = true;
                     m_lastConfirmedLayoutIndex = row;
                     m_viewsController->save();
@@ -513,21 +512,21 @@ void ViewsHandler::updateWindowTitle()
                                    m_ui->layoutsCmb->currentText()));
 }
 
-KMessageBox::ButtonCode ViewsHandler::removalConfirmation(const int &viewsCount)
+bool ViewsHandler::removalConfirmation(const int &viewsCount)
 {
-    if (viewsCount<=0) {
-        return KMessageBox::SecondaryAction;
+    if (viewsCount<=0 || !hasChangedData()) {
+        //! nothing to be approved
+        return true;
     }
 
-    if (hasChangedData() && viewsCount>0) {
-        return KMessageBox::warningContinueCancel(m_dialog,
-                                                  i18np("You are going to <b>remove 1</b> dock or panel completely from your layout.<br/>Would you like to continue?",
-                                                        "You are going to <b>remove %1</b> docks and panels completely from your layout.<br/>Would you like to continue?",
-                                                        viewsCount),
-                                                  i18n("Approve Removal"));
-    }
-
-    return KMessageBox::SecondaryAction;
+    //! KMessageBox::warningContinueCancel() answers with Continue, not with PrimaryAction
+    //! which is what the two actions variants use. Comparing against PrimaryAction here
+    //! never matched, so approving the removal did not save anything and the views stayed.
+    return KMessageBox::warningContinueCancel(m_dialog,
+                                              i18np("You are going to <b>remove 1</b> dock or panel completely from your layout.<br/>Would you like to continue?",
+                                                    "You are going to <b>remove %1</b> docks and panels completely from your layout.<br/>Would you like to continue?",
+                                                    viewsCount),
+                                              i18n("Approve Removal")) == KMessageBox::Continue;
 }
 
 KMessageBox::ButtonCode ViewsHandler::saveChangesConfirmation()

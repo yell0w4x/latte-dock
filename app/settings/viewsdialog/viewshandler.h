@@ -99,7 +99,9 @@ private:
     QString storedView(const QString &viewId);
 
     KMessageBox::ButtonCode saveChangesConfirmation();
-    KMessageBox::ButtonCode removalConfirmation(const int &count);
+    //! true when the removal is approved, either because the user confirmed it or because
+    //! there is nothing to remove
+    bool removalConfirmation(const int &count);
 
 private:
     Dialog::ViewsDialog *m_dialog{nullptr};

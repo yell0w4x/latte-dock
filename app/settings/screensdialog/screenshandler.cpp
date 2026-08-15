@@ -135,7 +135,7 @@ bool ScreensHandler::removalConfirmation(const QStringList &screens) const
                                                      "You are going to <b>remove %2</b> references completely.<br/>Would you like to continue?",
                                                      screens.count(),
                                                      screens.join(", ")),
-                                               i18n("Approve Removal")) == KMessageBox::PrimaryAction);
+                                               i18n("Approve Removal")) == KMessageBox::Continue);
 }
 
 }
