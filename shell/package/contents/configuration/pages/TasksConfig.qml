@@ -41,12 +41,22 @@ PlasmaComponents.Page {
     width: content.width + content.Layout.leftMargin * 2
     height: content.height + Kirigami.Units.smallSpacing * 2
 
-    property bool disableAllWindowsFunctionality: tasks.configuration.hideAllTasks
+    //! The Latte Tasks applet this page configures. It is handed over by the repeater that
+    //! creates one page per tasks applet, through the "tasks" role of latteTasksModel. Qt5
+    //! injected model roles into the delegate scope, Qt6 does not, so it is taken as a
+    //! property instead of relying on the name being visible here.
+    property QtObject tasksItem: null
+
+    //! the role provides the applet graphic item, while the configuration and the id belong
+    //! to the Plasma::Applet it exposes as "plasmoid"
+    readonly property QtObject tasks: tasksItem && tasksItem.plasmoid ? tasksItem.plasmoid : null
+
+    property bool disableAllWindowsFunctionality: tasks ? tasks.configuration.hideAllTasks : false
 
     readonly property bool isCurrentPage: (dialog.currentPage === _tasksPage)
 
     onIsCurrentPageChanged: {
-        if (isCurrentPage && latteView.extendedInterface.latteTasksModel.count>1) {
+        if (isCurrentPage && tasks && latteView.extendedInterface.latteTasksModel.count>1) {
             latteView.extendedInterface.appletRequestedVisualIndicator(tasks.id);
         }
     }

@@ -490,6 +490,7 @@ Loader {
                         model: plasmoid && plasmoid.configuration && latteView ? latteView.extendedInterface.latteTasksModel : 0
 
                         Pages.TasksConfig {
+                            tasksItem: model.tasks
                             readonly property int pageIndex: tabBar.visibleStaticPages+index
                         }
                     }
