@@ -141,6 +141,7 @@ private:
     void restoreOptions();
     void restoreOption(const char *option);
     void saveOption(const char *option);
+    void saveConfigOption(const QString &key, const QVariant &value);
 
     void destroyAppletContainer(QObject *applet);
 

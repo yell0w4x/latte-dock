@@ -298,6 +298,20 @@ void LayoutManager::onRootItemChanged()
 
 //! Plasma 6 exposes Containment::applets as QList<Plasma::Applet *>, it can not be
 //! converted to a QList<QObject *> through QVariant any longer.
+//! The "applet" property of the layout items carries the applet graphic item under plasma6
+//! and not an applet interface any longer, so the id has to be taken from the Plasma::Applet
+//! it wraps. Reading "id" from the item itself answers with 0 and makes the applet invisible
+//! to the ordering code.
+static uint appletIdOf(const QVariant &appletVariant)
+{
+    if (auto *appletitem = appletVariant.value<PlasmaQuick::AppletQuickItem *>()) {
+        return appletitem->applet() ? appletitem->applet()->id() : 0;
+    }
+
+    QObject *applet = appletVariant.value<QObject *>();
+    return applet ? applet->property("id").toUInt() : 0;
+}
+
 QList<QObject *> LayoutManager::appletsList() const
 {
     QList<QObject *> applets;
@@ -546,13 +560,7 @@ void LayoutManager::save()
                     continue;
                 }
 
-                QObject *applet = appletVariant.value<QObject *>();
-
-                if (!applet) {
-                    continue;
-                }
-
-                uint id = applet->property("id").toUInt();
+                uint id = appletIdOf(appletVariant);
 
                 if (id>0) {
                     childCount++;
@@ -572,6 +580,13 @@ void LayoutManager::save()
     if (alignment == Latte::Types::Justify) {
         setSplitterPosition(startChilds + 1);
         setSplitterPosition2(startChilds + 1 + mainChilds + 1);
+
+        //! The splitter positions describe how the applets are shared between the three
+        //! layouts of a justified view, so they belong to the stored arrangement just like
+        //! the applet order does. Without storing them the view is restored with whatever
+        //! the view template provided, and the applets land in the wrong sections.
+        saveConfigOption(QStringLiteral("splitterPosition"), m_splitterPosition);
+        saveConfigOption(QStringLiteral("splitterPosition2"), m_splitterPosition2);
     } else {
         int splitterPosition = (*m_configuration)["splitterPosition"].toInt();
         int splitterPosition2 = (*m_configuration)["splitterPosition2"].toInt();
@@ -597,6 +612,16 @@ void LayoutManager::save()
         m_configuration->insert("appletOrder", appletsserialized);
         emit m_configuration->valueChanged("appletOrder", appletsserialized);
     }
+}
+
+void LayoutManager::saveConfigOption(const QString &key, const QVariant &value)
+{
+    if ((*m_configuration)[key] == value) {
+        return;
+    }
+
+    m_configuration->insert(key, value);
+    emit m_configuration->valueChanged(key, value);
 }
 
 void LayoutManager::saveOptions()
@@ -869,15 +894,7 @@ QQuickItem *LayoutManager::appletItemInLayout(QQuickItem *layout, const int &id)
                 continue;
             }
 
-            QObject *applet = appletVariant.value<QObject *>();
-
-            if (!applet) {
-                continue;
-            }
-
-            int tempid = applet->property("id").toInt();
-
-            if (id == tempid) {
+            if (id == (int)appletIdOf(appletVariant)) {
                 return item;
             }
         }

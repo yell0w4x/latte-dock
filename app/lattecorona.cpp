@@ -224,8 +224,6 @@ void Corona::adjustPopupForLatteView(QObject *object)
     }
 
     if (position != window->position()) {
-        qDebug() << "TIPDBG correcting" << object->metaObject()->className()
-                 << " from:" << window->position() << " to:" << position;
         window->setPosition(position);
     }
 }
