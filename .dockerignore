@@ -1,0 +1,10 @@
+# Keeps the build context to the sources. The build directory of the host would otherwise be
+# copied in and confuse the configure step inside the image, and the rest is scratch space.
+build/
+.temp/
+.git/
+out/
+
+*.o
+*.so
+*.user

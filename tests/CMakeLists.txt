@@ -10,9 +10,14 @@ find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS Test)
 
 set(LATTE_TEST_LIBS
     GTest::gtest
-    GTest::gmock
     lattedock-core
 )
+
+#! gmock ships separately from gtest on some distributions. None of the tests mock anything,
+#! they drive the real objects, so it is linked when it is around and skipped when it is not.
+if(TARGET GTest::gmock)
+    list(APPEND LATTE_TEST_LIBS GTest::gmock)
+endif()
 
 #! every test drives real QObjects, a few of them real QWidgets, so they all need a
 #! QApplication which the shared main() below creates on the offscreen platform
