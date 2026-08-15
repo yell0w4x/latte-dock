@@ -91,6 +91,12 @@ public:
 
     bool inQuit() const;
 
+    //! Plasma places popups of panel applets against the edge of the panel window. Latte
+    //! views are taller than the panel they show, because the remaining space is kept for
+    //! the parabolic zoom, so those popups end up floating away from the dock. They are
+    //! corrected here, since Plasma provides no way to tell it where the visible edge is.
+    bool eventFilter(QObject *watched, QEvent *event) override;
+
     int numScreens() const override;
     QRect screenGeometry(int id) const override;
     QRegion availableScreenRegion(int id) const override;
@@ -179,6 +185,9 @@ signals:
     void availableScreenRectChangedFrom(Latte::View *origin);
     void availableScreenRegionChangedFrom(Latte::View *origin);
     void verticalUnityViewHasFocus();
+
+private:
+    void adjustPopupForLatteView(QObject *dialog);
 
 private slots:
     void alternativesVisibilityChanged(bool visible);

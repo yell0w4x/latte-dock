@@ -65,6 +65,7 @@
 #include <Plasma/Containment>
 #include <PlasmaActivities/Consumer>
 #include <PlasmaQuick/ConfigView>
+#include <PlasmaQuick/Dialog>
 
 // KDE
 #include <KActionCollection>
@@ -148,10 +149,85 @@ Corona::Corona(bool defaultLayoutOnStartup, QString layoutNameOnStartUp, QString
         m_viewsScreenSyncTimer.setInterval(m_universalSettings->screenTrackerInterval());
     });
 
+    //! watch every window so that plasma popups shown from applets of a latte view can be
+    //! placed against the visible dock edge instead of the edge of its taller window
+    qGuiApp->installEventFilter(this);
+
     //! Dbus adaptor initialization
     new LatteDockAdaptor(this);
     QDBusConnection dbus = QDBusConnection::sessionBus();
     dbus.registerObject(QStringLiteral("/Latte"), this);
+}
+
+bool Corona::eventFilter(QObject *watched, QEvent *event)
+{
+    if (event->type() == QEvent::Show || event->type() == QEvent::Move) {
+        adjustPopupForLatteView(watched);
+    }
+
+    return Plasma::Corona::eventFilter(watched, event);
+}
+
+void Corona::adjustPopupForLatteView(QObject *object)
+{
+    auto *window = qobject_cast<QWindow *>(object);
+
+    if (!window || !window->isVisible()) {
+        return;
+    }
+
+    //! Latte dialogs already know how to place themselves inside a latte view
+    if (object->inherits("Latte::Quick::Dialog")) {
+        return;
+    }
+
+    //! ToolTipDialog is not a PlasmaQuick::Dialog any longer under plasma6, so the popup is
+    //! recognized from the property every plasma popup carries instead of from its class
+    QQuickItem *visualparent = object->property("visualParent").value<QQuickItem *>();
+
+    if (!visualparent || !visualparent->window()) {
+        return;
+    }
+
+    auto *view = qobject_cast<Latte::View *>(visualparent->window());
+
+    if (!view) {
+        return;
+    }
+
+    //! Plasma aligned the popup to the window edge, which for a latte view sits behind the
+    //! zoom area. The visual parent is the applet itself, so its own edge is the one the
+    //! popup should touch. Only the thickness axis is corrected, the length axis is already
+    //! centered on the applet by plasma.
+    const QPointF parenttopleft = visualparent->mapToGlobal(QPointF(0, 0));
+    QPoint position = window->position();
+
+    switch (view->location()) {
+    case Plasma::Types::BottomEdge:
+        position.setY(qRound(parenttopleft.y()) - window->height());
+        break;
+
+    case Plasma::Types::TopEdge:
+        position.setY(qRound(parenttopleft.y() + visualparent->height()));
+        break;
+
+    case Plasma::Types::LeftEdge:
+        position.setX(qRound(parenttopleft.x() + visualparent->width()));
+        break;
+
+    case Plasma::Types::RightEdge:
+        position.setX(qRound(parenttopleft.x()) - window->width());
+        break;
+
+    default:
+        return;
+    }
+
+    if (position != window->position()) {
+        qDebug() << "TIPDBG correcting" << object->metaObject()->className()
+                 << " from:" << window->position() << " to:" << position;
+        window->setPosition(position);
+    }
 }
 
 Corona::~Corona()

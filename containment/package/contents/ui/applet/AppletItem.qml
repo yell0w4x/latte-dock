@@ -25,6 +25,7 @@ import org.kde.kirigami 2.20 as Kirigami
 
 Item {
     id: appletItem
+
     width: isInternalViewSplitter && !root.inConfigureAppletsMode ? 0 : computeWidth
     height: isInternalViewSplitter && !root.inConfigureAppletsMode ? 0 : computeHeight
 
