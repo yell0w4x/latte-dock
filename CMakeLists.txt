@@ -29,6 +29,19 @@ include(CheckIncludeFiles)
 include(CMakePackageConfigHelpers)
 include(ECMOptionalAddSubdirectory)
 include(ECMQtDeclareLoggingCategory)
+#! Registering the appstream test before KDECMakeSettings keeps it from adding its own, as
+#! it skips that when a test of this name already exists. The one below accepts the component
+#! id warning that is inherent to how Latte is published, see cmake/LatteAppstreamTest.cmake
+find_program(APPSTREAMCLI appstreamcli)
+
+if(APPSTREAMCLI AND NOT KDE_SKIP_TEST_SETTINGS)
+    enable_testing()
+    add_test(NAME appstreamtest
+             COMMAND ${CMAKE_COMMAND} -DAPPSTREAMCLI=${APPSTREAMCLI}
+                                      -DINSTALL_FILES=${CMAKE_BINARY_DIR}/install_manifest.txt
+                                      -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/LatteAppstreamTest.cmake)
+endif()
+
 include(KDECMakeSettings)
 include(KDECompilerSettings NO_POLICY_SCOPE)
 include(KDEPackageAppTemplates)
