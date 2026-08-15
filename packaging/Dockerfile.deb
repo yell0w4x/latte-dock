@@ -102,6 +102,7 @@ RUN cmake -S /src -B /src/build \
         -G Ninja \
         -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
         -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_SUPPRESS_REGENERATION=ON \
         -DBUILD_TESTING=ON \
         -DLATTE_PACKAGE_RUNTIME_DEPENDS="plasma-workspace, plasma-desktoptheme, qml6-module-org-kde-kirigami, qml6-module-org-kde-ksvg, qml6-module-org-kde-activities, qml6-module-org-kde-kwindowsystem, qml6-module-org-kde-pipewire, qml6-module-org-kde-plasma-plasma5support"
 

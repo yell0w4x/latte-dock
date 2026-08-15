@@ -5,6 +5,18 @@ working tree, runs the test suite, builds the package and then installs it insid
 so a package that does not install fails the build here rather than on the machine of whoever
 downloads it.
 
+The usual way in is [`../build.sh`](../build.sh), which builds the packages and collects them
+into `dist/`:
+
+```
+./build.sh              # deb, rpm and aur
+./build.sh --deb --rpm  # only those two
+./build.sh --clean      # empty dist/ first
+```
+
+It finds podman or docker on its own, reports which targets failed and exits non zero if any
+of them did. What it runs underneath is the images below, one build each.
+
 All of them take the repository root as their context, so they are run from there:
 
 | Package                  | Build                                                                            |

@@ -92,6 +92,7 @@ RUN cmake -S /src -B /src/build \
         -G Ninja \
         -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
         -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_SUPPRESS_REGENERATION=ON \
         -DBUILD_TESTING=ON \
         -DLATTE_PACKAGE_RUNTIME_DEPENDS="plasma6-workspace,plasma6-activities-imports,kf6-kwindowsystem-imports,kpipewire6-imports"
 

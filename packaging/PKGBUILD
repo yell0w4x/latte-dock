@@ -64,10 +64,14 @@ _srcdir="$pkgname-$pkgver"
 # END replace for the aur
 
 build() {
+    # A package is configured once and built once, so nothing has to be regenerated in
+    # between. Turning it off also keeps the build going on a machine whose clock is
+    # behind the files it installed, where cmake would otherwise regenerate forever.
     cmake -S "$srcdir/$_srcdir" -B build \
         -G Ninja \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_SUPPRESS_REGENERATION=ON \
         -DBUILD_TESTING=ON
     cmake --build build
 }

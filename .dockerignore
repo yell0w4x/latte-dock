@@ -4,6 +4,7 @@ build/
 .temp/
 .git/
 out/
+dist/
 
 *.o
 *.so

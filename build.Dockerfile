@@ -100,6 +100,7 @@ RUN cmake -S /src -B /src/build \
         -G Ninja \
         -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
         -DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" \
+        -DCMAKE_SUPPRESS_REGENERATION=ON \
         -DBUILD_TESTING=ON
 
 RUN cmake --build /src/build ${JOBS:+--parallel ${JOBS}}
