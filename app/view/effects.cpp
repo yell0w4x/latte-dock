@@ -573,16 +573,12 @@ void Effects::updateEffects()
                 //! adjust mask coordinates based on local coordinates
                 int fX = m_rect.x(); int fY = m_rect.y();
 
-                //! Latte is now using GtkFrameExtents so Effects geometries must be adjusted
-                //! windows that use GtkFrameExtents and apply Effects on them they take GtkFrameExtents
-                //! as granted
-                if (KWindowSystem::isPlatformX11() && !m_view->byPassWM()) {
-                    if (m_view->location() == Plasma::Types::BottomEdge) {
-                        fY = qMax(0, fY - m_view->headThicknessGap());
-                    } else if (m_view->location() == Plasma::Types::RightEdge) {
-                        fX = qMax(0, fX - m_view->headThicknessGap());
-                    }
-                }
+                //! Latte publishes _GTK_FRAME_EXTENTS for the empty part of its window, and
+                //! this used to compensate the effects geometry for it, assuming the
+                //! compositor measures blur and contrast regions from the frame. KWin
+                //! measures them from the window origin instead, so subtracting the extents
+                //! placed the blurred background above the dock, as a floating rectangle of
+                //! its size and length. The region is passed in plain window coordinates.
 
                 //! There are cases that mask is NULL even though it should not
                 //! Example: SidebarOnDemand from v0.10 that BEHAVEASPLASMAPANEL in EditMode
