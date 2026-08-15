@@ -1,0 +1,137 @@
+# Builds the deb package.
+#
+#   podman build -f packaging/Dockerfile.deb -t latte-dock:deb .
+#   podman build -f packaging/Dockerfile.deb --target artifact -o type=local,dest=./out .
+#
+# docker understands the same file. The context is the repository root, so both commands are
+# run from there.
+#
+# The result is a latte-dock_<version>_amd64.deb, installable with
+# "apt install ./latte-dock_<version>_amd64.deb".
+#
+# The base is ubuntu rather than debian because debian ships no cmake package for the private
+# Qt gui module, which the x11 code of Latte needs for qtx11extras_p.h; on debian the build
+# stops at the find_package for it.
+
+ARG BASE_IMAGE=docker.io/library/ubuntu:25.10
+
+FROM --platform=linux/amd64 ${BASE_IMAGE} AS builder
+
+ARG BUILD_TYPE=Release
+ARG JOBS=
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Toolchain, the dependencies CMakeLists.txt declares, and the packages the deb generator
+# itself needs, dpkg-dev for dpkg-shlibdeps and file for the type detection it does. The
+# plasma runtime packages at the end are not needed to compile, they carry the qml modules
+# the shipped files import, which the qml test resolves while it compiles them.
+RUN apt-get update \
+ && apt-get install --no-install-recommends -y \
+        build-essential \
+        g++ \
+        cmake \
+        ninja-build \
+        git \
+        ca-certificates \
+        dpkg-dev \
+        file \
+        dbus \
+        appstream \
+        extra-cmake-modules \
+        googletest \
+        libgtest-dev \
+        libgmock-dev \
+        qt6-base-dev \
+        qt6-base-private-dev \
+        qt6-declarative-dev \
+        qt6-declarative-private-dev \
+        qt6-tools-dev \
+        qt6-wayland-dev \
+        libkf6archive-dev \
+        libkf6coreaddons-dev \
+        libkf6crash-dev \
+        libkf6dbusaddons-dev \
+        libkf6declarative-dev \
+        libkf6globalaccel-dev \
+        libkf6guiaddons-dev \
+        libkf6i18n-dev \
+        libkf6iconthemes-dev \
+        libkf6kio-dev \
+        libkirigami-dev \
+        libkf6newstuff-dev \
+        libkf6notifications-dev \
+        libkf6package-dev \
+        libkf6svg-dev \
+        libkf6windowsystem-dev \
+        libkf6xmlgui-dev \
+        libkf6config-dev \
+        libplasma-dev \
+        libplasmaactivities-dev \
+        plasma-workspace-dev \
+        kwayland-dev \
+        plasma-wayland-protocols \
+        libwayland-dev \
+        plasma-workspace \
+        plasma-desktoptheme \
+        qml6-module-org-kde-kirigami \
+        qml6-module-org-kde-ksvg \
+        qml6-module-org-kde-activities \
+        qml6-module-org-kde-kwindowsystem \
+        qml6-module-org-kde-pipewire \
+        qml6-module-org-kde-plasma-plasma5support \
+        libx11-dev \
+        libsm-dev \
+        libice-dev \
+        libxcb1-dev \
+        libxcb-util-dev \
+        libxcb-shape0-dev \
+        libxcb-randr0-dev \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+
+COPY . /src
+
+# The prefix is the one of the distribution, the package installs where the rest of plasma
+# lives. LATTE_PACKAGE_RUNTIME_DEPENDS names the packages carrying the qml modules the
+# shipped files import, which nothing links against so dpkg-shlibdeps can not find them.
+RUN cmake -S /src -B /src/build \
+        -G Ninja \
+        -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DBUILD_TESTING=ON \
+        -DLATTE_PACKAGE_RUNTIME_DEPENDS="plasma-workspace, plasma-desktoptheme, qml6-module-org-kde-kirigami, qml6-module-org-kde-ksvg, qml6-module-org-kde-activities, qml6-module-org-kde-kwindowsystem, qml6-module-org-kde-pipewire, qml6-module-org-kde-plasma-plasma5support"
+
+RUN cmake --build /src/build ${JOBS:+--parallel ${JOBS}}
+
+# Installing before testing on purpose, the appstream test validates the metadata that was
+# installed and the qml test compiles the shipped files against the installed qml modules
+RUN cmake --install /src/build
+
+ENV QT_QPA_PLATFORM=offscreen \
+    HOME=/tmp/latte-build-home
+RUN mkdir -p "${HOME}" \
+ && dbus-run-session -- ctest --test-dir /src/build --output-on-failure
+
+RUN cd /src/build \
+ && cpack -G DEB \
+ && mkdir -p /out \
+ && cp /src/build/*.deb /out/ \
+ && dpkg-deb --info /out/*.deb \
+ && ls -lh /out
+
+# Installing it as well, so a package that can not be installed fails here rather than on the
+# machine of whoever downloads it. The already installed tree is removed first, otherwise
+# dpkg reports the very same files as belonging to nothing.
+RUN xargs rm -f < /src/build/install_manifest.txt \
+ && apt-get update \
+ && apt-get install --no-install-recommends -y /out/*.deb \
+ && dpkg -s latte-dock | head -12 \
+ && rm -rf /var/lib/apt/lists/*
+
+# Carries only the package, for "--target artifact -o type=local,dest=./out"
+FROM scratch AS artifact
+COPY --from=builder /out/ /

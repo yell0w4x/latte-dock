@@ -1,0 +1,83 @@
+# Maintainer: Michail Vourlakos <mvourlakos@gmail.com>
+#
+# Builds the working tree, which packaging/Dockerfile.arch hands over as a tarball next to
+# this file. To publish it on the aur, replace the two lines marked below with the release
+# it should build, e.g.
+#
+#   source=("$pkgname-$pkgver.tar.gz::https://download.kde.org/stable/latte-dock/latte-dock-$pkgver.tar.xz")
+#   sha256sums=('<the checksum of that tarball>')
+#
+# and drop the _srcdir line, the tarball then unpacks into "$pkgname-$pkgver" already.
+
+pkgname=latte-dock
+pkgver=0.10.240
+pkgrel=1
+pkgdesc="Dock and panel for the Plasma desktop"
+arch=('x86_64')
+url="https://userbase.kde.org/LatteDock"
+license=('GPL-2.0-or-later')
+
+depends=('karchive'
+         'kcoreaddons'
+         'kcrash'
+         'kdbusaddons'
+         'kdeclarative'
+         'kglobalaccel'
+         'kguiaddons'
+         'ki18n'
+         'kiconthemes'
+         'kio'
+         'kirigami'
+         'knewstuff'
+         'knotifications'
+         'kpackage'
+         'ksvg'
+         'kwindowsystem'
+         'kxmlgui'
+         'kconfig'
+         'libplasma'
+         'libsm'
+         'libxcb'
+         'plasma-activities'
+         'plasma-workspace'
+         'qt6-base'
+         'qt6-declarative'
+         'wayland'
+         'xcb-util')
+
+# plasma-workspace carries the task manager qml the tasks applet builds on and kpipewire the
+# window previews, qt6-wayland is what the dock runs on in a wayland session
+optdepends=('kpipewire: window previews'
+            'qt6-wayland: wayland session support')
+
+makedepends=('extra-cmake-modules'
+             'cmake'
+             'ninja'
+             'kwayland'
+             'plasma-wayland-protocols'
+             'gtest')
+
+# BEGIN replace for the aur
+source=("$pkgname-$pkgver.tar.gz")
+sha256sums=('SKIP')
+_srcdir="$pkgname-$pkgver"
+# END replace for the aur
+
+build() {
+    cmake -S "$srcdir/$_srcdir" -B build \
+        -G Ninja \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DBUILD_TESTING=ON
+    cmake --build build
+}
+
+check() {
+    # the tests drive real Qt objects without a display, and reach the window view over a
+    # session bus of their own
+    QT_QPA_PLATFORM=offscreen dbus-run-session -- ctest --test-dir build --output-on-failure
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+}

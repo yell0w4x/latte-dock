@@ -175,3 +175,6 @@ if(BUILD_TESTING)
 endif()
 
 ki18n_install(po)
+
+#! deb and rpm packaging of the installed tree, driven by the images under packaging/
+include(cmake/LattePackaging.cmake)

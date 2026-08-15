@@ -1,0 +1,53 @@
+# Builds the arch package, the one the aur recipe next to this file produces.
+#
+#   podman build -f packaging/Dockerfile.arch -t latte-dock:arch .
+#   podman build -f packaging/Dockerfile.arch --target artifact -o type=local,dest=./out .
+#
+# docker understands the same file. The context is the repository root, so both commands are
+# run from there.
+#
+# The result is a latte-dock-<version>-x86_64.pkg.tar.zst, installable with
+# "pacman -U", and the PKGBUILD it was built from.
+
+ARG BASE_IMAGE=docker.io/library/archlinux:base-devel
+
+FROM --platform=linux/amd64 ${BASE_IMAGE} AS builder
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+# makepkg refuses to run as root, so the build happens as a user of its own that can install
+# the dependencies the recipe asks for
+RUN pacman -Syu --noconfirm --needed base-devel git sudo \
+ && useradd -m builder \
+ && echo "builder ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/builder \
+ && pacman -Scc --noconfirm
+
+USER builder
+WORKDIR /home/builder/build
+
+# The sources arrive as the tarball the recipe expects, named after the version the recipe
+# declares, so that the very same file works unchanged on the aur once its source line points
+# at a release instead.
+COPY --chown=builder:builder packaging/PKGBUILD ./PKGBUILD
+COPY --chown=builder:builder . ./tree
+
+RUN set -eu \
+ && version="$(sed -n 's/^pkgver=//p' PKGBUILD)" \
+ && rm -rf "tree/build" "tree/.git" \
+ && mv tree "latte-dock-${version}" \
+ && tar -czf "latte-dock-${version}.tar.gz" "latte-dock-${version}" \
+ && rm -rf "latte-dock-${version}"
+
+# -s installs the declared dependencies, the tests of the recipe run as part of this
+RUN makepkg -s --noconfirm --needed
+
+# Installing it as well, so a package that can not be installed fails the build here rather
+# than on the machine of whoever downloads it
+RUN sudo pacman -U --noconfirm ./*.pkg.tar.zst \
+ && pacman -Qi latte-dock \
+ && ls -lh ./*.pkg.tar.zst
+
+# Carries only the package, for "--target artifact -o type=local,dest=./out"
+FROM scratch AS artifact
+COPY --from=builder /home/builder/build/*.pkg.tar.zst /
+COPY --from=builder /home/builder/build/PKGBUILD /

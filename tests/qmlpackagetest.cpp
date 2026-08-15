@@ -65,13 +65,54 @@ bool lattePluginsAreInstalled()
     return QFileInfo::exists(QStringLiteral(LATTE_QMLDIR) + QStringLiteral("/org/kde/latte/core/qmldir"));
 }
 
+//! The modules a running plasma shell brings with it. Some distributions ship them as files
+//! that any engine can resolve, others register them from c++ while the shell runs and then
+//! nothing of them exists on disk. Where they can not be resolved, the files importing them
+//! are out of reach of this test and are reported as skipped instead of failing it.
+const QStringList &shellProvidedModules()
+{
+    static const QStringList modules {
+        QStringLiteral("org.kde.plasma.plasmoid"),
+    };
+
+    return modules;
+}
+
+//! asks the engine itself whether a module can be resolved, rather than guessing from paths
+bool moduleIsResolvable(QQmlEngine *engine, const QString &module)
+{
+    QQmlComponent probe(engine);
+    probe.setData(QStringLiteral("import QtQml\nimport %1\nQtObject{}").arg(module).toUtf8(), QUrl());
+
+    return !probe.isError();
+}
+
+bool importsAnyOf(const QString &file, const QStringList &modules)
+{
+    QFile source(file);
+
+    if (!source.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return false;
+    }
+
+    const QString contents = QString::fromUtf8(source.readAll());
+
+    for (const QString &module : modules) {
+        if (contents.contains(QStringLiteral("import ") + module)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 //! Files that can not be compiled outside of a running plasma shell.
 //!
 //! The tasks applet builds on the qml of the plasma task manager, which is published as a
 //! module private to that applet and only exists while it runs, so anything importing it is
 //! out of reach here. The thumbnail files carrying a plasma version in their name are the
 //! older variants, kept for those releases and never loaded on this one.
-bool needsARunningShell(const QString &file)
+bool needsARunningShell(const QString &file, const QStringList &unresolvableModules)
 {
     const QString name = QFileInfo(file).fileName();
 
@@ -80,13 +121,11 @@ bool needsARunningShell(const QString &file)
         return true;
     }
 
-    QFile source(file);
-
-    if (!source.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        return false;
+    if (!unresolvableModules.isEmpty() && importsAnyOf(file, unresolvableModules)) {
+        return true;
     }
 
-    return QString::fromUtf8(source.readAll()).contains(QStringLiteral("import plasma.applet."));
+    return importsAnyOf(file, QStringList() << QStringLiteral("plasma.applet."));
 }
 
 QStringList qmlFilesOf(const QString &directory)
@@ -132,6 +171,12 @@ protected:
 
         //! a package looks up its own files through this, e.g. "../code/tools.js"
         m_engine->addImportPath(sourceDirectory() + QStringLiteral("/declarativeimports"));
+
+        for (const QString &module : shellProvidedModules()) {
+            if (!moduleIsResolvable(m_engine, module)) {
+                m_unresolvableModules << module;
+            }
+        }
     }
 
     void TearDown() override
@@ -148,12 +193,23 @@ protected:
         ASSERT_FALSE(files.isEmpty()) << "no qml files were found under " << packagePath.toStdString()
                                       << ", the package layout must have changed";
 
+        for (const QString &module : m_unresolvableModules) {
+            for (const QString &file : files) {
+                if (importsAnyOf(file, QStringList() << module)) {
+                    GTEST_SKIP() << packagePath.toStdString() << " builds on " << module.toStdString()
+                                 << ", which this system does not carry. It is registered by the"
+                                    " plasma shell while it runs on some distributions and shipped"
+                                    " as files on others, and only the latter can be compiled here";
+                }
+            }
+        }
+
         QStringList failures;
 
         int compiled{0};
 
         for (const QString &file : files) {
-            if (needsARunningShell(file)) {
+            if (needsARunningShell(file, m_unresolvableModules)) {
                 continue;
             }
 
@@ -179,6 +235,9 @@ protected:
     }
 
     QQmlEngine *m_engine{nullptr};
+
+    //! shell modules this environment can not resolve, empty on a system with plasma
+    QStringList m_unresolvableModules;
 };
 
 TEST_F(QmlPackageTest, TheContainmentPackageCompiles)

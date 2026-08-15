@@ -1,0 +1,127 @@
+# Builds the rpm package.
+#
+#   podman build -f packaging/Dockerfile.rpm -t latte-dock:rpm .
+#   podman build -f packaging/Dockerfile.rpm --target artifact -o type=local,dest=./out .
+#
+# docker understands the same file. The context is the repository root, so both commands are
+# run from there.
+#
+# The base is a rolling distribution on purpose, Latte builds against Plasma 6 and KF6 and
+# fixed releases lag behind them. The result is a latte-dock-<version>.x86_64.rpm for any
+# distribution using rpm whose Plasma is recent enough, installable with "rpm -i" or "zypper
+# install".
+
+ARG BASE_IMAGE=opensuse/tumbleweed
+
+FROM --platform=linux/amd64 ${BASE_IMAGE} AS builder
+
+ARG BUILD_TYPE=Release
+ARG JOBS=
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+# The same dependencies the build itself needs, plus rpm-build which cpack drives to write
+# the package, and dbus for the tests
+RUN zypper --non-interactive refresh \
+ && zypper --non-interactive install --no-recommends \
+        gcc-c++ \
+        cmake \
+        ninja \
+        make \
+        git \
+        which \
+        tar \
+        gzip \
+        rpm-build \
+        dbus-1-daemon \
+        AppStream \
+        kf6-extra-cmake-modules \
+        gtest \
+        gmock \
+        qt6-base-devel \
+        qt6-base-private-devel \
+        qt6-declarative-devel \
+        qt6-declarative-private-devel \
+        qt6-tools-devel \
+        qt6-wayland-devel \
+        qt6-wayland-private-devel \
+        kf6-karchive-devel \
+        kf6-kcoreaddons-devel \
+        kf6-kcrash-devel \
+        kf6-kdbusaddons-devel \
+        kf6-kdeclarative-devel \
+        kf6-kglobalaccel-devel \
+        kf6-kguiaddons-devel \
+        kf6-ki18n-devel \
+        kf6-kiconthemes-devel \
+        kf6-kio-devel \
+        kf6-kirigami-devel \
+        kf6-knewstuff-devel \
+        kf6-knotifications-devel \
+        kf6-kpackage-devel \
+        kf6-ksvg-devel \
+        kf6-kwindowsystem-devel \
+        kf6-kxmlgui-devel \
+        kf6-kconfig-devel \
+        libplasma6-devel \
+        plasma6-activities-devel \
+        plasma6-workspace-devel \
+        kwayland6-devel \
+        plasma-wayland-protocols \
+        wayland-devel \
+        plasma6-workspace \
+        plasma6-activities-imports \
+        kf6-kwindowsystem-imports \
+        kpipewire6-imports \
+        plasma6-pa \
+        libX11-devel \
+        libSM-devel \
+        libICE-devel \
+        libxcb-devel \
+        xcb-util-devel \
+ && zypper --non-interactive clean --all
+
+WORKDIR /src
+
+COPY . /src
+
+# The prefix is the one of the distribution, the package installs where the rest of plasma
+# lives. LATTE_PACKAGE_RUNTIME_DEPENDS names the packages carrying the qml modules the
+# shipped files import, which nothing links against and no generator can therefore find.
+RUN cmake -S /src -B /src/build \
+        -G Ninja \
+        -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DBUILD_TESTING=ON \
+        -DLATTE_PACKAGE_RUNTIME_DEPENDS="plasma6-workspace,plasma6-activities-imports,kf6-kwindowsystem-imports,kpipewire6-imports"
+
+RUN cmake --build /src/build ${JOBS:+--parallel ${JOBS}}
+
+# Installing before testing on purpose, the appstream test validates the metadata that was
+# installed and the qml test compiles the shipped files against the installed qml modules
+RUN cmake --install /src/build
+
+ENV QT_QPA_PLATFORM=offscreen \
+    HOME=/tmp/latte-build-home
+RUN mkdir -p "${HOME}" \
+ && dbus-run-session -- ctest --test-dir /src/build --output-on-failure
+
+RUN cd /src/build \
+ && cpack -G RPM \
+ && mkdir -p /out \
+ && cp /src/build/*.rpm /out/ \
+ && rpm -qip /out/*.rpm \
+ && echo "files in the package: $(rpm -qlp /out/*.rpm | wc -l)" \
+ && rpm -qpR /out/*.rpm \
+ && ls -lh /out
+
+# Installing it as well, so a package that can not be installed fails here rather than on the
+# machine of whoever downloads it. The already installed tree is removed first, otherwise rpm
+# reports the very same files as conflicting with it.
+RUN xargs rm -f < /src/build/install_manifest.txt \
+ && zypper --non-interactive --no-gpg-checks install --allow-unsigned-rpm /out/*.rpm \
+ && rpm -q latte-dock
+
+# Carries only the package, for "--target artifact -o type=local,dest=./out"
+FROM scratch AS artifact
+COPY --from=builder /out/ /
