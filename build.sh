@@ -2,9 +2,9 @@
 #
 # Builds distribution packages of Latte in containers and puts them into ./dist.
 #
-#   ./build.sh              deb, rpm and aur
-#   ./build.sh --deb        only the deb
-#   ./build.sh --rpm --aur  the rpm and the arch/aur package
+#   ./build.sh                   deb, rpm, aur and appimage
+#   ./build.sh --deb             only the deb
+#   ./build.sh --rpm --appimage  the rpm and the appimage
 #
 # Every package is built by the image of the same name under packaging/, which compiles
 # Latte, runs the test suite and installs the package it produced, so what lands in ./dist
@@ -21,9 +21,10 @@ declare -A DOCKERFILES=(
     [deb]="packaging/Dockerfile.deb"
     [rpm]="packaging/Dockerfile.rpm"
     [aur]="packaging/Dockerfile.arch"
+    [appimage]="packaging/Dockerfile.appimage"
 )
 
-readonly ALL_TARGETS=(deb rpm aur)
+readonly ALL_TARGETS=(deb rpm aur appimage)
 
 ENGINE=""
 JOBS=""
@@ -42,7 +43,8 @@ Targets, all of them when none is given:
   --deb              debian package, built on ubuntu
   --rpm              rpm package, built on opensuse tumbleweed
   --aur              arch package, built from packaging/PKGBUILD
-  --all              the three above, the default
+  --appimage         appimage, built on ubuntu, runs on a plasma 6 session
+  --all              the four above, the default
 
 Options:
   --clean            empty ./dist before building
@@ -80,7 +82,7 @@ parse_arguments()
 {
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --deb|--rpm|--aur)
+            --deb|--rpm|--aur|--appimage)
                 targets+=("${1#--}")
                 ;;
             --arch)
@@ -173,7 +175,7 @@ build_target()
         fi
 
         packages+=("${file}")
-    done < <(find "${exported}" -type f \( -name '*.deb' -o -name '*.rpm' -o -name '*.pkg.tar.zst' \) | sort)
+    done < <(find "${exported}" -type f \( -name '*.deb' -o -name '*.rpm' -o -name '*.pkg.tar.zst' -o -name '*.AppImage' \) | sort)
 
     if [[ ${#packages[@]} -eq 0 ]]; then
         rm -rf "${exported}"

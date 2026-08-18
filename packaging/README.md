@@ -9,7 +9,7 @@ The usual way in is [`../build.sh`](../build.sh), which builds the packages and 
 into `dist/`:
 
 ```
-./build.sh              # deb, rpm and aur
+./build.sh              # deb, rpm, aur and appimage
 ./build.sh --deb --rpm  # only those two
 ./build.sh --clean      # empty dist/ first
 ```
@@ -24,6 +24,7 @@ All of them take the repository root as their context, so they are run from ther
 | `.deb`                   | `podman build -f packaging/Dockerfile.deb -t latte-dock:deb .`                     |
 | `.rpm`                   | `podman build -f packaging/Dockerfile.rpm -t latte-dock:rpm .`                     |
 | `.pkg.tar.zst` (arch/aur)| `podman build -f packaging/Dockerfile.arch -t latte-dock:arch .`                   |
+| `.AppImage`              | `podman build -f packaging/Dockerfile.appimage -t latte-dock:appimage .`           |
 | plain install tree       | `podman build -f build.Dockerfile -t latte-dock .` (the root image, produces a tarball)  |
 
 `docker` understands the same files and the same arguments.
@@ -53,9 +54,23 @@ dependencies and runs the test suite in its `check()`.
 | `Dockerfile.deb`  | `ubuntu:25.10`        | Debian ships no cmake package for the private Qt gui module, which the x11 code needs for `qtx11extras_p.h`            |
 | `Dockerfile.rpm`  | `opensuse/tumbleweed` | rolling, so it follows Plasma 6 and KF6 closely                                                                        |
 | `Dockerfile.arch` | `archlinux:base-devel`| the distribution the aur recipe targets                                                                                |
+| `Dockerfile.appimage` | `ubuntu:25.10`    | same reason as the deb, and the AppImage then needs a host whose glibc is at least that new                            |
 
 They are pinned to `linux/amd64`, so the result is an x86_64 package whatever the machine
 running the build is.
+
+## The AppImage
+
+`Dockerfile.appimage` installs Latte into an AppDir, adds the qml modules, plugins and plasma
+package files nothing links against and therefore no tool can find, and lets `linuxdeploy`
+with its qt plugin pull in the libraries. The result is unpacked again at the end of the
+build and the binary inside it is started, so an AppImage that can not run fails the build.
+
+It carries Latte with Qt, the KDE frameworks and the plasma libraries, around 170M of them.
+What it can not carry is the session Latte docks into: it talks to kwin, plasmashell and the
+activity manager of the machine it runs on, so a Plasma 6 session still has to be there. It
+is for running this build on a distribution whose own packages are older, not for running
+Latte without Plasma.
 
 ## Publishing the arch package on the aur
 
