@@ -25,14 +25,16 @@ RUN pacman -Syu --noconfirm --needed base-devel git sudo \
 USER builder
 WORKDIR /home/builder/build
 
-# The sources arrive as the tarball the recipe expects, named after the version the recipe
-# declares, so that the very same file works unchanged on the aur once its source line points
-# at a release instead.
+# The sources arrive as the tarball the recipe expects, named after the version the sources
+# declare, so that the very same file works unchanged on the aur once its source line points
+# at a release instead. The recipe carries that version too, and is stamped with it here so
+# that a package built from the working tree can not claim a version the tree does not have.
 COPY --chown=builder:builder packaging/PKGBUILD ./PKGBUILD
 COPY --chown=builder:builder . ./tree
 
 RUN set -eu \
- && version="$(sed -n 's/^pkgver=//p' PKGBUILD)" \
+ && version="$(sed -n 's/^set(VERSION *\([^)]*\))/\1/p' tree/CMakeLists.txt | head -1)" \
+ && sed -i "s/^pkgver=.*/pkgver=${version}/" PKGBUILD \
  && rm -rf "tree/build" "tree/.git" \
  && mv tree "latte-dock-${version}" \
  && tar -czf "latte-dock-${version}.tar.gz" "latte-dock-${version}" \

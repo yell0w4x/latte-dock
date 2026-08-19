@@ -9,8 +9,9 @@ The usual way in is [`../build.sh`](../build.sh), which builds the packages and 
 into `dist/`:
 
 ```
-./build.sh              # deb, rpm, aur and appimage
+./build.sh              # deb, rpm, aur, appimage and the binary tarball
 ./build.sh --deb --rpm  # only those two
+./build.sh --bin        # only the binary tarball
 ./build.sh --clean      # empty dist/ first
 ```
 
@@ -25,7 +26,7 @@ All of them take the repository root as their context, so they are run from ther
 | `.rpm`                   | `podman build -f packaging/Dockerfile.rpm -t latte-dock:rpm .`                     |
 | `.pkg.tar.zst` (arch/aur)| `podman build -f packaging/Dockerfile.arch -t latte-dock:arch .`                   |
 | `.AppImage`              | `podman build -f packaging/Dockerfile.appimage -t latte-dock:appimage .`           |
-| plain install tree       | `podman build -f build.Dockerfile -t latte-dock .` (the root image, produces a tarball)  |
+| `.tar.gz` of the install tree | `podman build -f build.Dockerfile -t latte-dock .` (the root image, `--bin` in the script) |
 
 `docker` understands the same files and the same arguments.
 

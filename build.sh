@@ -2,13 +2,15 @@
 #
 # Builds distribution packages of Latte in containers and puts them into ./dist.
 #
-#   ./build.sh                   deb, rpm, aur and appimage
+#   ./build.sh                   deb, rpm, aur, appimage and the binary tarball
 #   ./build.sh --deb             only the deb
 #   ./build.sh --rpm --appimage  the rpm and the appimage
+#   ./build.sh --bin             only the binary tarball
 #
 # Every package is built by the image of the same name under packaging/, which compiles
 # Latte, runs the test suite and installs the package it produced, so what lands in ./dist
-# has been built and installed at least once.
+# has been built and installed at least once. The binary tarball comes from build.Dockerfile
+# in the root, which is the plain install tree of the same build.
 
 set -euo pipefail
 
@@ -22,9 +24,10 @@ declare -A DOCKERFILES=(
     [rpm]="packaging/Dockerfile.rpm"
     [aur]="packaging/Dockerfile.arch"
     [appimage]="packaging/Dockerfile.appimage"
+    [bin]="build.Dockerfile"
 )
 
-readonly ALL_TARGETS=(deb rpm aur appimage)
+readonly ALL_TARGETS=(deb rpm aur appimage bin)
 
 ENGINE=""
 JOBS=""
@@ -44,7 +47,8 @@ Targets, all of them when none is given:
   --rpm              rpm package, built on opensuse tumbleweed
   --aur              arch package, built from packaging/PKGBUILD
   --appimage         appimage, built on ubuntu, runs on a plasma 6 session
-  --all              the four above, the default
+  --bin              binary tarball of the install tree, from build.Dockerfile
+  --all              the five above, the default
 
 Options:
   --clean            empty ./dist before building
@@ -82,7 +86,7 @@ parse_arguments()
 {
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --deb|--rpm|--aur|--appimage)
+            --deb|--rpm|--aur|--appimage|--bin)
                 targets+=("${1#--}")
                 ;;
             --arch)
@@ -134,11 +138,11 @@ parse_arguments()
     mapfile -t targets < <(printf '%s\n' "${targets[@]}" | awk '!seen[$0]++')
 }
 
-#! Builds one target and copies the packages it produced into ./dist.
+#! Builds one target and copies what it produced into ./dist.
 #!
 #! The images carry their result in an "artifact" stage holding nothing else, which is
 #! exported into a directory of its own first; that stage also carries the recipe of the
-#! arch build, and only packages are wanted here.
+#! arch build, and only the packages and the tarball are wanted here.
 build_target()
 {
     local target="$1"
@@ -175,11 +179,12 @@ build_target()
         fi
 
         packages+=("${file}")
-    done < <(find "${exported}" -type f \( -name '*.deb' -o -name '*.rpm' -o -name '*.pkg.tar.zst' -o -name '*.AppImage' \) | sort)
+    done < <(find "${exported}" -type f \( -name '*.deb' -o -name '*.rpm' -o -name '*.pkg.tar.zst' \
+                                        -o -name '*.AppImage' -o -name '*.tar.gz' \) | sort)
 
     if [[ ${#packages[@]} -eq 0 ]]; then
         rm -rf "${exported}"
-        echo "==> ${target}: the image produced no package" >&2
+        echo "==> ${target}: the image produced nothing to collect" >&2
         return 1
     fi
 
@@ -216,7 +221,7 @@ main()
 
     echo
     echo "built: ${built[*]:-none}"
-    echo "packages in dist/:"
+    echo "in dist/:"
     find "${DIST}" -maxdepth 1 -type f -printf '  %f\n' | sort
 
     if [[ ${#failed[@]} -gt 0 ]]; then

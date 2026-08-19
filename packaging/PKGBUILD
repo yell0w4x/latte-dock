@@ -10,7 +10,7 @@
 # and drop the _srcdir line, the tarball then unpacks into "$pkgname-$pkgver" already.
 
 pkgname=latte-dock
-pkgver=0.10.240
+pkgver=1.10.240
 pkgrel=1
 pkgdesc="Dock and panel for the Plasma desktop"
 arch=('x86_64')
