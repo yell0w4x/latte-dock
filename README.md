@@ -126,47 +126,6 @@ The tests that talk over dbus, e.g. the one covering the window selection Latte 
 need a session bus. In a session there already is one; without it, run them under
 `dbus-run-session -- ctest --test-dir build`. Every container build above runs the same suite.
 
-## From distribution repositories
-
-These are the packages the distributions build themselves, which for most of them are still
-the Plasma 5 releases of Latte. To run this tree on Plasma 6, build it with `./build.sh` or
-from source as described above.
-
-### Ubuntu/Debian
-
-- [Ubuntu](https://packages.ubuntu.com/bionic/latte-dock)
-
-### openSUSE
-
-- [openSUSE](https://software.opensuse.org/package/latte-dock?search_term=latte+dock)
-- [psifidotos - OBS](https://software.opensuse.org//download.html?project=home%3Apsifidotos&package=latte-dock)
-
-### Fedora
-
-- [Fedora](https://koji.fedoraproject.org/koji/packageinfo?packageID=24229)
-
-### Arch Linux
-
-- [Arch Linux](https://www.archlinux.org/packages/?sort=&q=latte-dock)
-
-### Gentoo
-
-- [Gentoo](https://packages.gentoo.org/packages/kde-misc/latte-dock)
-
-### Solus Project
-
-- [Solus](https://packages.solus-project.com/shannon/l/latte-dock/)
-
-### Void Linux
-
-- [Void Linux](https://github.com/void-linux/void-packages/tree/master/srcpkgs/latte-dock)
-
-### FreeBSD
-- [FreeBSD Port](https://www.freshports.org/deskutils/latte-dock/)
-
-[INSTALLATION.md](./INSTALLATION.md) carries the upstream instructions for other distributions.
-They name the KF5 and Qt 5 packages of the Plasma 5 releases and have not been ported.
-
 ## Run Latte-Dock
 
 Latte is now ready to be used by executing
