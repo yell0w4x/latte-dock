@@ -1,0 +1,261 @@
+# Builds the AppImage on ubuntu, the variant that runs on older hosts.
+#
+#   podman build -f packaging/Dockerfile.appimage-ubuntu -t latte-dock:appimage-ubuntu .
+#   podman build -f packaging/Dockerfile.appimage-ubuntu --target artifact -o type=local,dest=./out .
+#
+# docker understands the same file. The context is the repository root, so both commands are
+# run from there.
+#
+# The result is a single executable Latte_Dock-<version>-ubuntu-x86_64.AppImage carrying Latte
+# with the Qt, KDE frameworks and plasma libraries it links, the qml modules its shipped qml
+# imports and the plasma plugins and package files it reads.
+#
+# What it can not carry is the session it docks into: Latte talks to kwin, plasmashell and
+# the activity manager of the machine it runs on, so the AppImage needs a Plasma 6 session
+# around it.
+#
+# It also can not carry Latte Tasks. The tasks plasmoid is built on the task manager applet,
+# which plasma publishes as a compiled applet plugin
+# ("plasma/applets/org.kde.plasma.taskmanager.so") only since Plasma 6.5, and ubuntu 25.10 is
+# on 6.4, where that plugin exists nowhere. Latte comes up, its containments and the other
+# applets come up, and the tasks of the dock stay away. The arch variant next to this file
+# carries them and is the one to reach for where the host is new enough to run it.
+#
+# What this variant is for is the glibc of the host. It is built against the one of ubuntu
+# 25.10 rather than the one of a rolling distribution, so it starts on hosts an AppImage
+# built on arch refuses to load on at all.
+
+ARG BASE_IMAGE=docker.io/library/ubuntu:25.10
+
+FROM --platform=linux/amd64 ${BASE_IMAGE} AS builder
+
+ARG BUILD_TYPE=Release
+ARG JOBS=
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# The toolchain and dependencies of the deb build, plus what the bundling needs: wget for the
+# linuxdeploy tools, and the runtime packages whose plugins, qml modules and package files are
+# copied into the AppImage rather than only linked against.
+RUN apt-get update \
+ && apt-get install --no-install-recommends -y \
+        build-essential \
+        g++ \
+        cmake \
+        ninja-build \
+        git \
+        ca-certificates \
+        wget \
+        file \
+        desktop-file-utils \
+        zsync \
+        dbus \
+        appstream \
+        extra-cmake-modules \
+        googletest \
+        libgtest-dev \
+        libgmock-dev \
+        qt6-base-dev \
+        qt6-base-private-dev \
+        qt6-declarative-dev \
+        qt6-declarative-private-dev \
+        qt6-tools-dev \
+        qt6-wayland-dev \
+        libkf6archive-dev \
+        libkf6coreaddons-dev \
+        libkf6crash-dev \
+        libkf6dbusaddons-dev \
+        libkf6declarative-dev \
+        libkf6globalaccel-dev \
+        libkf6guiaddons-dev \
+        libkf6i18n-dev \
+        libkf6iconthemes-dev \
+        libkf6kio-dev \
+        libkirigami-dev \
+        libkf6newstuff-dev \
+        libkf6notifications-dev \
+        libkf6package-dev \
+        libkf6svg-dev \
+        libkf6windowsystem-dev \
+        libkf6xmlgui-dev \
+        libkf6config-dev \
+        libplasma-dev \
+        libplasmaactivities-dev \
+        plasma-workspace-dev \
+        kwayland-dev \
+        plasma-wayland-protocols \
+        libwayland-dev \
+        plasma-workspace \
+        plasma-desktop \
+        plasma-desktoptheme \
+        qml6-module-org-kde-kirigami \
+        qml6-module-org-kde-ksvg \
+        qml6-module-org-kde-activities \
+        qml6-module-org-kde-kwindowsystem \
+        qml6-module-org-kde-pipewire \
+        qml6-module-org-kde-plasma-plasma5support \
+        qml6-module-qt5compat-graphicaleffects \
+        libx11-dev \
+        libsm-dev \
+        libice-dev \
+        libxcb1-dev \
+        libxcb-util-dev \
+        libxcb-shape0-dev \
+        libxcb-randr0-dev \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+
+COPY . /src
+
+RUN cmake -S /src -B /src/build \
+        -G Ninja \
+        -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_SUPPRESS_REGENERATION=ON \
+        -DBUILD_TESTING=ON
+
+RUN cmake --build /src/build ${JOBS:+--parallel ${JOBS}}
+
+# Installing into the system as well as into the AppDir: the tests below compile the shipped
+# qml against the installed modules and validate the installed metadata, the qml modules of
+# Latte are picked up from the system by the qt plugin of linuxdeploy, and the AppDir is what
+# the AppImage is made of.
+RUN cmake --install /src/build \
+ && DESTDIR=/AppDir cmake --install /src/build
+
+ENV QT_QPA_PLATFORM=offscreen \
+    HOME=/tmp/latte-build-home
+RUN mkdir -p "${HOME}" \
+ && dbus-run-session -- ctest --test-dir /src/build --output-on-failure
+
+# The plugins, qml modules and package files Latte reaches for at runtime. Nothing links
+# against these, so no tool can find them by walking the libraries, and the dock comes up
+# empty without them.
+#
+# The plugins go where usr/bin/qt.conf points Qt at, "usr/plugins", and not into the qt
+# directory they are installed in; the second one is searched by nothing inside an AppImage.
+# kpackage carries the structures that make a plasma package readable at all, plasma the
+# applets. The task manager applet is not among them on this base, see the note at the top.
+RUN set -eu \
+ && qtdir="/usr/lib/x86_64-linux-gnu/qt6" \
+ && mkdir -p "/AppDir/usr/plugins" "/AppDir/usr/qml" "/AppDir/usr/share" \
+ && for plugins in plasma kpackage kf6 kcms styles platformthemes ; do \
+        if [ -d "${qtdir}/plugins/${plugins}" ]; then \
+            cp -a "${qtdir}/plugins/${plugins}" "/AppDir/usr/plugins/" ; \
+        fi ; \
+    done \
+ && for module in \
+        org/kde/latte \
+        org/kde/plasma \
+        org/kde/kirigami \
+        org/kde/ksvg \
+        org/kde/taskmanager \
+        org/kde/pipewire \
+        org/kde/activities \
+        org/kde/kwindowsystem \
+        org/kde/kquickcontrolsaddons \
+        org/kde/config \
+        org/kde/kcmutils \
+        org/kde/kitemmodels \
+        org/kde/coreaddons \
+        org/kde/draganddrop \
+        org/kde/notification \
+        Qt5Compat/GraphicalEffects ; do \
+        if [ -d "${qtdir}/qml/${module}" ]; then \
+            mkdir -p "/AppDir/usr/qml/$(dirname ${module})" ; \
+            cp -a "${qtdir}/qml/${module}" "/AppDir/usr/qml/$(dirname ${module})/" ; \
+        fi ; \
+    done \
+ && for data in plasma kservicetypes6 kf6 knotifications6 ; do \
+        if [ -d "/usr/share/${data}" ]; then \
+            cp -a "/usr/share/${data}" "/AppDir/usr/share/" ; \
+        fi ; \
+    done \
+ && test -d "/AppDir/usr/plugins/kpackage/packagestructure" \
+ && test -d "/AppDir/usr/share/plasma/plasmoids/org.kde.latte.containment"
+
+# linuxdeploy walks the binary and everything it loads and pulls the libraries in; its qt
+# plugin does the same for the qt plugins and the qml modules named below. Both are AppImages
+# themselves, and the extract and run mode is what lets them run in a container, which has no
+# fuse.
+#! NO_APPSTREAM keeps appimagetool from validating the metadata a second time. It refuses
+#! any warning at all, and the one it finds is cid-rdns-contains-hyphen: the component id of
+#! Latte is org.kde.latte-dock.desktop and the hyphen in it is how Latte is published. The
+#! test suite validates that same metadata a few steps above and accepts only that warning,
+#! see cmake/LatteAppstreamTest.cmake.
+#! The qt plugin deploys the xcb platform on its own. Latte also runs on wayland sessions,
+#! and the offscreen one is what lets the checks at the end start the bundled binary without
+#! a display of any kind.
+ENV APPIMAGE_EXTRACT_AND_RUN=1 \
+    NO_APPSTREAM=1 \
+    DISABLE_COPYRIGHT_FILES_DEPLOYMENT=1 \
+    QMAKE=/usr/lib/qt6/bin/qmake6 \
+    EXTRA_QT_MODULES="waylandcompositor" \
+    EXTRA_PLATFORM_PLUGINS="libqwayland-generic.so;libqwayland-egl.so;libqoffscreen.so;libqminimal.so" \
+    QML_SOURCES_PATHS=/src
+
+RUN set -eu \
+ && cd /tmp \
+ && wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage \
+ && wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage \
+ && chmod +x linuxdeploy-x86_64.AppImage linuxdeploy-plugin-qt-x86_64.AppImage
+
+# The desktop file Latte installs starts the binary by its full path, which inside an
+# AppImage points at whatever the host has rather than at what is bundled. The copy in the
+# AppDir names it plainly, so the one next to it is the one that runs.
+RUN sed -i 's|^Exec=.*|Exec=latte-dock|' \
+        /AppDir/usr/share/applications/org.kde.latte-dock.desktop
+
+# The version reaches the file name of the AppImage through this, the way linuxdeploy expects
+# it to be given, and the name says which base it was built on.
+#! --deploy-deps-only names the directories that were filled in above: the libraries those
+#! plugins and qml plugins need are pulled in and their rpath is rewritten to the bundled
+#! ones, which is what linuxdeploy does on its own only for what it copied itself.
+#! --custom-apprun replaces the symlink linuxdeploy would leave behind with the script that
+#! points XDG_DATA_DIRS at the plasma package files of the bundle, see packaging/AppRun.
+RUN set -eu \
+ && export VERSION="$(sed -n 's/^set(VERSION *\([^)]*\))/\1/p' /src/CMakeLists.txt | head -1)" \
+ && mkdir -p /out \
+ && cd /out \
+ && /tmp/linuxdeploy-x86_64.AppImage \
+        --appdir /AppDir \
+        --executable /AppDir/usr/bin/latte-dock \
+        --custom-apprun=/src/packaging/AppRun \
+        --deploy-deps-only=/AppDir/usr/plugins \
+        --deploy-deps-only=/AppDir/usr/qml \
+        --plugin qt \
+        --desktop-file /AppDir/usr/share/applications/org.kde.latte-dock.desktop \
+        --icon-file /AppDir/usr/share/icons/hicolor/scalable/apps/latte-dock.svg \
+        --output appimage \
+ && mv /out/Latte_Dock-"${VERSION}"-x86_64.AppImage "/out/Latte_Dock-${VERSION}-ubuntu-x86_64.AppImage" \
+ && chmod +x /out/*.AppImage \
+ && ls -lh /out
+
+# Unpacking it again and starting what it carries, so an AppImage that can not run at all
+# fails the build here.
+#
+# It starts twice: once for its version, and once with a home of its own, where it imports the
+# default layout, and what it says about that is read back. The arch variant is asked whether
+# the tasks plasmoid came up, which can not be asked here; what is left is whether the corona
+# found its shell package and every package the layout names, which is what the AppRun and the
+# plugins above are there for and what breaks silently when either of them is wrong. Latte has
+# no session to dock into here, so it is left running for a while and then stopped.
+RUN set -eu \
+ && cd /tmp \
+ && /out/*.AppImage --appimage-extract > /dev/null \
+ && ./squashfs-root/AppRun --version \
+ && grep -q XDG_DATA_DIRS ./squashfs-root/AppRun \
+ && export HOME=/tmp/latte-appimage-home \
+ && mkdir -p "${HOME}" \
+ && dbus-run-session -- timeout 40 ./squashfs-root/AppRun --debug > /tmp/appimage-check.log 2>&1 || true \
+ && ! grep -q "Failed to load fallback plasma shell package" /tmp/appimage-check.log \
+ && ! grep -q "the package QJsonObject() is invalid" /tmp/appimage-check.log \
+ && ! grep -q "does not exist" /tmp/appimage-check.log \
+ && rm -rf /tmp/squashfs-root
+
+# Carries only the AppImage, for "--target artifact -o type=local,dest=./out"
+FROM scratch AS artifact
+COPY --from=builder /out/ /

@@ -1,12 +1,15 @@
-# Builds the AppImage.
+# Builds the AppImage on arch, the variant that carries a plasma new enough for Latte Tasks.
 #
-#   podman build -f packaging/Dockerfile.appimage -t latte-dock:appimage .
-#   podman build -f packaging/Dockerfile.appimage --target artifact -o type=local,dest=./out .
+#   podman build -f packaging/Dockerfile.appimage-arch -t latte-dock:appimage-arch .
+#   podman build -f packaging/Dockerfile.appimage-arch --target artifact -o type=local,dest=./out .
+#
+# The other variant, packaging/Dockerfile.appimage-ubuntu, runs on older hosts and can not
+# bring up Latte Tasks; the two are described next to each other in packaging/README.md.
 #
 # docker understands the same file. The context is the repository root, so both commands are
 # run from there.
 #
-# The result is a single executable Latte_Dock-<version>-x86_64.AppImage carrying Latte with
+# The result is a single executable Latte_Dock-<version>-arch-x86_64.AppImage carrying Latte with
 # the Qt, KDE frameworks and plasma libraries it links, the qml modules its shipped qml
 # imports, the plasma plugins and package files it reads and the plasma applets its layouts
 # are built from.
@@ -157,6 +160,8 @@ RUN set -eu \
             cp -a "/usr/share/${data}" "/AppDir/usr/share/" ; \
         fi ; \
     done \
+ && test -d "/AppDir/usr/plugins/kpackage/packagestructure" \
+ && test -d "/AppDir/usr/share/plasma/plasmoids/org.kde.latte.containment" \
  && test -f "/AppDir/usr/plugins/plasma/applets/org.kde.plasma.taskmanager.so"
 
 # linuxdeploy walks the binary and everything it loads and pulls the libraries in; its qt
@@ -217,6 +222,7 @@ RUN set -eu \
         --desktop-file /AppDir/usr/share/applications/org.kde.latte-dock.desktop \
         --icon-file /AppDir/usr/share/icons/hicolor/scalable/apps/latte-dock.svg \
         --output appimage \
+ && mv /out/Latte_Dock-"${VERSION}"-x86_64.AppImage "/out/Latte_Dock-${VERSION}-arch-x86_64.AppImage" \
  && chmod +x /out/*.AppImage \
  && ls -lh /out
 
@@ -225,18 +231,23 @@ RUN set -eu \
 #
 # The first check is that it starts, finds its libraries and answers for its version. The
 # second one starts it the way a session would, with a home of its own so that it imports the
-# default layout, and reads what it says about itself: the dock of that layout is built from
-# the tasks plasmoid, which needs the task manager applet plugin and the plasma packages of
-# the bundle, and an AppImage that carries neither still starts and shows an empty dock. That
-# is the failure this catches. Latte has no session to dock into here, so it is left running
-# for a while and then stopped.
+# default layout, and reads what it says about itself. Two failures hide there, and an
+# AppImage with either still starts and shows an empty dock:
+#
+# without the plasma package files, the corona finds no shell package and says so, and
+# without the task manager applet plugin the tasks of the dock stay away and it says that too.
+#
+# Latte has no session to dock into here, so it is left running for a while and then stopped.
 RUN set -eu \
  && cd /tmp \
  && /out/*.AppImage --appimage-extract > /dev/null \
  && ./squashfs-root/AppRun --version \
+ && grep -q XDG_DATA_DIRS ./squashfs-root/AppRun \
  && export HOME=/tmp/latte-appimage-home \
  && mkdir -p "${HOME}" \
  && dbus-run-session -- timeout 40 ./squashfs-root/AppRun --debug > /tmp/appimage-check.log 2>&1 || true \
+ && ! grep -q "Failed to load fallback plasma shell package" /tmp/appimage-check.log \
+ && ! grep -q "the package QJsonObject() is invalid" /tmp/appimage-check.log \
  && grep -q "Task manager applet qml types registered" /tmp/appimage-check.log \
  && ! grep -q "Latte Tasks will not be available" /tmp/appimage-check.log \
  && ! grep -q "is not installed" /tmp/appimage-check.log \

@@ -79,10 +79,11 @@ Minimum requirements:
 It needs podman or docker and nothing else, the build dependencies live in the images.
 
 ```
-./build.sh                   # deb, rpm, aur, appimage and the binary tarball
-./build.sh --deb             # only one of them
-./build.sh --rpm --appimage  # or a few
-./build.sh --clean           # empty dist/ first
+./build.sh                     # deb, rpm, aur, both appimages and the binary tarball
+./build.sh --deb               # only one of them
+./build.sh --rpm --appimage    # or a few
+./build.sh --appimage-arch     # one appimage variant on its own
+./build.sh --clean             # empty dist/ first
 ```
 
 | Target       | Result                                    | Built on            |
@@ -90,7 +91,8 @@ It needs podman or docker and nothing else, the build dependencies live in the i
 | `--deb`      | `latte-dock_<version>_amd64.deb`          | ubuntu              |
 | `--rpm`      | `latte-dock-<version>-1.x86_64.rpm`       | opensuse tumbleweed |
 | `--aur`      | `latte-dock-<version>-1-x86_64.pkg.tar.zst` | arch, from [packaging/PKGBUILD](packaging/PKGBUILD) |
-| `--appimage` | `Latte_Dock-<version>-x86_64.AppImage`    | arch                |
+| `--appimage-arch` | `Latte_Dock-<version>-arch-x86_64.AppImage`    | arch           |
+| `--appimage-ubuntu` | `Latte_Dock-<version>-ubuntu-x86_64.AppImage` | ubuntu       |
 | `--bin`      | `latte-dock-<version>-x86_64.tar.gz`, the plain install tree | opensuse tumbleweed |
 
 Each image compiles Latte, runs the test suite, builds its package and installs it inside the
@@ -98,14 +100,16 @@ image, so a package that does not build or does not install fails there rather t
 machine of whoever downloads it. [packaging/README.md](packaging/README.md) describes the
 images and how to publish the arch recipe on the aur.
 
-The AppImage carries Qt, the KDE frameworks and the plasma libraries and applets, but not the
+The AppImages carry Qt, the KDE frameworks and the plasma libraries and applets, but not the
 session Latte docks into: it talks to kwin, plasmashell and the activity manager of the
 machine it runs on, so a Plasma 6 session still has to be there.
 
-Latte Tasks is built on the task manager applet, which plasma publishes as a compiled applet
-plugin since Plasma 6.5. On an older plasma the dock comes up without it. That is why the
-AppImage is built on arch, and why the deb, built on the ubuntu that is still on Plasma 6.4,
-is only useful on a release that has caught up.
+They come in two variants because no single one can do both things. Latte Tasks is built on
+the task manager applet, which plasma publishes as a compiled applet plugin since Plasma 6.5,
+so the arch variant has tasks and needs a host as new as arch; the ubuntu variant is built
+against an older glibc and loads on hosts the arch one refuses to start on, and its dock comes
+up without tasks. The deb, built on that same ubuntu, carries the same limitation until ubuntu
+ships Plasma 6.5.
 
 ## Building from source
 

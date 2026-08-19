@@ -2,10 +2,11 @@
 #
 # Builds distribution packages of Latte in containers and puts them into ./dist.
 #
-#   ./build.sh                   deb, rpm, aur, appimage and the binary tarball
-#   ./build.sh --deb             only the deb
-#   ./build.sh --rpm --appimage  the rpm and the appimage
-#   ./build.sh --bin             only the binary tarball
+#   ./build.sh                     deb, rpm, aur, both appimages and the binary tarball
+#   ./build.sh --deb               only the deb
+#   ./build.sh --rpm --appimage    the rpm and both appimages
+#   ./build.sh --appimage-arch     only the appimage built on arch
+#   ./build.sh --bin               only the binary tarball
 #
 # Every package is built by the image of the same name under packaging/, which compiles
 # Latte, runs the test suite and installs the package it produced, so what lands in ./dist
@@ -19,15 +20,20 @@ readonly DIST="${ROOT}/dist"
 
 #! the file each target is built from, the aur one produces the arch package its recipe
 #! describes
+#!
+#! The appimage comes in two variants, which differ in the plasma and the glibc they carry:
+#! the one built on arch can bring up Latte Tasks and needs a host as new as arch, the one
+#! built on ubuntu runs on older hosts and can not. packaging/README.md has the whole story.
 declare -A DOCKERFILES=(
     [deb]="packaging/Dockerfile.deb"
     [rpm]="packaging/Dockerfile.rpm"
     [aur]="packaging/Dockerfile.arch"
-    [appimage]="packaging/Dockerfile.appimage"
+    [appimage-arch]="packaging/Dockerfile.appimage-arch"
+    [appimage-ubuntu]="packaging/Dockerfile.appimage-ubuntu"
     [bin]="build.Dockerfile"
 )
 
-readonly ALL_TARGETS=(deb rpm aur appimage bin)
+readonly ALL_TARGETS=(deb rpm aur appimage-arch appimage-ubuntu bin)
 
 ENGINE=""
 JOBS=""
@@ -46,9 +52,11 @@ Targets, all of them when none is given:
   --deb              debian package, built on ubuntu
   --rpm              rpm package, built on opensuse tumbleweed
   --aur              arch package, built from packaging/PKGBUILD
-  --appimage         appimage, built on ubuntu, runs on a plasma 6 session
+  --appimage-arch    appimage built on arch, carries Latte Tasks, needs a host as new
+  --appimage-ubuntu  appimage built on ubuntu, runs on older hosts, no Latte Tasks
+  --appimage         both appimages
   --bin              binary tarball of the install tree, from build.Dockerfile
-  --all              the five above, the default
+  --all              the six above, the default
 
 Options:
   --clean            empty ./dist before building
@@ -86,8 +94,12 @@ parse_arguments()
 {
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --deb|--rpm|--aur|--appimage|--bin)
+            --deb|--rpm|--aur|--appimage-arch|--appimage-ubuntu|--bin)
                 targets+=("${1#--}")
+                ;;
+            --appimage)
+                #! the two variants of it, whoever wants one of them asks for it by name
+                targets+=(appimage-arch appimage-ubuntu)
                 ;;
             --arch)
                 #! the arch package and the aur recipe are the same thing

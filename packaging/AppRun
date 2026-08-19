@@ -1,0 +1,23 @@
+#!/bin/sh
+#
+# Entry point of the AppImage, handed to linuxdeploy as --custom-apprun.
+#
+# The one linuxdeploy writes on its own is a symlink to the binary, which is enough for the
+# libraries, since those are found through the rpath it patches into them, and for the qt
+# plugins and qml modules, which usr/bin/qt.conf points at.
+#
+# What no rpath and no qt.conf can point at are the plasma package files: the latte
+# containment, the latte tasks applet, the indicators, the layout templates and the plasma
+# applets next to them are read through XDG_DATA_DIRS, and the directory they live in only
+# exists once the AppImage is mounted, so it has to be named here.
+#
+# The bundle comes first and the directories of the host follow it, so that the packages of
+# a host whose plasma is older than this build do not shadow the ones that were built with
+# it, while everything the bundle does not carry, e.g. the icon theme and the applets of the
+# session, is still found where it is.
+
+HERE="$(dirname "$(readlink -f "$0")")"
+
+export XDG_DATA_DIRS="${HERE}/usr/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+
+exec "${HERE}/usr/bin/latte-dock" "$@"
