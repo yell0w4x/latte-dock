@@ -39,15 +39,18 @@ depends=('karchive'
          'libsm'
          'libxcb'
          'plasma-activities'
+         'plasma-desktop'
          'plasma-workspace'
          'qt6-base'
          'qt6-declarative'
          'wayland'
          'xcb-util')
 
-# plasma-workspace carries the task manager qml the tasks applet builds on and kpipewire the
-# window previews, qt6-wayland is what the dock runs on in a wayland session
+# plasma-desktop carries the task manager applet plugin the tasks applet builds on and
+# plasma-workspace the shell it is read through, kpipewire the window previews, qt6-wayland is
+# what the dock runs on in a wayland session
 optdepends=('kpipewire: window previews'
+            'plasma-pa: audio badges on tasks'
             'qt6-wayland: wayland session support')
 
 makedepends=('extra-cmake-modules'

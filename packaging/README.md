@@ -55,23 +55,41 @@ dependencies and runs the test suite in its `check()`.
 | `Dockerfile.deb`  | `ubuntu:25.10`        | Debian ships no cmake package for the private Qt gui module, which the x11 code needs for `qtx11extras_p.h`            |
 | `Dockerfile.rpm`  | `opensuse/tumbleweed` | rolling, so it follows Plasma 6 and KF6 closely                                                                        |
 | `Dockerfile.arch` | `archlinux:base-devel`| the distribution the aur recipe targets                                                                                |
-| `Dockerfile.appimage` | `ubuntu:25.10`    | same reason as the deb, and the AppImage then needs a host whose glibc is at least that new                            |
+| `Dockerfile.appimage` | `archlinux:base-devel` | the AppImage carries plasma itself, and Latte Tasks needs the compiled task manager applet plugin that only Plasma 6.5 and later have |
 
 They are pinned to `linux/amd64`, so the result is an x86_64 package whatever the machine
 running the build is.
 
 ## The AppImage
 
-`Dockerfile.appimage` installs Latte into an AppDir, adds the qml modules, plugins and plasma
+`Dockerfile.appimage` installs Latte into an AppDir, adds the plugins, qml modules and plasma
 package files nothing links against and therefore no tool can find, and lets `linuxdeploy`
-with its qt plugin pull in the libraries. The result is unpacked again at the end of the
-build and the binary inside it is started, so an AppImage that can not run fails the build.
+with its qt plugin pull in the libraries.
 
-It carries Latte with Qt, the KDE frameworks and the plasma libraries, around 170M of them.
-What it can not carry is the session Latte docks into: it talks to kwin, plasmashell and the
-activity manager of the machine it runs on, so a Plasma 6 session still has to be there. It
-is for running this build on a distribution whose own packages are older, not for running
-Latte without Plasma.
+Three things have to be pointed at explicitly, and an AppImage missing any of them still
+starts, only to show a dock with nothing in it:
+
+- the plugins go to `usr/plugins`, where `usr/bin/qt.conf` points Qt, and not into the qt
+  directory they are installed in, which nothing inside an AppImage searches. `plasma`
+  carries the applets, among them the task manager applet Latte Tasks is built on, and
+  `kpackage` the structures that make a plasma package readable at all
+- `--deploy-deps-only` hands those directories back to `linuxdeploy`, which pulls in the
+  libraries they need and rewrites their rpath, something it does on its own only for what it
+  copied itself
+- [`AppRun`](AppRun), passed as `--custom-apprun`, points `XDG_DATA_DIRS` at the plasma
+  package files of the bundle. The default AppRun is a symlink to the binary and sets nothing,
+  and no rpath or `qt.conf` can name a directory that exists only once the AppImage is mounted
+
+The result is unpacked again at the end of the build and started twice: once for its version,
+and once with a home of its own, where it imports the default layout and is read back for
+whether the tasks plasmoid of that layout came up. An AppImage that starts but can not bring
+up a dock fails the build there.
+
+It carries Latte with Qt, the KDE frameworks and the plasma libraries and applets, around
+300M of them. What it can not carry is the session Latte docks into: it talks to kwin,
+plasmashell and the activity manager of the machine it runs on, so a Plasma 6 session still
+has to be there. It is for running this build on a distribution whose own packages are older,
+not for running Latte without Plasma.
 
 ## Publishing the arch package on the aur
 
