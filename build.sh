@@ -2,9 +2,10 @@
 #
 # Builds distribution packages of Latte in containers and puts them into ./dist.
 #
-#   ./build.sh                     deb, rpm, aur, both appimages and the binary tarball
-#   ./build.sh --deb               only the deb
-#   ./build.sh --rpm --appimage    the rpm and both appimages
+#   ./build.sh                     deb, rpm, aur, every appimage and the binary tarball
+#   ./build.sh --deb               only the deb for ubuntu 25.10
+#   ./build.sh --deb-2504          only the deb for ubuntu 25.04
+#   ./build.sh --rpm --appimage    the rpm and every appimage
 #   ./build.sh --appimage-arch     only the appimage built on arch
 #   ./build.sh --bin               only the binary tarball
 #
@@ -21,19 +22,26 @@ readonly DIST="${ROOT}/dist"
 #! the file each target is built from, the aur one produces the arch package its recipe
 #! describes
 #!
-#! The appimage comes in two variants, which differ in the plasma and the glibc they carry:
-#! the one built on arch can bring up Latte Tasks and needs a host as new as arch, the one
-#! built on ubuntu runs on older hosts and can not. packaging/README.md has the whole story.
+#! The deb comes once per ubuntu release, because it has to: dpkg-shlibdeps pins it to the Qt
+#! of the release it was built on, so the one built on 25.10 does not install on 25.04 and the
+#! other way round.
+#!
+#! The appimage comes in variants that differ in the plasma and the glibc they carry: the one
+#! built on arch can bring up Latte Tasks and needs a host as new as arch, the ubuntu ones run
+#! on older hosts and can not, and of those the 25.04 one reaches furthest back.
+#! packaging/README.md has the whole story.
 declare -A DOCKERFILES=(
     [deb]="packaging/Dockerfile.deb"
+    [deb-2504]="packaging/Dockerfile.deb-2504"
     [rpm]="packaging/Dockerfile.rpm"
     [aur]="packaging/Dockerfile.arch"
     [appimage-arch]="packaging/Dockerfile.appimage-arch"
     [appimage-ubuntu]="packaging/Dockerfile.appimage-ubuntu"
+    [appimage-ubuntu-2504]="packaging/Dockerfile.appimage-ubuntu-2504"
     [bin]="build.Dockerfile"
 )
 
-readonly ALL_TARGETS=(deb rpm aur appimage-arch appimage-ubuntu bin)
+readonly ALL_TARGETS=(deb deb-2504 rpm aur appimage-arch appimage-ubuntu appimage-ubuntu-2504 bin)
 
 ENGINE=""
 JOBS=""
@@ -49,14 +57,17 @@ Usage: ./build.sh [options]
 Builds distribution packages in containers and copies them into ./dist.
 
 Targets, all of them when none is given:
-  --deb              debian package, built on ubuntu
-  --rpm              rpm package, built on opensuse tumbleweed
-  --aur              arch package, built from packaging/PKGBUILD
-  --appimage-arch    appimage built on arch, carries Latte Tasks, needs a host as new
-  --appimage-ubuntu  appimage built on ubuntu, runs on older hosts, no Latte Tasks
-  --appimage         both appimages
-  --bin              binary tarball of the install tree, from build.Dockerfile
-  --all              the six above, the default
+  --deb                    debian package, built on and for ubuntu 25.10
+  --deb-2504               debian package, built on and for ubuntu 25.04, kubuntu 25.04
+  --rpm                    rpm package, built on opensuse tumbleweed
+  --aur                    arch package, built from packaging/PKGBUILD
+  --appimage-arch          appimage built on arch, carries Latte Tasks, needs a host as new
+  --appimage-ubuntu        appimage built on ubuntu 25.10, no Latte Tasks
+  --appimage-ubuntu-2504   appimage built on ubuntu 25.04, runs on the most hosts, no
+                           Latte Tasks
+  --appimage               every appimage
+  --bin                    binary tarball of the install tree, from build.Dockerfile
+  --all                    the eight above, the default
 
 Options:
   --clean            empty ./dist before building
@@ -94,12 +105,12 @@ parse_arguments()
 {
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --deb|--rpm|--aur|--appimage-arch|--appimage-ubuntu|--bin)
+            --deb|--deb-2504|--rpm|--aur|--appimage-arch|--appimage-ubuntu|--appimage-ubuntu-2504|--bin)
                 targets+=("${1#--}")
                 ;;
             --appimage)
-                #! the two variants of it, whoever wants one of them asks for it by name
-                targets+=(appimage-arch appimage-ubuntu)
+                #! every variant of it, whoever wants one of them asks for it by name
+                targets+=(appimage-arch appimage-ubuntu appimage-ubuntu-2504)
                 ;;
             --arch)
                 #! the arch package and the aur recipe are the same thing

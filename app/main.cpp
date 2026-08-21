@@ -643,5 +643,16 @@ inline void registerTaskManagerAppletQmlTypes()
         return;
     }
 
+    //! Plasma publishes the task manager applet as a compiled plugin only since 6.5, so on
+    //! anything older the tasks plasmoid finds no Backend and no SmartLauncherItem and Latte
+    //! comes up without its tasks.
+    //!
+    //! Those two types do exist on 6.3, in org.kde.plasma.private.taskmanager, and pointing the
+    //! module the plasmoid imports at that one with qmlRegisterModuleImport() does bring the
+    //! tasks up: it was tried, and under a bare Xvfb with plasma 6.3.4 and Qt 6.8.3 it ran
+    //! clean, tasks and all, with real applications and their launchers. On a real 6.3 session
+    //! it crashes on startup instead, and with KCrash restarting Latte each time the crash
+    //! takes the whole session down with it. Whatever differs between the two Backends is not
+    //! understood, so that route is not taken here; a dock without its tasks is still a dock.
     qWarning() << "Task manager applet plugin was not found, Latte Tasks will not be available...";
 }

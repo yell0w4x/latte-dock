@@ -48,7 +48,21 @@ include(KDEPackageAppTemplates)
 include(WriteBasicConfigVersionFile)
 
 
-find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED NO_MODULE COMPONENTS DBus Gui GuiPrivate Qml Quick Widgets)
+find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED NO_MODULE COMPONENTS DBus Gui Qml Quick Widgets)
+
+#! The x11 code includes qtx11extras_p.h and links Qt6::GuiPrivate for it. Where that target
+#! comes from moved: the debian packaging of Qt 6.8, which is what ubuntu 25.04 has, defines it
+#! in Qt6GuiConfig.cmake and ships no Qt6GuiPrivateConfig.cmake at all, so naming GuiPrivate as
+#! a component of Qt6 fails the whole find_package there; newer Qt ships that file and defines
+#! the target only through it. Asking for it on its own covers the second case and is quiet
+#! about the first, where the target is already there, and the target is then what is checked.
+find_package(Qt6GuiPrivate ${QT_MIN_VERSION} CONFIG QUIET)
+
+if(NOT TARGET Qt6::GuiPrivate)
+    message(FATAL_ERROR
+        "Qt6::GuiPrivate was not found. It comes with the private Qt gui headers, packaged as "
+        "qt6-base-private-dev on debian and ubuntu and part of qt6-base elsewhere.")
+endif()
 
 #find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
 #    Activities Archive CoreAddons GuiAddons Crash DBusAddons Declarative GlobalAccel Kirigami2

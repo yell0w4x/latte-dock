@@ -13,6 +13,14 @@
 set(LATTE_PACKAGE_RUNTIME_DEPENDS "" CACHE STRING
     "Runtime packages carrying the qml modules Latte imports, comma separated")
 
+#! The distribution release a binary package was built on, e.g. "ubuntu25.04". A deb or an rpm
+#! resolves against the libraries of the release it was built on and is installable on that
+#! release only, so the images under packaging/ name theirs here. It reaches the version of the
+#! package and through it the file name, which is what keeps two builds of the same Latte
+#! version apart, both in a directory of downloads and in the eyes of dpkg and rpm.
+set(LATTE_PACKAGE_RELEASE "" CACHE STRING
+    "Distribution release a binary package is built for, e.g. ubuntu25.04")
+
 set(CPACK_PACKAGE_NAME "latte-dock")
 set(CPACK_PACKAGE_VERSION "${VERSION}")
 set(CPACK_PACKAGE_VENDOR "KDE")
@@ -37,6 +45,10 @@ set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
 set(CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT")
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "${LATTE_PACKAGE_RUNTIME_DEPENDS}")
+
+if(LATTE_PACKAGE_RELEASE)
+    set(CPACK_DEBIAN_PACKAGE_RELEASE "${LATTE_PACKAGE_RELEASE}")
+endif()
 #! END deb
 
 #! BEGIN rpm
@@ -44,6 +56,10 @@ set(CPACK_RPM_FILE_NAME "RPM-DEFAULT")
 set(CPACK_RPM_PACKAGE_LICENSE "GPL-2.0-or-later")
 set(CPACK_RPM_PACKAGE_GROUP "System/GUI/KDE")
 set(CPACK_RPM_PACKAGE_URL "${WEBSITE}")
+
+if(LATTE_PACKAGE_RELEASE)
+    set(CPACK_RPM_PACKAGE_RELEASE "${LATTE_PACKAGE_RELEASE}")
+endif()
 
 if(LATTE_PACKAGE_RUNTIME_DEPENDS)
     #! rpm separates its requirements by commas as well, so the value is shared with the deb
