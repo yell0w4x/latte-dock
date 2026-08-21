@@ -79,47 +79,45 @@ Minimum requirements:
 It needs podman or docker and nothing else, the build dependencies live in the images.
 
 ```
-./build.sh                     # deb, rpm, aur, every appimage and the binary tarball
-./build.sh --deb               # only one of them
-./build.sh --rpm --appimage    # or a few
-./build.sh --appimage-arch     # one appimage variant on its own
+./build.sh                     # every deb, rpm, aur, the appimage and the binary tarball
+./build.sh --deb               # both debs
+./build.sh --deb-ubuntu26      # only the deb for ubuntu 26.04
+./build.sh --appimage          # only the appimage
 ./build.sh --clean             # empty dist/ first
 ```
 
-| Target       | Result                                    | Built on            |
-| ------------ | ----------------------------------------- | ------------------- |
-| `--deb`      | `latte-dock_<version>-ubuntu25.10_amd64.deb` | ubuntu 25.10     |
-| `--deb-2504` | `latte-dock_<version>-ubuntu25.04_amd64.deb` | ubuntu 25.04, which kubuntu 25.04 is |
-| `--rpm`      | `latte-dock-<version>-1.x86_64.rpm`       | opensuse tumbleweed |
-| `--aur`      | `latte-dock-<version>-1-x86_64.pkg.tar.zst` | arch, from [packaging/PKGBUILD](packaging/PKGBUILD) |
-| `--appimage-arch` | `Latte_Dock-<version>-arch-x86_64.AppImage`    | arch           |
-| `--appimage-ubuntu` | `Latte_Dock-<version>-ubuntu-x86_64.AppImage` | ubuntu 25.10 |
-| `--appimage-ubuntu-2504` | `Latte_Dock-<version>-ubuntu2504-x86_64.AppImage` | ubuntu 25.04 |
-| `--bin`      | `latte-dock-<version>-x86_64.tar.gz`, the plain install tree | opensuse tumbleweed |
+| Target           | Result                                             | Built on                                  |
+| ---------------- | -------------------------------------------------- | ----------------------------------------- |
+| `--deb-ubuntu24` | `latte-dock_<version>-neon24.04_amd64.deb`         | ubuntu 24.04 + the KDE neon archive       |
+| `--deb-ubuntu26` | `latte-dock_<version>-ubuntu26.04_amd64.deb`       | ubuntu 26.04                              |
+| `--rpm`          | `latte-dock-<version>-1.x86_64.rpm`                | opensuse tumbleweed                       |
+| `--aur`          | `latte-dock-<version>-1-x86_64.pkg.tar.zst`        | arch, from [packaging/PKGBUILD](packaging/PKGBUILD) |
+| `--appimage`     | `Latte_Dock-<version>-neon24.04-x86_64.AppImage`   | ubuntu 24.04 + the KDE neon archive       |
+| `--bin`          | `latte-dock-<version>-x86_64.tar.gz`, the plain install tree | opensuse tumbleweed              |
 
 Each image compiles Latte, runs the test suite, builds its package and installs it inside the
 image, so a package that does not build or does not install fails there rather than on the
-machine of whoever downloads it. [packaging/README.md](packaging/README.md) describes the
-images and how to publish the arch recipe on the aur.
+machine of whoever downloads it. There is one image per packaging family rather than one per
+distribution, and which release a family builds for is a line in the table in
+[`build.sh`](build.sh). [packaging/README.md](packaging/README.md) describes the images and
+how to publish the arch recipe on the aur.
 
-The deb comes once per ubuntu release because it has to. `dpkg-shlibdeps` writes the Qt of the
-machine that built it into its dependencies, down to `qt6-base-private-abi (= 6.9.2)`, which no
-other release satisfies, so the 25.10 package does not install on 25.04 and the other way
-round. Its release is in its file name and in its version to keep the two apart.
+The deb comes once per release because it has to. `dpkg-shlibdeps` writes the Qt of the
+machine that built it into its dependencies, down to `qt6-base-private-abi (= 6.10.2)`, which
+no other release satisfies, so a package built on one release does not install on another. Its
+release is in its file name and in its version to keep them apart.
 
-The AppImages carry Qt, the KDE frameworks and the plasma libraries and applets, but not the
+Ubuntu 24.04 is built with the KDE neon archive over it because stock 24.04 is on Plasma 5.27
+with no KF6 Plasma libraries and cannot build Latte 6 at all. Neon is that same 24.04 with
+KDE's own Plasma 6.7 archive.
+
+The AppImage is one file, not one per distribution. The only thing it cannot carry is glibc,
+so what its base decides is how old a host it still starts on, and ubuntu 24.04 with neon is
+the oldest base that holds everything it needs: glibc 2.39 for reach, and Plasma 6.7 for the
+compiled task manager applet plugin that Latte Tasks is built on, which Plasma publishes only
+since 6.5. It carries Qt, the KDE frameworks and the plasma libraries and applets, but not the
 session Latte docks into: it talks to kwin, plasmashell and the activity manager of the
 machine it runs on, so a Plasma 6 session still has to be there.
-
-They are not one per distribution. The only thing an AppImage can not carry is glibc, so what
-its base decides is how old a host it still starts on, and the variants are the trade between
-that and what the bundle holds. Latte Tasks is built on the task manager applet, which plasma
-publishes as a compiled applet plugin since Plasma 6.5, so the arch variant has tasks and needs
-a host as new as arch. The ubuntu ones are built against an older glibc and load on hosts the
-arch one refuses to start on, with a dock that comes up without tasks; of those the 25.04 one
-reaches furthest back, asking for no glibc symbol newer than 2.39 and running on kubuntu 25.04,
-25.10, 26.04 and debian 13. The debs carry the same
-tasks limitation until ubuntu ships Plasma 6.5.
 
 ## Building from source
 

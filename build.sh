@@ -2,11 +2,10 @@
 #
 # Builds distribution packages of Latte in containers and puts them into ./dist.
 #
-#   ./build.sh                     deb, rpm, aur, every appimage and the binary tarball
-#   ./build.sh --deb               only the deb for ubuntu 25.10
-#   ./build.sh --deb-2504          only the deb for ubuntu 25.04
-#   ./build.sh --rpm --appimage    the rpm and every appimage
-#   ./build.sh --appimage-arch     only the appimage built on arch
+#   ./build.sh                     every deb, rpm, aur, the appimage and the binary tarball
+#   ./build.sh --deb               both debs
+#   ./build.sh --deb-ubuntu26      only the deb for ubuntu 26.04
+#   ./build.sh --appimage          only the appimage
 #   ./build.sh --bin               only the binary tarball
 #
 # Every package is built by the image of the same name under packaging/, which compiles
@@ -19,29 +18,34 @@ set -euo pipefail
 readonly ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly DIST="${ROOT}/dist"
 
-#! the file each target is built from, the aur one produces the arch package its recipe
-#! describes
+#! Each target names the file it is built from and, where the file serves more than one of
+#! them, the arguments that say which one. Adding a distribution is a line in each table, not
+#! a file of its own.
 #!
-#! The deb comes once per ubuntu release, because it has to: dpkg-shlibdeps pins it to the Qt
-#! of the release it was built on, so the one built on 25.10 does not install on 25.04 and the
-#! other way round.
+#! The debs come one per release because a deb can not be anything else: dpkg-shlibdeps pins
+#! them to the exact Qt of the machine that built them. ubuntu24 is ubuntu 24.04 with the KDE
+#! neon archive over it, because stock 24.04 is on plasma 5.27 and does not build Latte 6.
 #!
-#! The appimage comes in variants that differ in the plasma and the glibc they carry: the one
-#! built on arch can bring up Latte Tasks and needs a host as new as arch, the ubuntu ones run
-#! on older hosts and can not, and of those the 25.04 one reaches furthest back.
+#! The AppImage is not one per distribution, it is one, built on the oldest base that has what
+#! the bundle must hold: neon's plasma 6.7 for the task manager applet plugin Latte Tasks
+#! needs, over the glibc 2.39 of ubuntu 24.04 so it starts on as much as possible.
 #! packaging/README.md has the whole story.
 declare -A DOCKERFILES=(
-    [deb]="packaging/Dockerfile.deb"
-    [deb-2504]="packaging/Dockerfile.deb-2504"
+    [deb-ubuntu24]="packaging/Dockerfile.deb"
+    [deb-ubuntu26]="packaging/Dockerfile.deb"
+    [appimage]="packaging/Dockerfile.appimage"
     [rpm]="packaging/Dockerfile.rpm"
     [aur]="packaging/Dockerfile.arch"
-    [appimage-arch]="packaging/Dockerfile.appimage-arch"
-    [appimage-ubuntu]="packaging/Dockerfile.appimage-ubuntu"
-    [appimage-ubuntu-2504]="packaging/Dockerfile.appimage-ubuntu-2504"
     [bin]="build.Dockerfile"
 )
 
-readonly ALL_TARGETS=(deb deb-2504 rpm aur appimage-arch appimage-ubuntu appimage-ubuntu-2504 bin)
+declare -A BUILD_ARGS=(
+    [deb-ubuntu24]="BASE_IMAGE=docker.io/library/ubuntu:24.04 NEON_SUITE=noble DEPS=neon PACKAGE_RELEASE=neon24.04"
+    [deb-ubuntu26]="BASE_IMAGE=docker.io/library/ubuntu:26.04 NEON_SUITE= DEPS=ubuntu PACKAGE_RELEASE=ubuntu26.04"
+    [appimage]="BASE_IMAGE=docker.io/library/ubuntu:24.04 NEON_SUITE=noble DEPS=neon VARIANT=neon24.04 GLIBC_FLOOR=2.39"
+)
+
+readonly ALL_TARGETS=(deb-ubuntu24 deb-ubuntu26 rpm aur appimage bin)
 
 ENGINE=""
 JOBS=""
@@ -57,17 +61,14 @@ Usage: ./build.sh [options]
 Builds distribution packages in containers and copies them into ./dist.
 
 Targets, all of them when none is given:
-  --deb                    debian package, built on and for ubuntu 25.10
-  --deb-2504               debian package, built on and for ubuntu 25.04, kubuntu 25.04
-  --rpm                    rpm package, built on opensuse tumbleweed
-  --aur                    arch package, built from packaging/PKGBUILD
-  --appimage-arch          appimage built on arch, carries Latte Tasks, needs a host as new
-  --appimage-ubuntu        appimage built on ubuntu 25.10, no Latte Tasks
-  --appimage-ubuntu-2504   appimage built on ubuntu 25.04, runs on the most hosts, no
-                           Latte Tasks
-  --appimage               every appimage
-  --bin                    binary tarball of the install tree, from build.Dockerfile
-  --all                    the eight above, the default
+  --deb-ubuntu24     debian package for ubuntu 24.04 with the KDE neon archive
+  --deb-ubuntu26     debian package for ubuntu 26.04
+  --deb              both debs above
+  --rpm              rpm package, built on opensuse tumbleweed
+  --aur              arch package, built from packaging/PKGBUILD
+  --appimage         appimage, built on ubuntu 24.04 with the KDE neon archive
+  --bin              binary tarball of the install tree, from build.Dockerfile
+  --all              the six above, the default
 
 Options:
   --clean            empty ./dist before building
@@ -105,12 +106,12 @@ parse_arguments()
 {
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --deb|--deb-2504|--rpm|--aur|--appimage-arch|--appimage-ubuntu|--appimage-ubuntu-2504|--bin)
+            --deb-ubuntu24|--deb-ubuntu26|--rpm|--aur|--appimage|--bin)
                 targets+=("${1#--}")
                 ;;
-            --appimage)
-                #! every variant of it, whoever wants one of them asks for it by name
-                targets+=(appimage-arch appimage-ubuntu appimage-ubuntu-2504)
+            --deb)
+                #! every release of it, whoever wants one of them asks for it by name
+                targets+=(deb-ubuntu24 deb-ubuntu26)
                 ;;
             --arch)
                 #! the arch package and the aur recipe are the same thing
@@ -181,6 +182,12 @@ build_target()
     if [[ -n "${JOBS}" ]]; then
         arguments+=(--build-arg "JOBS=${JOBS}")
     fi
+
+    #! what makes one release of a shared file different from the next
+    local argument
+    for argument in ${BUILD_ARGS[${target}]:-}; do
+        arguments+=(--build-arg "${argument}")
+    done
 
     arguments+=("${ROOT}")
 

@@ -1,0 +1,71 @@
+# Packages the deb and the AppImage images install on a debian-family base whose names are
+# ubuntu's own. The toolchain, what CMakeLists.txt declares, what the deb generator needs
+# (dpkg-dev, file), what the bundling needs (wget, desktop-file-utils, zsync), and the plasma
+# runtime packages carrying the qml modules the shipped qml imports, which the qml test
+# resolves while it compiles them and the AppImage copies into the bundle.
+build-essential
+g++
+cmake
+ninja-build
+git
+dpkg-dev
+file
+wget
+desktop-file-utils
+zsync
+dbus
+appstream
+extra-cmake-modules
+googletest
+libgtest-dev
+libgmock-dev
+qt6-base-dev
+qt6-base-private-dev
+qt6-declarative-dev
+qt6-declarative-private-dev
+qt6-tools-dev
+qt6-wayland-dev
+libkf6archive-dev
+libkf6coreaddons-dev
+libkf6crash-dev
+libkf6dbusaddons-dev
+libkf6declarative-dev
+libkf6globalaccel-dev
+libkf6guiaddons-dev
+libkf6i18n-dev
+libkf6iconthemes-dev
+libkf6kio-dev
+libkirigami-dev
+libkf6newstuff-dev
+libkf6notifications-dev
+libkf6package-dev
+libkf6svg-dev
+libkf6windowsystem-dev
+libkf6xmlgui-dev
+libkf6config-dev
+libplasma-dev
+libplasmaactivities-dev
+plasma-workspace-dev
+kwayland-dev
+plasma-wayland-protocols
+libwayland-dev
+plasma-workspace
+plasma-desktop
+plasma-desktoptheme
+# carries org.kde.plasma.private.volume, which the tasks plasmoid imports for the audio
+# badges; the qml test compiles that import and fails without it
+plasma-pa
+qml6-module-org-kde-kirigami
+qml6-module-org-kde-ksvg
+qml6-module-org-kde-activities
+qml6-module-org-kde-kwindowsystem
+qml6-module-org-kde-pipewire
+qml6-module-org-kde-plasma-plasma5support
+qml6-module-qt5compat-graphicaleffects
+libx11-dev
+libsm-dev
+libice-dev
+libxcb1-dev
+libxcb-util-dev
+libxcb-shape0-dev
+libxcb-randr0-dev

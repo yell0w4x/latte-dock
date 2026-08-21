@@ -5,130 +5,101 @@ working tree, runs the test suite, builds the package and then installs it insid
 so a package that does not install fails the build here rather than on the machine of whoever
 downloads it.
 
-The usual way in is [`../build.sh`](../build.sh), which builds the packages and collects them
-into `dist/`:
+There is one image per packaging family, not one per distribution. Which release a family
+builds for is decided by build arguments, and [`../build.sh`](../build.sh) keeps the table of
+them, so adding a distribution is a line in that table rather than a file of its own.
+
+The usual way in is that script, which builds the packages and collects them into `dist/`:
 
 ```
-./build.sh                 # deb, rpm, aur, every appimage and the binary tarball
-./build.sh --deb --rpm     # only those two
-./build.sh --deb-2504      # the deb for ubuntu 25.04, which kubuntu 25.04 is
-./build.sh --appimage      # every appimage variant
-./build.sh --appimage-arch # only the one built on arch
-./build.sh --bin           # only the binary tarball
-./build.sh --clean         # empty dist/ first
+./build.sh                    # every deb, rpm, aur, the appimage and the binary tarball
+./build.sh --deb              # both debs
+./build.sh --deb-ubuntu26     # only the deb for ubuntu 26.04
+./build.sh --appimage         # only the appimage
+./build.sh --clean            # empty dist/ first
 ```
 
 It finds podman or docker on its own, reports which targets failed and exits non zero if any
-of them did. What it runs underneath is the images below, one build each.
+of them did.
 
-All of them take the repository root as their context, so they are run from there:
+All of the images take the repository root as their context, so they are run from there:
 
-| Package                  | Build                                                                            |
-| ------------------------ | -------------------------------------------------------------------------------- |
-| `.deb` (ubuntu 25.10)    | `podman build -f packaging/Dockerfile.deb -t latte-dock:deb .`                     |
-| `.deb` (ubuntu 25.04)    | `podman build -f packaging/Dockerfile.deb-2504 -t latte-dock:deb-2504 .`           |
-| `.rpm`                   | `podman build -f packaging/Dockerfile.rpm -t latte-dock:rpm .`                     |
-| `.pkg.tar.zst` (arch/aur)| `podman build -f packaging/Dockerfile.arch -t latte-dock:arch .`                   |
-| `.AppImage` (arch)       | `podman build -f packaging/Dockerfile.appimage-arch -t latte-dock:appimage-arch .`   |
-| `.AppImage` (ubuntu 25.10)| `podman build -f packaging/Dockerfile.appimage-ubuntu -t latte-dock:appimage-ubuntu .` |
-| `.AppImage` (ubuntu 25.04)| `podman build -f packaging/Dockerfile.appimage-ubuntu-2504 -t latte-dock:appimage-2504 .` |
+| Package                  | Build                                                                     |
+| ------------------------ | ------------------------------------------------------------------------- |
+| `.deb`                   | `podman build -f packaging/Dockerfile.deb -t latte-dock:deb .`             |
+| `.rpm`                   | `podman build -f packaging/Dockerfile.rpm -t latte-dock:rpm .`             |
+| `.pkg.tar.zst` (arch/aur)| `podman build -f packaging/Dockerfile.arch -t latte-dock:arch .`          |
+| `.AppImage`              | `podman build -f packaging/Dockerfile.appimage -t latte-dock:appimage .`  |
 | `.tar.gz` of the install tree | `podman build -f build.Dockerfile -t latte-dock .` (the root image, `--bin` in the script) |
 
-`docker` understands the same files and the same arguments.
-
-To get the package out of the image instead of into it, build the `artifact` stage, which
-carries nothing else:
+`docker` understands the same files and the same arguments. Building one of the shared files
+by hand builds its default target; `--build-arg` picks another, as `build.sh` does:
 
 ```
-podman build -f packaging/Dockerfile.deb --target artifact -o type=local,dest=./out .
+podman build -f packaging/Dockerfile.deb \
+    --build-arg BASE_IMAGE=docker.io/library/ubuntu:24.04 \
+    --build-arg NEON_SUITE=noble \
+    --build-arg PACKAGE_RELEASE=neon24.04 \
+    --target artifact -o type=local,dest=./out .
 ```
 
-## What ends up in the package
+## The targets
 
-The deb and the rpm are written by CPack over the tree `cmake --install` produces, configured
-in [`../cmake/LattePackaging.cmake`](../cmake/LattePackaging.cmake). The libraries Latte links
-are found by the generators themselves; the qml modules the shipped qml files import at
-runtime are not, since nothing links against them, so each image passes the names its
-distribution uses for them through `LATTE_PACKAGE_RUNTIME_DEPENDS`.
-
-The arch package is built by [`PKGBUILD`](PKGBUILD) through `makepkg`, which declares its own
-dependencies and runs the test suite in its `check()`.
-
-## Bases
-
-| Image             | Base                  | Why                                                                                                                  |
-| ----------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `Dockerfile.deb`  | `ubuntu:25.10`        | the release the package is for; debian is untried                                                                     |
-| `Dockerfile.deb-2504` | `ubuntu:25.04`    | the same package for the release kubuntu 25.04 is; a deb is bound to the release it was built on, see below            |
-| `Dockerfile.rpm`  | `opensuse/tumbleweed` | rolling, so it follows Plasma 6 and KF6 closely                                                                        |
-| `Dockerfile.arch` | `archlinux:base-devel`| the distribution the aur recipe targets                                                                                |
-| `Dockerfile.appimage-arch` | `archlinux:base-devel` | the AppImage carries plasma itself, and Latte Tasks needs the compiled task manager applet plugin that only Plasma 6.5 and later have |
-| `Dockerfile.appimage-ubuntu` | `ubuntu:25.10`   | an older glibc, so the AppImage loads on hosts the arch one does not                                                   |
-| `Dockerfile.appimage-ubuntu-2504` | `ubuntu:25.04` | the oldest base Latte 6 still builds on, so the AppImage from it loads on the most hosts                          |
+| Target           | Base                                | glibc | Plasma | Latte Tasks |
+| ---------------- | ----------------------------------- | ----- | ------ | ----------- |
+| `--deb-ubuntu24` | `ubuntu:24.04` + KDE neon `user/noble` | 2.39 | 6.7  | yes         |
+| `--deb-ubuntu26` | `ubuntu:26.04`                      | 2.43  | 6.6    | yes         |
+| `--appimage`     | `ubuntu:24.04` + KDE neon `user/noble` | 2.39 | 6.7  | yes         |
+| `--rpm`          | `opensuse/tumbleweed`               | rolling | rolling | yes      |
+| `--aur`          | `archlinux:base-devel`              | rolling | rolling | yes      |
 
 They are pinned to `linux/amd64`, so the result is an x86_64 package whatever the machine
 running the build is.
 
+### Why ubuntu 24.04 is KDE neon and not ubuntu
+
+Stock ubuntu 24.04 is on plasma 5.27 with no KF6 plasma libraries, so Latte 6 does not build
+on it at all. KDE neon is that same 24.04 with KDE's own archive over it, carrying plasma 6.7,
+KF6 and Qt 6.11, and Latte builds there without a complaint.
+
+The images add `archive.neon.kde.org` to an `ubuntu` base rather than starting from the neon
+image, which is the same thing and two gigabytes.
+
 ## The deb is bound to the release it was built on
 
-A deb is not portable between ubuntu releases, and there is no packaging change that makes it
-one. `dpkg-shlibdeps` reads the libraries Latte links out of the packages of the build machine
-and writes their versions into the dependencies, and Latte includes `qtx11extras_p.h`, so among
+A deb is not portable between releases, and there is no packaging change that makes it one.
+`dpkg-shlibdeps` reads the libraries Latte links out of the packages of the build machine and
+writes their versions into the dependencies, and Latte includes `qtx11extras_p.h`, so among
 the dependencies it writes is `qt6-base-private-abi`, pinned to the exact Qt of that release:
 
 ```
-Depends: ... qt6-base-private-abi (= 6.9.2), libqt6core6t64 (>= 6.9.1), ...
+Depends: ... qt6-base-private-abi (= 6.10.2), libqt6core6t64 (>= 6.10.0), ...
 ```
 
-Ubuntu 25.04 carries Qt 6.8.3 and no `qt6-base-private-abi` package at all, so apt refuses the
-deb built on 25.10 there, and the same happens the other way round. A release that is to have a
-deb needs an image that builds on it: `Dockerfile.deb` is 25.10, `Dockerfile.deb-2504` is 25.04,
-and a further release is a further file with a further base.
-
-Each image passes its release to `LATTE_PACKAGE_RELEASE`, which reaches the version of the
-package and through it the file name, so the two are told apart both in `dist/` and by dpkg:
+A release that is to have a deb needs a line in the table in `build.sh` naming its base image
+and its release label. The label reaches the version of the package and through it the file
+name, so the packages are told apart both in `dist/` and by dpkg:
 
 ```
-latte-dock_1.10.240-ubuntu25.10_amd64.deb
-latte-dock_1.10.240-ubuntu25.04_amd64.deb
+latte-dock_1.10.240-neon24.04_amd64.deb
+latte-dock_1.10.240-ubuntu26.04_amd64.deb
 ```
 
 ## The AppImage
 
-An AppImage, unlike the deb, is not bound to the release it was built on. It is bound to that
-release's glibc, the one library it can not carry: every bundled library resolves against the
-glibc of the host, and the host has to be at least as new. So these variants are not one per
-distribution, they are one per trade between how new the host has to be and what the bundle can
-carry, and none of them is a better version of the other:
+There is one, and one is the point of it. An AppImage is not bound to the release it was built
+on, it is bound to that release's glibc, the one library it can not carry: every bundled
+library resolves against the glibc of the host, and the host has to be at least as new. So the
+base to build it on is the oldest one that still holds everything the bundle needs.
 
-| Variant       | Built by                          | Latte Tasks | Runs on                                                      |
-| ------------- | --------------------------------- | ----------- | ------------------------------------------------------------ |
-| arch          | `Dockerfile.appimage-arch`        | yes         | hosts whose glibc is at least the one arch had at build time  |
-| ubuntu 25.10  | `Dockerfile.appimage-ubuntu`      | no          | glibc 2.42 and newer: ubuntu 25.10 onwards                    |
-| ubuntu 25.04  | `Dockerfile.appimage-ubuntu-2504` | no          | glibc 2.39 and newer: kubuntu 25.04, 25.10, 26.04, debian 13  |
+That base is ubuntu 24.04 with the KDE neon archive: glibc 2.39, older than any other base
+Latte 6 builds on, and plasma 6.7, which carries the compiled task manager applet plugin that
+Latte Tasks is built on and that plasma publishes only since 6.5. Everything else is one or
+the other — 25.04 and 25.10 have the older glibc but a plasma too old for the tasks, arch and
+26.04 have the tasks but a glibc that shuts out every older host.
 
-The tasks plasmoid is built on the task manager applet, which plasma publishes as a compiled
-applet plugin only since Plasma 6.5. Arch is rolling and has it; ubuntu 25.10 is on Plasma 6.4
-and 25.04 on 6.3, and neither has it anywhere, so both ubuntu variants bring up a dock without
-its tasks. What they have is the older glibc: an AppImage built on arch does not load at all on
-a host that far behind, not even to print its version.
-
-There is no base with Plasma 6.5 and a glibc old enough for ubuntu 24.04, so an AppImage that
-does both does not exist. 24.04 is out of reach anyway: it is on plasma 5.27 with no KF6 plasma
-libraries, so Latte 6 does not build on it, which makes 25.04 the oldest base there is and the
-25.04 variant the one that reaches furthest back.
-
-One library is enough to take that reach away again. The 25.10 bundle pulls in a `libssh` that
-wants `GLIBC_2.42`, through `libavformat` and `libKPipeWireRecord`, which is why the
-`org.kde.pipewire` module of that variant, the one behind window previews on wayland, can not
-load on 25.04 even though everything else in it would. The 25.04 image therefore ends with a
-check over every bundled library, asking which glibc symbols it wants and refusing an answer
-newer than the base's own. What that check reports for the current build is `GLIBC_2.39`, below
-the 2.41 of the base, so what actually limits this variant is not its glibc but the Plasma 6
-session it needs around it.
-
-All variants install Latte into an AppDir, add the plugins, qml modules and plasma package
-files nothing links against and therefore no tool can find, and let `linuxdeploy` with its qt
+It installs Latte into an AppDir, adds the plugins, qml modules and plasma package files
+nothing links against and therefore no tool can find, and lets `linuxdeploy` with its qt
 plugin pull in the libraries.
 
 Three things have to be pointed at explicitly, and an AppImage missing any of them still
@@ -146,16 +117,46 @@ starts, only to show a dock with nothing in it:
   and no rpath or `qt.conf` can name a directory that exists only once the AppImage is mounted
 
 The result is unpacked again at the end of the build and started twice: once for its version,
-and once with a home of its own, where it imports the default layout and is read back. The
-arch variant is asked whether the tasks plasmoid of that layout came up, the ubuntu ones
-whether every package that layout names was found. An AppImage that starts but can not bring
-up a dock fails the build there.
+and once with a home of its own, where it imports the default layout and is read back, for
+whether the corona found its shell package and every package that layout names, and whether
+the tasks plasmoid found the applet plugin it is built on. An AppImage that starts but can not
+bring up a dock fails the build there.
 
-Each carries Latte with Qt, the KDE frameworks and the plasma libraries and applets, 170M to
-300M of them. What it can not carry is the session Latte docks into: it talks to kwin,
-plasmashell and the activity manager of the machine it runs on, so a Plasma 6 session still
-has to be there. It is for running this build on a distribution whose own packages are older,
-not for running Latte without Plasma.
+Then every bundled library is asked which glibc symbols it wants, and the newest answer has to
+be one the base itself has. Without that check the bundle can be quietly narrower than its
+base promises: an earlier one built on 25.10 pulled in a `libssh` wanting `GLIBC_2.42` through
+`libavformat` and `libKPipeWireRecord`, and that single library kept its pipewire module from
+loading on anything older.
+
+It carries Latte with Qt, the KDE frameworks and the plasma libraries and applets, some 180M
+of them. What it can not carry is the session Latte docks into: it talks to kwin, plasmashell
+and the activity manager of the machine it runs on, so a Plasma 6 session still has to be
+there. It is for running this build on a distribution whose own packages are older, not for
+running Latte without Plasma.
+
+## What ends up in the package
+
+The deb and the rpm are written by CPack over the tree `cmake --install` produces, configured
+in [`../cmake/LattePackaging.cmake`](../cmake/LattePackaging.cmake). The libraries Latte links
+are found by the generators themselves; the qml modules the shipped qml files import at
+runtime are not, since nothing links against them, so each image passes the names its
+distribution uses for them through `LATTE_PACKAGE_RUNTIME_DEPENDS`.
+
+The arch package is built by [`PKGBUILD`](PKGBUILD) through `makepkg`, which declares its own
+dependencies and runs the test suite in its `check()`.
+
+## Reaching further than this
+
+These images are for building and verifying a handful of targets locally. Covering every
+distribution that matters is a different job, and containers are the wrong tool for it: each
+release needs its own rebuild, which is exactly the per-release pin above, and that is what
+the [openSUSE Build Service](https://build.opensuse.org) exists to do. It builds debs and rpms
+for debian, ubuntu, fedora and openSUSE releases from one source package and rebuilds them as
+those releases move. Keep these images for local verification and the AppImage, and let OBS do
+the fan out.
+
+Flatpak is not a way out here. A dock needs kwin, plasmashell and the session bus, which is
+what the sandbox is designed to withhold.
 
 ## Publishing the arch package on the aur
 

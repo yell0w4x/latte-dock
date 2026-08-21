@@ -1,117 +1,77 @@
-# Builds the AppImage on ubuntu 25.04, the release kubuntu 25.04 is.
+# Builds the AppImage.
 #
-#   podman build -f packaging/Dockerfile.appimage-ubuntu-2504 -t latte-dock:appimage-2504 .
-#   podman build -f packaging/Dockerfile.appimage-ubuntu-2504 --target artifact -o type=local,dest=./out .
+#   podman build -f packaging/Dockerfile.appimage -t latte-dock:appimage .
+#   podman build -f packaging/Dockerfile.appimage --target artifact -o type=local,dest=./out .
 #
 # docker understands the same file. The context is the repository root, so both commands are
 # run from there.
 #
-# The result is a single executable Latte_Dock-<version>-ubuntu2504-x86_64.AppImage carrying
+# The result is a single executable Latte_Dock-<version>-<variant>-x86_64.AppImage carrying
 # Latte with the Qt, KDE frameworks and plasma libraries it links, the qml modules its shipped
 # qml imports and the plasma plugins and package files it reads.
 #
-# Unlike the deb, an AppImage is not bound to the release it was built on, it is bound to the
-# glibc of that release, since glibc is the one library it can not carry: every bundled library
-# resolves against the one of the host, and the host has to be at least as new. So there is no
-# reason to build one of these per distribution, only a reason to build it on the oldest base
-# that can still compile Latte. This is that base. 25.04 has glibc 2.41 and the bundle it
-# produces asks for no symbol newer than GLIBC_2.39, which makes this AppImage run on kubuntu
-# 25.04 as well as on 25.10, 26.04 and debian 13, where the one built on 25.10 (GLIBC_2.42) and
-# the one built on arch (GLIBC_2.43) do not.
+# Unlike the deb, an AppImage is not bound to the release it was built on, it is bound to that
+# release's glibc, the one library it can not carry: every bundled library resolves against
+# the glibc of the host, and the host has to be at least as new. So there is one of these, not
+# one per distribution, and the base to build it on is the oldest one that still has what the
+# bundle has to hold.
 #
-# 24.04 would be older still and is not usable: it is on plasma 5.27 with no KF6 plasma
-# libraries, so Latte 6 does not build on it at all.
+# That base is ubuntu 24.04 with the KDE neon archive over it:
 #
-# What it can not carry is the session it docks into: Latte talks to kwin, plasmashell and
-# the activity manager of the machine it runs on, so the AppImage needs a Plasma 6 session
-# around it.
+#   glibc 2.39   older than any other base that can build Latte 6, so the AppImage starts on
+#                hosts that refuse everything built on 25.04, 25.10, 26.04 or arch
+#   plasma 6.7   which is what carries the compiled task manager applet plugin, published only
+#                since plasma 6.5, and that plugin is what Latte Tasks is built on
 #
-# It also can not carry Latte Tasks. The tasks plasmoid is built on the task manager applet,
-# which plasma publishes as a compiled applet plugin
-# ("plasma/applets/org.kde.plasma.taskmanager.so") only since Plasma 6.5, and ubuntu 25.04 is
-# on 6.3. Latte comes up, its containments and the other applets come up, and the tasks of the
-# dock stay away. The arch variant carries them and is the one to reach for where the host is
-# new enough to run it.
+# Stock ubuntu 24.04 is on plasma 5.27 with no KF6 plasma libraries and does not build Latte 6
+# at all; every other base is either too new in its glibc or too old in its plasma. This one
+# is both old enough to run widely and new enough to carry the tasks.
+#
+# What it can not carry is the session it docks into: Latte talks to kwin, plasmashell and the
+# activity manager of the machine it runs on, so a Plasma 6 session still has to be there.
+#
+#   BASE_IMAGE   the image to build in
+#   NEON_SUITE   empty for a stock ubuntu, or the KDE neon suite to add on top of it
+#   DEPS         which dependency list under packaging/deps to install, ubuntu or neon
+#   VARIANT      what goes into the file name, e.g. neon24.04
+#   GLIBC_FLOOR  the newest glibc symbol the bundle is allowed to ask for, checked at the end
+#   QT_PLATFORM_PLUGINS, QT_EXTRA_PLUGINS   the qt plugins to bundle beyond what linuxdeploy
+#                finds on its own, named the way the distribution names them
 
-ARG BASE_IMAGE=docker.io/library/ubuntu:25.04
+ARG BASE_IMAGE=docker.io/library/ubuntu:24.04
 
 FROM --platform=linux/amd64 ${BASE_IMAGE} AS builder
 
 ARG BUILD_TYPE=Release
 ARG JOBS=
+ARG NEON_SUITE=noble
+ARG VARIANT=neon24.04
+ARG GLIBC_FLOOR=2.39
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# The toolchain and dependencies of the deb build, plus what the bundling needs: wget for the
-# linuxdeploy tools, and the runtime packages whose plugins, qml modules and package files are
-# copied into the AppImage rather than only linked against.
+# KDE neon is an ubuntu LTS with KDE's archive over it, so it is that archive rather than a
+# base image of its own; the official neon image is the same thing and two gigabytes.
 RUN apt-get update \
- && apt-get install --no-install-recommends -y \
-        build-essential \
-        g++ \
-        cmake \
-        ninja-build \
-        git \
-        ca-certificates \
-        wget \
-        file \
-        desktop-file-utils \
-        zsync \
-        dbus \
-        appstream \
-        extra-cmake-modules \
-        googletest \
-        libgtest-dev \
-        libgmock-dev \
-        qt6-base-dev \
-        qt6-base-private-dev \
-        qt6-declarative-dev \
-        qt6-declarative-private-dev \
-        qt6-tools-dev \
-        qt6-wayland-dev \
-        libkf6archive-dev \
-        libkf6coreaddons-dev \
-        libkf6crash-dev \
-        libkf6dbusaddons-dev \
-        libkf6declarative-dev \
-        libkf6globalaccel-dev \
-        libkf6guiaddons-dev \
-        libkf6i18n-dev \
-        libkf6iconthemes-dev \
-        libkf6kio-dev \
-        libkirigami-dev \
-        libkf6newstuff-dev \
-        libkf6notifications-dev \
-        libkf6package-dev \
-        libkf6svg-dev \
-        libkf6windowsystem-dev \
-        libkf6xmlgui-dev \
-        libkf6config-dev \
-        libplasma-dev \
-        libplasmaactivities-dev \
-        plasma-workspace-dev \
-        kwayland-dev \
-        plasma-wayland-protocols \
-        libwayland-dev \
-        plasma-workspace \
-        plasma-desktop \
-        plasma-desktoptheme \
-        qml6-module-org-kde-kirigami \
-        qml6-module-org-kde-ksvg \
-        qml6-module-org-kde-activities \
-        qml6-module-org-kde-kwindowsystem \
-        qml6-module-org-kde-pipewire \
-        qml6-module-org-kde-plasma-plasma5support \
-        qml6-module-qt5compat-graphicaleffects \
-        libx11-dev \
-        libsm-dev \
-        libice-dev \
-        libxcb1-dev \
-        libxcb-util-dev \
-        libxcb-shape0-dev \
-        libxcb-randr0-dev \
+ && apt-get install --no-install-recommends -y ca-certificates curl \
+ && if [ -n "${NEON_SUITE}" ]; then \
+        install -d /etc/apt/keyrings \
+     && curl -fsSL https://archive.neon.kde.org/public.key -o /etc/apt/keyrings/neon.asc \
+     && echo "deb [signed-by=/etc/apt/keyrings/neon.asc] http://archive.neon.kde.org/user ${NEON_SUITE} main" \
+            > /etc/apt/sources.list.d/neon.list \
+     && apt-get update ; \
+    fi
+
+# The dependency list lives next to this file, one per family of package names; neon keeps the
+# upstream names where ubuntu renames them. Copied on its own and before the sources, so a
+# change to the sources does not reinstall the toolchain.
+COPY packaging/deps /deps
+
+ARG DEPS=neon
+
+RUN grep -v '^#' "/deps/${DEPS}.build" | xargs apt-get install --no-install-recommends -y \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /src
@@ -146,7 +106,7 @@ RUN mkdir -p "${HOME}" \
 # The plugins go where usr/bin/qt.conf points Qt at, "usr/plugins", and not into the qt
 # directory they are installed in; the second one is searched by nothing inside an AppImage.
 # kpackage carries the structures that make a plasma package readable at all, plasma the
-# applets. The task manager applet is not among them on this base, see the note at the top.
+# applets, among them the task manager applet Latte Tasks is built on.
 RUN set -eu \
  && qtdir="/usr/lib/x86_64-linux-gnu/qt6" \
  && mkdir -p "/AppDir/usr/plugins" "/AppDir/usr/qml" "/AppDir/usr/share" \
@@ -183,7 +143,8 @@ RUN set -eu \
         fi ; \
     done \
  && test -d "/AppDir/usr/plugins/kpackage/packagestructure" \
- && test -d "/AppDir/usr/share/plasma/plasmoids/org.kde.latte.containment"
+ && test -d "/AppDir/usr/share/plasma/plasmoids/org.kde.latte.containment" \
+ && test -f "/AppDir/usr/plugins/plasma/applets/org.kde.plasma.taskmanager.so"
 
 # linuxdeploy walks the binary and everything it loads and pulls the libraries in; its qt
 # plugin does the same for the qt plugins and the qml modules named below. Both are AppImages
@@ -197,12 +158,19 @@ RUN set -eu \
 #! The qt plugin deploys the xcb platform on its own. Latte also runs on wayland sessions,
 #! and the offscreen one is what lets the checks at the end start the bundled binary without
 #! a display of any kind.
+#! The names of the wayland platform plugin and of the plugin directories next to it are the
+#! distribution's, not Qt's: neon carries the upstream ones, libqwayland.so and the wayland-*
+#! directories, where debian and ubuntu rename and split them. They are arguments for that
+#! reason, with neon's as the default.
+ARG QT_PLATFORM_PLUGINS="libqwayland.so;libqoffscreen.so;libqminimal.so"
+ARG QT_EXTRA_PLUGINS="wayland-shell-integration;wayland-decoration-client;wayland-graphics-integration-client"
+
 ENV APPIMAGE_EXTRACT_AND_RUN=1 \
     NO_APPSTREAM=1 \
     DISABLE_COPYRIGHT_FILES_DEPLOYMENT=1 \
     QMAKE=/usr/lib/qt6/bin/qmake6 \
-    EXTRA_QT_MODULES="waylandcompositor" \
-    EXTRA_PLATFORM_PLUGINS="libqwayland-generic.so;libqwayland-egl.so;libqoffscreen.so;libqminimal.so" \
+    EXTRA_PLATFORM_PLUGINS="${QT_PLATFORM_PLUGINS}" \
+    EXTRA_PLUGINS="${QT_EXTRA_PLUGINS}" \
     QML_SOURCES_PATHS=/src
 
 RUN set -eu \
@@ -224,6 +192,7 @@ RUN sed -i 's|^Exec=.*|Exec=latte-dock|' \
 #! ones, which is what linuxdeploy does on its own only for what it copied itself.
 #! --custom-apprun replaces the symlink linuxdeploy would leave behind with the script that
 #! points XDG_DATA_DIRS at the plasma package files of the bundle, see packaging/AppRun.
+ARG VARIANT
 RUN set -eu \
  && export VERSION="$(sed -n 's/^set(VERSION *\([^)]*\))/\1/p' /src/CMakeLists.txt | head -1)" \
  && mkdir -p /out \
@@ -238,7 +207,7 @@ RUN set -eu \
         --desktop-file /AppDir/usr/share/applications/org.kde.latte-dock.desktop \
         --icon-file /AppDir/usr/share/icons/hicolor/scalable/apps/latte-dock.svg \
         --output appimage \
- && mv /out/Latte_Dock-"${VERSION}"-x86_64.AppImage "/out/Latte_Dock-${VERSION}-ubuntu2504-x86_64.AppImage" \
+ && mv /out/Latte_Dock-"${VERSION}"-x86_64.AppImage "/out/Latte_Dock-${VERSION}-${VARIANT}-x86_64.AppImage" \
  && chmod +x /out/*.AppImage \
  && ls -lh /out
 
@@ -246,11 +215,11 @@ RUN set -eu \
 # fails the build here.
 #
 # It starts twice: once for its version, and once with a home of its own, where it imports the
-# default layout, and what it says about that is read back. The arch variant is asked whether
-# the tasks plasmoid came up, which can not be asked here; what is left is whether the corona
-# found its shell package and every package the layout names, which is what the AppRun and the
-# plugins above are there for and what breaks silently when either of them is wrong. Latte has
-# no session to dock into here, so it is left running for a while and then stopped.
+# default layout, and what it says about that is read back: whether the corona found its shell
+# package and every package the layout names, which is what the AppRun and the plugins above
+# are there for and what breaks silently when either of them is wrong, and whether the tasks
+# plasmoid found the applet plugin it is built on. Latte has no session to dock into here, so
+# it is left running for a while and then stopped.
 RUN set -eu \
  && cd /tmp \
  && /out/*.AppImage --appimage-extract > /dev/null \
@@ -261,21 +230,24 @@ RUN set -eu \
  && dbus-run-session -- timeout 40 ./squashfs-root/AppRun --debug > /tmp/appimage-check.log 2>&1 || true \
  && ! grep -q "Failed to load fallback plasma shell package" /tmp/appimage-check.log \
  && ! grep -q "the package QJsonObject() is invalid" /tmp/appimage-check.log \
- && ! grep -q "does not exist" /tmp/appimage-check.log
+ && ! grep -q "does not exist" /tmp/appimage-check.log \
+ && grep -q "Task manager applet qml types registered" /tmp/appimage-check.log \
+ && ! grep -q "Latte Tasks will not be available" /tmp/appimage-check.log
 
 # The glibc floor of the bundle, which is the one thing that decides which hosts this AppImage
 # starts on. Every bundled library is asked which glibc symbols it wants and the newest answer
-# has to be one 25.04 itself has, otherwise the AppImage is quietly narrower than the base it
-# was built on promises. This is not hypothetical: the 25.10 bundle pulls in a libssh that
-# wants GLIBC_2.42 through libavformat and libKPipeWireRecord, which is the whole reason the
-# org.kde.pipewire module of that variant can not load on 25.04.
+# has to be one the base itself has, otherwise the AppImage is quietly narrower than the base
+# it was built on promises. This is not hypothetical: an earlier bundle built on 25.10 pulled
+# in a libssh that wanted GLIBC_2.42 through libavformat and libKPipeWireRecord, and that one
+# library alone kept its pipewire module from loading on anything older.
+ARG GLIBC_FLOOR
 RUN set -eu \
  && cd /tmp \
  && floor="$(find ./squashfs-root/usr -type f \( -name '*.so*' -o -name 'latte-dock' \) \
                 -exec objdump -T {} + 2> /dev/null \
              | grep -o 'GLIBC_2\.[0-9]*' | sort -u -V | tail -1)" \
- && echo "the bundle asks for at most ${floor}" \
- && [ "$(printf '%s\nGLIBC_2.41\n' "${floor}" | sort -V | tail -1)" = "GLIBC_2.41" ] \
+ && echo "the bundle asks for at most ${floor}, the base allows GLIBC_${GLIBC_FLOOR}" \
+ && [ "$(printf '%s\nGLIBC_%s\n' "${floor}" "${GLIBC_FLOOR}" | sort -V | tail -1)" = "GLIBC_${GLIBC_FLOOR}" ] \
  && rm -rf /tmp/squashfs-root
 
 # Carries only the AppImage, for "--target artifact -o type=local,dest=./out"
